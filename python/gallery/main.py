@@ -24,7 +24,7 @@ window.content = Tab(style=Style(padding=(1 | em, 0.5 | em)))
 window.content.add(TabItem("Flexible", content=Flexibles()))
 window.content.add(TabItem("Widgets", content=Widgets(window, assets)))
 window.content.add(TabItem("Plots", content=plots))
-window.content.add(TabItem("Style Editor", content=StyleEditor(window)))
+window.content.add(TabItem("Style", content=StyleEditor(window)))
 
 #
 # create a menu
