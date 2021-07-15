@@ -1,4 +1,4 @@
-from oogui import *
+from p3ui import Flexible, ComboBox, Direction, Justification, Alignment, px, Button
 
 
 class Flexibles(Flexible):

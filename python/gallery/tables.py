@@ -1,4 +1,4 @@
-from oogui import *
+from p3ui import Table, px
 import numpy as np
 
 

@@ -1,4 +1,5 @@
-from oogui import *
+from p3ui import Flexible, ScrollArea, Plot, Style, percent, auto, px, \
+    percent, Direction, Alignment, Justification, MarkerStyle
 import numpy as np
 
 

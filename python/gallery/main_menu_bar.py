@@ -1,4 +1,4 @@
-from oogui import MenuBar, Menu, MenuItem
+from p3ui import MenuBar, Menu, MenuItem
 
 
 class MainMenuBar(MenuBar):

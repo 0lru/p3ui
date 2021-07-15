@@ -1,4 +1,4 @@
-from oogui import *
+from p3ui import *
 import numpy as np
 from matplotlib.image import imread
 

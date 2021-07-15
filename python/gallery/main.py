@@ -1,4 +1,4 @@
-from oogui import Context, Window, Tab, TabItem, Style, em
+from p3ui import Context, Window, Tab, TabItem, Style, em
 import pathlib
 from plots import Plots
 from widgets import Widgets
@@ -7,17 +7,12 @@ from tables import Tables
 from style_editor import StyleEditor
 from main_menu_bar import MainMenuBar
 
-#
-# create oogui context. the window must be created first, else texture loading etc. will not work
 context = Context()
 window = Window(context)
-
-#
-# get asset folder
 assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
 #
-# load main font, merge icon font
+# load font with merged icon font
 context.default_font = context.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
 context.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
 
