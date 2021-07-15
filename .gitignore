@@ -1,0 +1,9 @@
+##############################################################################
+# Visual Studio temporary files, build results, and temp files from add-ons.
+
+out/**
+doc/sphinx/**
+python/venv/**
+**/.idea/**
+**/__pycache__/**
+.vs/**

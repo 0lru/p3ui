@@ -1,0 +1,5 @@
+file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
+set(SOURCES ${TEST_SOURCES})
+add_executable(p3_tests ${TEST_SOURCES})
+add_test(NAME p3_tests COMMAND p3_tests)
+target_link_libraries(p3_tests PUBLIC gtest p3)

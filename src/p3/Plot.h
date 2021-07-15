@@ -1,0 +1,222 @@
+/***************************************************************************//*/
+  Copyright (c) 2021 Martin Rudoff
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+/******************************************************************************/
+
+#pragma once
+
+#include <string>
+#include <functional>
+#include <optional>
+#include <variant>
+
+#include "Node.h"
+
+#include <implot.h>
+
+namespace p3
+{
+
+    enum class MarkerStyle : std::int32_t
+    {
+        None = ImPlotMarker_None,
+        Circle = ImPlotMarker_Circle,
+        Square = ImPlotMarker_Square,
+        Diamond = ImPlotMarker_Diamond,
+        Up = ImPlotMarker_Up,
+        Down = ImPlotMarker_Down,
+        Left = ImPlotMarker_Left,
+        Right = ImPlotMarker_Right,
+        Cross = ImPlotMarker_Cross,
+        Plus = ImPlotMarker_Plus,
+        Asterisk = ImPlotMarker_Asterisk
+    };
+
+    class Plot : public Node
+    {
+    public:
+        using Ticks = std::vector<double>;
+        using TickLabels = std::vector<std::string>;
+
+        class Item
+        {
+        public:
+            virtual ~Item() = default;
+            virtual void render() = 0;
+        };
+
+        template<typename T>
+        class BarSeries : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> values;
+            double shift = 0.;
+            double width = 1.;
+            void render() override;
+        };
+
+        template<typename T>
+        class LineSeries : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> x;
+            std::vector<T> y;
+            MarkerStyle marker_Style = MarkerStyle::None;
+            void render() override;
+        };
+
+        template<typename T>
+        class StemSeries : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> x;
+            std::vector<T> y;
+            MarkerStyle marker_Style = MarkerStyle::None;
+            void render() override;
+        };
+
+        template<typename T>
+        class ScatterSeries : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> x;
+            std::vector<T> y;
+            MarkerStyle marker_style = MarkerStyle::None;
+            void render() override;
+        };
+
+        template<typename T>
+        class HorizontalLines : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> data;
+            // TODO: std::optional<Color> color;
+            void render() override;
+        };
+
+        template<typename T>
+        class VerticalLines : public Item
+        {
+        public:
+            std::string name;
+            std::vector<T> data;
+            // TODO: std::optional<Color> color;
+            void render() override;
+        };
+
+        Plot();
+
+        using Limits = std::optional<std::array<float, 2>>;
+        using Label = std::optional<std::string>;
+
+        void set_x_label(Label);
+        Label const& x_label() const;
+
+        void set_y_label(Label);
+        Label const& y_label() const;
+
+        void set_x_limits(Limits);
+        Limits const& x_limits() const;
+
+        void set_y_limits(Limits);
+        Limits const& y_limits() const;
+
+        void set_x_ticks(std::optional<Ticks>);
+        std::optional<Ticks> const& x_ticks() const;
+        std::optional<Ticks>& x_ticks();
+
+        void set_y_ticks(std::optional<Ticks>);
+        std::optional<Ticks> const& y_ticks() const;
+        std::optional<Ticks>& y_ticks();
+
+        void set_x_tick_labels(std::optional<TickLabels>);
+        std::optional<TickLabels> const& x_tick_labels() const;
+
+        void set_y_tick_labels(std::optional<TickLabels>);
+        std::optional<TickLabels> const& y_tick_labels() const;
+
+        void update_content() override;
+        void render_impl(float width, float height) override;
+
+        void add(std::shared_ptr<Item>);
+        void remove(std::shared_ptr<Item>);
+        void clear();
+
+    private:
+        std::string _title;
+        Label _x_label;
+        Label _y_label;
+        Limits _x_limits;
+        Limits _y_limits;
+        std::optional<Ticks> _x_ticks;
+        std::optional<Ticks> _y_ticks;
+        std::optional<TickLabels> _x_tick_labels;
+        std::optional<TickLabels> _y_tick_labels;
+        
+        std::vector<std::shared_ptr<Item>> _items;
+    };
+
+    template<typename T>
+    void Plot::BarSeries<T>::render()
+    {
+        auto sample_count = values.size();
+        ImPlot::PlotBars(name.c_str(), values.data(), int(values.size()), width, shift);
+    }
+
+    template<typename T>
+    void Plot::LineSeries<T>::render()
+    {
+        auto sample_count = std::min(x.size(), y.size());
+        ImPlot::PlotLine(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
+    }
+
+    template<typename T>
+    void Plot::ScatterSeries<T>::render()
+    {
+        auto count = int(std::min(x.size(), y.size()));
+        ImPlot::SetNextMarkerStyle(static_cast<ImPlotMarker>(marker_style));
+        ImPlot::PlotScatter(name.c_str(), x.data(), y.data(), count);
+    }
+
+    template<typename T>
+    void Plot::StemSeries<T>::render()
+    {
+        auto sample_count = std::min(x.size(), y.size());
+        ImPlot::PlotStems(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
+    }
+
+    template<typename T>
+    void Plot::HorizontalLines<T>::render()
+    {
+        ImPlot::PlotHLines(name.c_str(), data.data(), static_cast<int>(data.size()));
+    }
+
+    template<typename T>
+    void Plot::VerticalLines<T>::render()
+    {
+        ImPlot::PlotVLines(name.c_str(), data.data(), static_cast<int>(data.size()));
+    }
+
+}
