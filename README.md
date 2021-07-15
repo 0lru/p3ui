@@ -1,4 +1,4 @@
-# Object-Oriented ImGui
+# C++, Python User Interface Library
 
 This project aims at fast prototyping and data visualization for applications written in C++ as well as in Python.
 
