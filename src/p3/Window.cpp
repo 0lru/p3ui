@@ -71,7 +71,7 @@ namespace p3
 
         glfwSetErrorCallback(error_callback);
         _glfw_window = std::shared_ptr<GLFWwindow>(
-            glfwCreateWindow(_width, _height, _title.c_str(), glfwGetPrimaryMonitor(), NULL),
+            glfwCreateWindow(_width, _height, _title.c_str(), nullptr/*glfwGetPrimaryMonitor()*/, nullptr),
             glfwDestroyWindow);
         if (!_glfw_window)
         {

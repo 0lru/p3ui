@@ -86,7 +86,7 @@ namespace p3
         std::vector<std::shared_ptr<Popup>> _popups;
         std::vector<std::shared_ptr<ChildWindow>> _child_windows;
         std::string _title = "p3";
-        int _width = 1920, _height = 1080;
+        int _width = 1024, _height = 768;
         std::array<float, 2> _mouse_position = std::array<float, 2>{0.f, 0.f};
         std::shared_ptr<MenuBar> _menu_bar;
         std::shared_ptr<Theme> _theme;
