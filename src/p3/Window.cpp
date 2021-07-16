@@ -123,11 +123,14 @@ namespace p3
             std::cout << "fps: " << ImGui::GetIO().Framerate << std::endl;
             _timer.reset();
         }
-        auto ms = _throttle_timer.ticks().count();
-        auto ms_minimum = static_cast<decltype(ms)>(1000000000.0 / target_frame_rate);
-        if (ms < ms_minimum)
-            std::this_thread::sleep_for(std::chrono::nanoseconds(ms_minimum - ms));
-        _throttle_timer.reset();
+        if (_target_framerate)
+        {
+            auto ms = _throttle_timer.ticks().count();
+            auto ms_minimum = static_cast<decltype(ms)>(1000000000.0 / _target_framerate.value());
+            if (ms < ms_minimum)
+                std::this_thread::sleep_for(std::chrono::nanoseconds(ms_minimum - ms));
+            _throttle_timer.reset();
+        }
     }
 
     void Window::loop(UpdateCallback update_callback)
@@ -138,6 +141,17 @@ namespace p3
                 update_callback(std::static_pointer_cast<Window>(shared_from_this()));
             frame();
         }
+    }
+
+    void Window::set_target_framerate(std::optional<double> target_framerate)
+    {
+        _target_framerate = std::move(target_framerate);
+        _throttle_timer.reset();
+    }
+
+    std::optional<double> const& Window::target_framerate() const
+    {
+        return _target_framerate;
     }
 
 }

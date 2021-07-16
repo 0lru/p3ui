@@ -31,6 +31,7 @@
 #include <functional>
 #include <string>
 #include <chrono>
+#include <optional>
 
 struct GLFWwindow;
 
@@ -82,6 +83,9 @@ namespace p3
         void loop(UpdateCallback);
         bool closed() const;
 
+        void set_target_framerate(std::optional<double>);
+        std::optional<double> const& target_framerate() const;
+
     private:
         std::string _title;
         int _width = 1024, _height = 768;
@@ -91,7 +95,7 @@ namespace p3
 
         Timer _timer;
         Timer _throttle_timer;
-        float target_frame_rate = 2000.f;
+        std::optional<double> _target_framerate = std::nullopt;
     };
 
 }

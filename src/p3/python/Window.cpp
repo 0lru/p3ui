@@ -46,16 +46,17 @@ namespace p3::python
                 return window;
             }), py::arg("title")="p3", py::arg("width")=1024, py::arg("height")=768)
             .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
-            .def("loop", [](Window& window, py::function f) {
+            .def_property("target_framerate", &Window::target_framerate, &Window::set_target_framerate)
+            .def("loop", [](Window& window, py::object f) {
                 Window::UpdateCallback on_frame;
                 if (!f.is(py::none()))
-                    on_frame = [f{std::move(f)}](auto window) {
+                    on_frame = [f{f.cast<py::function>()}](auto window) {
                         py::gil_scoped_acquire acquire;
                             f(std::move(window));
                     };
                 py::gil_scoped_release release;
                 window.loop(on_frame);
-            }, py::arg("on_frame")=py::none());
+            }, py::kw_only(), py::arg("on_frame")=py::none());
     }
 
 }
