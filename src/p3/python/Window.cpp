@@ -24,6 +24,7 @@
 #include <p3/Popup.h>
 #include <p3/Window.h>
 #include <p3/Theme.h>
+#include <p3/UserInterface.h>
 #include <p3/MenuBar.h>
 
 
@@ -36,31 +37,27 @@ namespace p3::python
 
     void Definition<Window>::apply(py::module& module)
     {
-        py::class_<Window, Node, std::shared_ptr<Window>>(module, "Window")
-            .def(py::init<>([](std::shared_ptr<Context> context, py::kwargs kwargs) {
-                auto window = std::make_shared<Window>(std::move(context));
+        py::class_<Window, std::shared_ptr<Window>>(module, "Window")
+            .def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
+                auto window = std::make_shared<Window>(std::move(title), width, height);
+                if (kwargs.contains("user_interface"))
+                    window->set_user_interface(kwargs["user_interface"].cast<std::shared_ptr<UserInterface>>());
                 parse(kwargs, *window);
                 return window;
-            }))
-            .def_property("content", &Window::content, &Window::set_content)
-            .def("add", [](Window& window, std::shared_ptr<Popup> popup) {
-                window.add(std::move(popup));
-            })
-            .def_property("menu_bar", &Window::menu_bar, &Window::set_menu_bar)
-            .def_property("theme", &Window::theme, &Window::set_theme)
-            .def("loop", [](std::shared_ptr<Window> window, py::kwargs kwargs) {
-                py::gil_scoped_release release;
+            }), py::arg("title")="p3", py::arg("width")=1024, py::arg("height")=768)
+            .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
+            .def("loop", [](Window& window, py::function f) {
                 Window::UpdateCallback on_frame;
-                if (kwargs.contains("on_frame"))
+                if (f != py::none())
                 {
-                    auto f = kwargs["on_frame"].cast<py::function>();
                     on_frame = [f{std::move(f)}](auto window) {
                         py::gil_scoped_acquire acquire;
                             f(std::move(window));
                     };
                 }
-                window->loop(on_frame);
-            });
+                py::gil_scoped_release release;
+                window.loop(on_frame);
+            }, py::arg("on_frame")=py::none());
     }
 
 }

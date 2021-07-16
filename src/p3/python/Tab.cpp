@@ -42,13 +42,12 @@ namespace p3::python
             return tab;
         }));
 
-        tab.def("add", &Tab::add);
-        tab.def("remove", &Tab::remove);
-
-        py::class_<Tab::Item, std::shared_ptr<Tab::Item>> tab_item(module, "TabItem");
+        py::class_<Tab::Item, Node, std::shared_ptr<Tab::Item>> tab_item(module, "TabItem");
 
         tab_item.def(py::init<>([](std::string name, py::kwargs kwargs) {
             auto tab_item = std::make_shared<Tab::Item>(std::move(name), kwargs.contains("content") ? kwargs["content"].cast<std::shared_ptr<Node>>(): nullptr);
+            if (kwargs.contains("content"))
+                tab_item->set_content(kwargs["content"].cast<std::shared_ptr<Node>>());
             return tab_item;
         }));
     }

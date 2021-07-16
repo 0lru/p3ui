@@ -1,34 +1,27 @@
-from p3ui import Context, Window, Tab, TabItem, Style, em
+from p3ui import UserInterface, Window, Tab, TabItem, Style, em, px
 import pathlib
 from plots import Plots
 from widgets import Widgets
 from flexibles import Flexibles
-from tables import Tables
 from style_editor import StyleEditor
 from main_menu_bar import MainMenuBar
 
-context = Context()
-window = Window(context)
 assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
-#
-# load font with merged icon font
-context.default_font = context.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
-context.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
-
-#
-# merge examples to tab
+ui = UserInterface(menu_bar=MainMenuBar())
+ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
+ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
 plots = Plots()
-window.content = Tab(style=Style(padding=(1 | em, 0.5 | em)))
-# window.content.add(TabItem("Tables (ImGui)", content=Tables()))
-window.content.add(TabItem("Flexible", content=Flexibles()))
-window.content.add(TabItem("Widgets", content=Widgets(window, assets)))
-window.content.add(TabItem("Plots", content=plots))
-window.content.add(TabItem("Style", content=StyleEditor(window)))
-
-#
-# create a menu
-window.menu_bar = MainMenuBar()
+window = Window(user_interface=ui)
+ui.content = Tab(
+    style=Style(padding=(1.5 | em, 0.5 | em)),
+    children=[
+        TabItem("Flexible", content=Flexibles()),
+        TabItem("Widgets", content=Widgets(ui, assets)),
+        TabItem("Plots", content=plots),
+        TabItem("Style", content=StyleEditor(ui))
+    ]
+)
 
 #
 # enter main loop

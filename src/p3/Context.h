@@ -30,81 +30,36 @@
 #include <string>
 #include <functional>
 
-struct ImGuiContext;
-struct ImPlotContext;
-
 namespace p3
 {
 
     struct Theme;
+    class UserInterface;
 
     class Context : public std::enable_shared_from_this<Context>
     {
     public:
+        using MouseMove = std::optional<std::array<float, 2>>;
         using Postponed = std::function<void()>;
-        class Font;
-        class FontAtlas;
 
-        Context();
+        Context(UserInterface&, MouseMove);
         ~Context();
-
-        FontAtlas font_atlas();
-        Font load_font(std::string const&, float size);
-        Font default_font();
-        void merge_font(std::string const&, float size);
-        void set_default_font(Font);
-
-        void set_mouse_cursor_scale(float);
-        float mouse_cursor_scale() const;
-
-        void set_anti_aliased_lines(bool);
-        bool anti_aliased_lines() const;
-
-        void set_anti_aliased_fill(bool);
-        bool anti_aliased_fill() const;
-        
-        void set_curve_tessellation_tolerance(float);
-        float curve_tessellation_tolerance() const;
-
-        void set_circle_tessellation_maximum_error(float);
-        float circle_tessellation_maximum_error() const;
-
-        std::array<float, 2> mouse_position() const;
-
-        void make_current();
         static Context& current();
 
-        void set_rem(float rem) { _rem = rem; }
-        float rem() const { return _rem; }
+        UserInterface& user_interface() const;
 
-        void set_mouse_delta(std::optional<std::array<float, 2>>);
-        std::optional<std::array<float, 2>> const& mouse_delta() const;
-
-        float to_actual(Length const &) const;
+        float rem() const;
+        Theme& theme() const;
+        
+        MouseMove const& mouse_move() const;
+        float to_actual(Length const&) const;
 
         void postpone(Postponed);
-        void execute_postponed();
-
-        void set_theme(Theme*);
-        Theme& theme() const;
 
     private:
-        float _rem = 0.f;
-        std::optional<std::array<float, 2>> _mouse_delta;
-        std::shared_ptr<ImGuiContext> _gui_context;
-        std::shared_ptr<ImPlotContext> _plot_context;
+        UserInterface& _user_interface;
+        MouseMove _mouse_move;
         std::vector<Postponed> _postponed;
-        Theme *_theme;
     };
-
-    inline void Context::set_mouse_delta(std::optional<std::array<float, 2>> mouse_delta)
-    {
-        _mouse_delta = std::move(mouse_delta);
-    }
-
-    inline std::optional<std::array<float, 2>> const& Context::mouse_delta() const
-    {
-        return _mouse_delta;
-    }
 
 }

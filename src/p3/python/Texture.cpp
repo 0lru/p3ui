@@ -22,7 +22,7 @@
 
 #include "p3ui.h"
 #include <p3/Texture.h>
-
+#include <format>
 
 namespace
 {
@@ -50,10 +50,10 @@ namespace
     {
         auto in = data.request();
         if (in.shape.size() != 3)
-            throw std::invalid_argument("array has wrong shape");
+            throw std::invalid_argument(std::format("array has wrong shape dimension of {}", in.shape.size()));
         auto depth = in.shape[2];
         if (depth != 4)
-            throw std::invalid_argument("only rgba is supported");
+            throw std::invalid_argument(std::format("only rgba is supported, but image has {} channels", depth));
         auto height = in.shape[0];
         auto width = in.shape[1];
         if (width * height == 0)

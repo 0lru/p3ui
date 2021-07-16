@@ -107,11 +107,9 @@ namespace p3
         auto const status_flag = window->DC.LastItemStatusFlags;
         if (status_flag == _status_flag)
         {
-            if (_mouse.hovered && _mouse.tracking_enabled && Context::current().mouse_delta())
-            {
+            if (_mouse.hovered && _mouse.tracking_enabled && Context::current().mouse_move())
                 if (_mouse.move)
                     _mouse.move(MouseEvent(this));
-            }
             return;
         }
         if (status_flag & ImGuiItemStatusFlags_HoveredRect)
@@ -142,7 +140,6 @@ namespace p3
 
     namespace
     {
-
         template<typename T>
         T cascade(Node const& node, Cascadable<T> const& combined, T StyleComputation::* member, T const& initial)
         {

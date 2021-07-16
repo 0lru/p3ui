@@ -29,69 +29,68 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <string>
+#include <chrono>
 
 struct GLFWwindow;
 
 namespace p3
 {
-    
+
     class ChildWindow;
     class MenuBar;
     class Popup;
 
-    class Window 
-        : public Node
-        , public Theme::Observer
+    class Timer
+    {
+    public:
+        using Clock = std::chrono::high_resolution_clock;
+        using TimePoint = Clock::time_point;
+
+        std::chrono::milliseconds reset()
+        {
+            auto now = Clock::now();
+            auto delta = now - _timepoint;
+            _timepoint = now;
+            return std::chrono::duration_cast<std::chrono::milliseconds>(delta);
+        }
+
+        std::chrono::nanoseconds ticks()
+        {
+            return std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - _timepoint);
+        }
+
+    private:
+        TimePoint _timepoint;
+    };
+
+    class Window : public std::enable_shared_from_this<Window>
     {
     public:
         using UpdateCallback = std::function<void(std::shared_ptr<Window>)>;
 
-        Window(std::shared_ptr<Context>);
+        Window(std::string title, std::size_t width, std::size_t height);
         ~Window();
-
-        void loop(UpdateCallback);
 
         void set_title(std::string);
         const std::string& title() const;
 
-        void set_content(std::shared_ptr<Node>);
-        std::shared_ptr<Node> content() const;
+        void set_user_interface(std::shared_ptr<UserInterface>);
+        std::shared_ptr<UserInterface> const& user_interface() const;
 
-        void add(std::shared_ptr<ChildWindow>);
-
-        void add(std::shared_ptr<Popup>);
-        void remove(std::shared_ptr<Popup>());
-
-        void update_content() override;
-        void render_impl(float width, float height) override;
-
-        void set_menu_bar(std::shared_ptr<MenuBar>);
-        std::shared_ptr<MenuBar> const& menu_bar() const;
-
-        void set_theme(std::shared_ptr<Theme>);
-        std::shared_ptr<Theme> const& theme() const;
-
-        void on_theme_changed() override;
-        void update_restyle();
-        void update_restyle(Context&, bool whole_tree) override;
+        void frame();
+        void loop(UpdateCallback);
+        bool closed() const;
 
     private:
-        void init_styling();
-        void update_style();
-
-        // native glfw window
-        std::shared_ptr<GLFWwindow> _glfw_window;
-        std::shared_ptr<Context> _context;
-        std::shared_ptr<Node> _content;
-        std::vector<std::shared_ptr<Popup>> _popups;
-        std::vector<std::shared_ptr<ChildWindow>> _child_windows;
-        std::string _title = "p3";
+        std::string _title;
         int _width = 1024, _height = 768;
-        std::array<float, 2> _mouse_position = std::array<float, 2>{0.f, 0.f};
-        std::shared_ptr<MenuBar> _menu_bar;
-        std::shared_ptr<Theme> _theme;
-        Theme::ApplyFunction _theme_apply_function;
-        std::optional<OnScopeExit> _theme_observer;
+        std::shared_ptr<GLFWwindow> _glfw_window;
+
+        std::shared_ptr<UserInterface> _user_interface;
+
+        Timer _timer;
+        float target_frame_rate = 60.f;
     };
 
 }

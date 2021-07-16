@@ -37,7 +37,6 @@ namespace p3
     class Color;
     class ColorEdit;
     class ComboBox;
-    class Context;
     class Flexible;
     class Image;
     template<typename T> class InputScalar;
@@ -56,6 +55,7 @@ namespace p3
     class Table;
     class Text;
     class Texture;
+    class UserInterface;
     struct Theme;
     class Window;
 }

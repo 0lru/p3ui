@@ -5,9 +5,18 @@ from matplotlib.image import imread
 icon_char = b'\xee\x8b\x88'.decode('utf-8')
 
 
+def load_texture_data(path):
+    rgb = (imread(path) * 255).astype(np.uint8)
+    return np.concatenate((rgb, np.zeros((rgb.shape[0], rgb.shape[1], 1))), axis=2)
+
+
+def show_popup(window):
+    window.add(Popup(content=Text('button clicked!')))
+
+
 class Widgets(ScrollArea):
 
-    def __init__(self, window, assets):
+    def __init__(self, user_interface, assets):
         super().__init__(
             content=Flexible(
                 style=Style(
@@ -22,7 +31,7 @@ class Widgets(ScrollArea):
                     Text(f'Red Text', style=Style(color='#ff0000')),
                     Button(
                         label='Button',
-                        on_click=lambda: window.add(Popup(content=Text('button clicked!')))
+                        on_click=lambda: user_interface.add(Popup(content=Text('button clicked!')))
                     ),
                     Button(
                         label=f"{icon_char} Icon Button",
@@ -53,9 +62,9 @@ class Widgets(ScrollArea):
                         height=(200 | px, 1, 0),
                         content=Image(
                             texture=Texture(
-                                (imread(assets.joinpath(
+                                load_texture_data(assets.joinpath(
                                     "test.png"
-                                ).as_posix()) * 255).astype(np.uint8)
+                                ).as_posix())
                             ),
                             on_mouse_enter=lambda e: print('mouse entered image'),
                             on_mouse_move=lambda e: print(f'{e.source} {e.x} {e.y}'),

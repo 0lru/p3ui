@@ -20,27 +20,19 @@
   SOFTWARE.
 /******************************************************************************/
 
-#include "log.h"
-#include "ChildWindow.h"
-#include "Font.h"
-#include "Menu.h"
-#include "MenuBar.h"
-#include "Popup.h"
 #include "Window.h"
+#include "UserInterface.h"
+#include "log.h"
 
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl2.h>
 #define GLFW_INCLUDE_NONE
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <ranges>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl2.h>
 
+#include <thread>
+#include <implot.h>
 
 namespace
 {
@@ -55,15 +47,8 @@ namespace
 namespace p3
 {
 
-    Window::Window(std::shared_ptr<Context> context)
-        : Node("Window")
-        , _context(std::move(context))
-        , _theme{ Theme::make_default() }
+    Window::Window(std::string title, std::size_t width, std::size_t height)
     {
-        _theme->add_observer(this);
-        _theme_observer = OnScopeExit([this, theme=_theme]() {
-            theme->remove_observer(this);
-        });
         if (!glfwInit())
             throw std::runtime_error("could not init glfw");
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -71,7 +56,7 @@ namespace p3
 
         glfwSetErrorCallback(error_callback);
         _glfw_window = std::shared_ptr<GLFWwindow>(
-            glfwCreateWindow(_width, _height, _title.c_str(), nullptr/*glfwGetPrimaryMonitor()*/, nullptr),
+            glfwCreateWindow(int(width), int(height), title.c_str(), nullptr/*glfwGetPrimaryMonitor()*/, nullptr),
             glfwDestroyWindow);
         if (!_glfw_window)
         {
@@ -82,21 +67,17 @@ namespace p3
         glfwMakeContextCurrent(_glfw_window.get());
         glfwSwapInterval(1); // Enable vsync
         gladLoadGL(glfwGetProcAddress);
-        ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), true);
-        ImGui_ImplOpenGL2_Init();
     }
 
     Window::~Window()
     {
+        _glfw_window.reset();
         glfwTerminate();
-    }
-
-    void Window::init_styling()
-    {
     }
 
     void Window::set_title(std::string title)
     {
+        glfwSetWindowTitle(_glfw_window.get(), title.c_str());
         _title = std::move(title);
     }
 
@@ -105,183 +86,51 @@ namespace p3
         return _title;
     }
 
-    void Window::set_content(std::shared_ptr<Node> content)
+    void Window::set_user_interface(std::shared_ptr<UserInterface> user_interface)
     {
-        if (_content)
-            Node::remove(_content);
-        _content = std::move(content);
-        if (_content)
-            Node::add(_content);
+        _user_interface = std::move(user_interface);
+        ImGui::SetCurrentContext(&_user_interface->im_gui_context());
+        ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
+        ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), true);
+        ImGui_ImplOpenGL2_Init();
     }
 
-    std::shared_ptr<Node> Window::content() const
+    std::shared_ptr<UserInterface> const& Window::user_interface() const
     {
-        return _content;
+        return _user_interface;
     }
 
-    void Window::add(std::shared_ptr<ChildWindow> child_window)
+    bool Window::closed() const
     {
-        _child_windows.push_back(child_window);
-        Node::add(child_window);
+        return glfwWindowShouldClose(_glfw_window.get());
     }
 
-    void Window::add(std::shared_ptr<Popup> popup)
+    void Window::frame()
     {
-        _popups.push_back(popup);
-        Node::add(popup);
-    }
+        glfwGetFramebufferSize(_glfw_window.get(), &_width, &_height);
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        if (_user_interface)
+            _user_interface->render(float(_width), float(_height));
+        glViewport(0, 0, _width, _height);
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(_glfw_window.get());
+        glfwPollEvents();
 
-    void Window::update_content()
-    {
-    }
-
-    void Window::render_impl(float, float)
-    {
-        std::optional<OnScopeExit> theme_guard;
-        if (_theme_apply_function)
-            theme_guard = _theme_apply_function();
-        ImGuiWindowFlags flags =
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoDecoration;
-        if (_menu_bar)
-        {
-            flags = flags | ImGuiWindowFlags_MenuBar;
-        }
-        ImGui::Begin("Window", 0, flags);
-        if (_menu_bar)
-        {
-            if (ImGui::BeginMenuBar())
-            {
-                for (auto& menu : _menu_bar->children())
-                    menu->render(0, 0);
-                ImGui::EndMenuBar();
-            }
-        }
-        auto content_region = ImGui::GetContentRegionAvail();
-        if (_content)
-            _content->render(content_region.x, content_region.y);
-        for (auto& child_window : _child_windows)
-            child_window->render(
-                child_window->width(content_region.x),
-                child_window->height(content_region.y));
-        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& popup) {
-            popup->render(popup->width(content_region.x), popup->height(content_region.y));
-            return !popup->opened();
-        }), _popups.end());
-        ImGui::End();
-        _context->execute_postponed();
-        ImGui::Render();
+        auto ms = _timer.reset().count();
+        auto ms_minimum = static_cast<decltype(ms)>(1000.0f / target_frame_rate);
+        if (ms < ms_minimum)
+            std::this_thread::sleep_for(std::chrono::milliseconds(ms_minimum - ms));
     }
 
     void Window::loop(UpdateCallback update_callback)
     {
-        while (!glfwWindowShouldClose(_glfw_window.get()))
+        while (!closed())
         {
-            ImGui_ImplOpenGL2_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            auto mouse_position = _context->mouse_position();
-            if (_mouse_position[0] != mouse_position[0] ||
-                _mouse_position[1] != mouse_position[1])
-            {
-                _context->set_mouse_delta(std::array<float, 2>{
-                    mouse_position[0] - _mouse_position[0],
-                        mouse_position[1] - _mouse_position[1]
-                });
-                std::swap(_mouse_position, mouse_position);
-            }
-            else
-            {
-                _context->set_mouse_delta(std::optional<std::array<float, 2>>());
-            }
-
-            update_restyle();
-
-            ImGui::SetNextWindowPos(ImVec2(.0f, .0f), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(static_cast<float>(_width), static_cast<float>(_height)), ImGuiCond_Always);
-
             if (update_callback)
                 update_callback(std::static_pointer_cast<Window>(shared_from_this()));
-
-            render(0, 0);
-
-            glfwGetFramebufferSize(_glfw_window.get(), &_width, &_height);
-            glViewport(0, 0, _width, _height);
-            ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-
-            glfwSwapBuffers(_glfw_window.get());
-            glfwPollEvents();
+            frame();
         }
-
-        _glfw_window = nullptr;
-        glfwTerminate();
-        exit(EXIT_SUCCESS);
-    }
-
-    void Window::set_menu_bar(std::shared_ptr<MenuBar> menu_bar)
-    {
-        if (_menu_bar)
-            Node::remove(_menu_bar);
-        _menu_bar = std::move(menu_bar);
-        if (_menu_bar)
-            Node::add(_menu_bar);
-    }
-
-    std::shared_ptr<MenuBar> const& Window::menu_bar() const
-    {
-        return _menu_bar;
-    }
-
-    void Window::set_theme(std::shared_ptr<Theme> theme)
-    {
-        std::swap(theme, _theme);
-        _theme_observer.reset();
-        if (_theme)
-        {
-            _theme->add_observer(this);
-            _theme_observer = OnScopeExit([this, theme=_theme]() {
-                theme->remove_observer(this);
-            });
-        }
-        set_needs_restyle();
-    }
-
-    std::shared_ptr<Theme> const& Window::theme() const
-    {
-        return _theme;
-    }
-
-    void Window::on_theme_changed()
-    {
-        log_verbose("-style- theme changed");
-        set_needs_restyle();
-    }
-
-    void Window::update_restyle(Context& context, bool force_recompute)
-    {
-        if (needs_update() && (needs_restyle() || force_recompute))
-        {
-            log_debug("restyling window");
-            if (_theme)
-                _theme_apply_function = _theme->compile(context);
-            else
-                _theme_apply_function = nullptr;
-        }
-        std::optional<OnScopeExit> theme_guard;
-        if (_theme_apply_function)
-            theme_guard = _theme_apply_function();
-        Node::update_restyle(context, force_recompute);
-    }
-
-    void Window::update_restyle()
-    {
-        _context->set_theme(_theme.get());
-        update_restyle(*_context, false);
     }
 
 }

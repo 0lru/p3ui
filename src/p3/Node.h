@@ -124,7 +124,7 @@ namespace p3
 
         // ##### render ########################################################
 
-        void render(float width, float height);
+        virtual void render(float width, float height);
         virtual void update_content() {};
 
         void set_label(std::optional<std::string>);
@@ -147,6 +147,7 @@ namespace p3
         // dom must not be modified during an update traversal of imgui, user callbacks need to be "postponed"
         void postpone(std::function<void()>);
 
+        [[nodiscard]] OnScopeExit _apply_style_compiled();
 
     private:
         std::string _element_name;
@@ -183,7 +184,6 @@ namespace p3
         
         void _perform_style_cascade(Context&);
         void _compile_style_computation(Context&);
-        [[nodiscard]] OnScopeExit _apply_style_compiled();
     };
 
     class Node::MouseEvent

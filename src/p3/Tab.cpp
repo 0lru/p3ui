@@ -38,72 +38,27 @@ namespace p3
     {
         ImVec2 size(width, height);
         ImGui::BeginChild(imgui_label().c_str(), size, false, ImGuiWindowFlags_NoScrollbar);
-        auto em = ImGui::GetCurrentContext()->FontSize;
-        ImGui::BeginTabBar((imgui_label()+"_tab").c_str());
-        for (auto& item : _items)
-        {
-            if (!ImGui::BeginTabItem(item->name().c_str()))
-                continue;
-            if (item->content())
-            {
-                auto available = ImGui::GetContentRegionAvail();
-                item->content()->render(available.x, available.y);
-            }
-            ImGui::EndTabItem();
-        }
-        ImVec2 pad(1.6f * em, 1.6f * em);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, pad);
+        ImGui::BeginTabBar((imgui_label() + "_tab").c_str());
+        for (auto& child : children())
+            child->render(width, height);
         ImGui::EndTabBar();
-        ImGui::PopStyleVar();
         ImGui::EndChild();
         update_status();
     }
 
     void Tab::update_content()
     {
-        for(auto& item : _items)
-            if (item->content())
-                item->content()->update_content();
+        for (auto& child : children())
+            child->update_content();
         _automatic_height = 1.f;
         _automatic_width = 1.f;
     }
 
-    void Tab::add(std::shared_ptr<Item> item)
-    {
-        if (item && item->content())
-            Node::add(item->content());
-        _items.push_back(std::move(item));
-    }
-
-    void Tab::remove(std::shared_ptr<Item> item)
-    {
-        _items.erase(std::remove_if(_items.begin(), _items.end(), [&](auto& it) {
-            if (item == it)
-            {
-                if(it->content())
-                    Node::remove(it->content());
-                return true;
-            }
-            return false;
-        }), _items.end());
-    }
-
     Tab::Item::Item(std::string name, std::shared_ptr<Node> node)
-        : _name(std::move(name))
+        : Node("TabItem")
         , _content(std::move(node))
     {
-    }
-
-    std::string const& Tab::Item::name() const
-    {
-        return _name;
-    }
-
-    void Tab::Item::set_name(std::string name)
-    {
-        _name = std::move(name);
-        if (_tab)
-            _tab->set_needs_update();
+        set_label(name);
     }
 
     std::shared_ptr<Node> Tab::Item::content() const
@@ -113,23 +68,38 @@ namespace p3
 
     void Tab::Item::set_content(std::shared_ptr<Node> content)
     {
-        if (_content && _tab)
-        {
-            static_cast<Node *>(_tab)->remove(_content);
-        }
+        if (_content)
+            remove(_content);
         _content = std::move(content);
-        if (_content && _tab)
-            static_cast<Node *>(_tab)->add(_content);
+        if (_content)
+            add(_content);
     }
 
-    void Tab::Item::set_tab(Tab* tab)
+    void Tab::Item::render(float width, float height)
     {
-        _tab = tab;
+        if (!ImGui::BeginTabItem(label() ? label().value().c_str() : ""))
+            return;
+        auto compiled_guard = _apply_style_compiled();
+        if (_content)
+        {
+            auto region = ImGui::GetContentRegionAvail();
+            _content->render(region.x, region.y);
+        }
+        ImGui::EndTabItem();
     }
 
-    Tab* Tab::Item::tab() const
+    void Tab::Item::update_content()
     {
-        return _tab;
+        if (_content)
+        {
+            _content->update_content();
+            _automatic_width = _content->automatic_width();
+            _automatic_height = _content->automatic_height();
+        }
+        else
+        {
+            _automatic_width = _automatic_height = 0.f;
+        }
     }
 
 }

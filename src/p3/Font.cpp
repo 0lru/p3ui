@@ -20,8 +20,8 @@
   SOFTWARE.
 /******************************************************************************/
 
-#include "Context.h"
 #include "Font.h"
+#include "UserInterface.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -29,41 +29,56 @@
 namespace p3
 {
 
-    Context::Font::Font(std::shared_ptr<Context> context, ImFont* font)
-        : _context(std::move(context))
+    Font::Font(std::shared_ptr<UserInterface> user_interface, ImFont* font)
+        : _user_interface(std::move(user_interface))
         , _font(font)
     {
     }
 
-    Context::Font::operator bool() const
+    Font::operator bool() const
     {
         return _font != nullptr;
     }
 
-    float Context::Font::scale() const
+    float Font::scale() const
     {
         return _font->Scale;
     }
 
-    float Context::Font::size() const
+    UserInterface const& Font::user_interface() const
+    {
+        return *_user_interface;
+    }
+
+    ImFont& Font::native() const
+    {
+        return *_font;
+    }
+
+    float Font::size() const
     {
         return _font->FontSize;
     }
 
-    Context::FontAtlas::FontAtlas(std::shared_ptr<Context> context, ImFontAtlas* atlas)
-        : _context(std::move(context))
+    FontAtlas::FontAtlas(std::shared_ptr<UserInterface> user_interface, ImFontAtlas* atlas)
+        : _user_interface(std::move(user_interface))
         , _atlas(atlas)
     {
     }
 
-    std::size_t Context::FontAtlas::size() const
+    std::size_t FontAtlas::size() const
     {
-        return static_cast<std::size_t>(_context->_gui_context->IO.Fonts->Fonts.Size);
+        return static_cast<std::size_t>(_user_interface->im_gui_context().IO.Fonts->Fonts.Size);
     }
 
-    Context::Font Context::FontAtlas::operator[](std::size_t index) const
+    Font FontAtlas::operator[](std::size_t index) const
     {
-        return Font(_context, _context->_gui_context->IO.Fonts->Fonts[static_cast<int>(index)]);
+        return Font(_user_interface, _user_interface->im_gui_context().IO.Fonts->Fonts[static_cast<int>(index)]);
+    }
+
+    ImFontAtlas& FontAtlas::native() const
+    {
+        return *_atlas;
     }
 
 }

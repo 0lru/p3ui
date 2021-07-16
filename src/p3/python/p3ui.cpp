@@ -32,23 +32,6 @@ PYBIND11_MODULE(p3ui, module)
         Object Oriented ImGUI (https://github.com/0lru/p3)
     )docstring";
 
-    module.def("test", [](int aaaa, int bbbb, int cccc, py::kwargs) {
-        std::cout << aaaa << " " << bbbb << " " << cccc << std::endl;
-    }, R"doc(
-        one is positional
-    
-        :param aaaa: the a-parameter.
-        :param bbbb: the b-parameter.
-        :param cccc: the a-parameter.
-
-        :Keyword Arguments:
-            * *extra* (``list``) --
-              Extra stuff
-            * *supplement* (``dict``) --
-              Additional content
-    )doc", py::arg("aaaa"), py::kw_only(), py::arg("bbbb")=1, py::arg("cccc")=2);
-
-    python::Definition<Context>::apply(module);
     python::Definition<Node>::apply(module);
     python::Definition<Button>::apply(module);
     python::Definition<CheckBox>::apply(module);
@@ -93,5 +76,6 @@ PYBIND11_MODULE(p3ui, module)
     python::Definition<Slider<double>>::apply(module);
     python::Definition<StyleBlock>::apply(module);
     python::Definition<Theme>::apply(module);
+    python::Definition<UserInterface>::apply(module);
     python::Definition<Window>::apply(module);
 }

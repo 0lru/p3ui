@@ -130,35 +130,35 @@ class Color4(Flexible):
 
 class StyleEditor(ScrollArea):
 
-    def __init__(self, window):
+    def __init__(self, ui):
         super().__init__(content=Flexible(
             width=(45 | em, 0, 0),
             direction=Direction.Vertical,
             align_items=Alignment.Stretch,
             justify_content=Justification.Start))
-        for name in [x for x in dir(window.theme) if not x.startswith('_')]:
-            value = getattr(window.theme, name)
+        for name in [x for x in dir(ui.theme) if not x.startswith('_')]:
+            value = getattr(ui.theme, name)
             label = ' '.join([c.title() for c in (name.split('_'))])
             if value is None:
                 print(f'[info] {name} is not set')
             elif isinstance(value, Color):
-                self.content.add(Color4(label, window.theme, name))
-        self.content.add(Length1('Tab Rounding', window.theme, 'tab_rounding'))
-        self.content.add(Length1('Window Rounding', window.theme, 'window_rounding'))
-        self.content.add(Length1('Window Border Size', window.theme, 'window_border_size'))
-        self.content.add(Length1('Child Rounding', window.theme, 'child_rounding'))
-        self.content.add(Length1('Child Border Size', window.theme, 'child_border_size'))
-        self.content.add(Length1('Frame Rounding', window.theme, 'frame_rounding'))
-        self.content.add(Length1('Frame Border Size', window.theme, 'frame_border_size'))
-        self.content.add(Length2('Frame Padding', window.theme, 'frame_padding'))
-        self.content.add(Length1('Popup Rounding', window.theme, 'popup_rounding'))
-        self.content.add(Length1('Popup Border Size', window.theme, 'popup_border_size'))
-        self.content.add(Length1('Indent Spacing', window.theme, 'indent_spacing'))
-        self.content.add(Length1('Scrollbar Size', window.theme, 'scrollbar_size'))
-        self.content.add(Length1('Scrollbar Rounding', window.theme, 'scrollbar_rounding'))
-        self.content.add(Length1('Grab Min Size', window.theme, 'grab_min_size'))
-        self.content.add(Length1('Grab Rounding', window.theme, 'grab_rounding'))
-        self.content.add(Length2('Item Spacing', window.theme, 'item_spacing'))
-        self.content.add(Length2('Inner Item Spacing', window.theme, 'item_inner_spacing'))
-        self.content.add(Length2('Window Padding', window.theme, 'window_padding'))
-        self.content.add(Length2('Cell Padding', window.theme, 'cell_padding'))
+                self.content.add(Color4(label, ui.theme, name))
+        self.content.add(Length1('Tab Rounding', ui.theme, 'tab_rounding'))
+        self.content.add(Length1('Window Rounding', ui.theme, 'window_rounding'))
+        self.content.add(Length1('Window Border Size', ui.theme, 'window_border_size'))
+        self.content.add(Length1('Child Rounding', ui.theme, 'child_rounding'))
+        self.content.add(Length1('Child Border Size', ui.theme, 'child_border_size'))
+        self.content.add(Length1('Frame Rounding', ui.theme, 'frame_rounding'))
+        self.content.add(Length1('Frame Border Size', ui.theme, 'frame_border_size'))
+        self.content.add(Length2('Frame Padding', ui.theme, 'frame_padding'))
+        self.content.add(Length1('Popup Rounding', ui.theme, 'popup_rounding'))
+        self.content.add(Length1('Popup Border Size', ui.theme, 'popup_border_size'))
+        self.content.add(Length1('Indent Spacing', ui.theme, 'indent_spacing'))
+        self.content.add(Length1('Scrollbar Size', ui.theme, 'scrollbar_size'))
+        self.content.add(Length1('Scrollbar Rounding', ui.theme, 'scrollbar_rounding'))
+        self.content.add(Length1('Grab Min Size', ui.theme, 'grab_min_size'))
+        self.content.add(Length1('Grab Rounding', ui.theme, 'grab_rounding'))
+        self.content.add(Length2('Item Spacing', ui.theme, 'item_spacing'))
+        self.content.add(Length2('Inner Item Spacing', ui.theme, 'item_inner_spacing'))
+        self.content.add(Length2('Window Padding', ui.theme, 'window_padding'))
+        self.content.add(Length2('Cell Padding', ui.theme, 'cell_padding'))

@@ -39,34 +39,21 @@ namespace p3
         Tab();
         void render_impl(float width, float height) override;
         void update_content() override;
-
-        void add(std::shared_ptr<Item>);
-        void remove(std::shared_ptr<Item>);
-        std::shared_ptr<Item> operator[](std::size_t) const;
-
-    private:
-        std::vector<std::shared_ptr<Item>> _items;
     };
 
-    class Tab::Item
+    class Tab::Item : public Node
     {
     public:
         Item(std::string name, std::shared_ptr<Node> = nullptr);
 
-        std::string const& name() const;
-        void set_name(std::string);
-
         std::shared_ptr<Node> content() const;
         void set_content(std::shared_ptr<Node>);
-
-        void set_tab(Tab*);
-        Tab* tab() const;
+        void render(float width, float height) override;
+        
+        void update_content();
 
     private:
-        Tab* _tab = nullptr;
-        std::string _name;
         std::shared_ptr<Node> _content;
     };
-
 
 }
