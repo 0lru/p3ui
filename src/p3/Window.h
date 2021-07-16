@@ -47,12 +47,12 @@ namespace p3
         using Clock = std::chrono::high_resolution_clock;
         using TimePoint = Clock::time_point;
 
-        std::chrono::milliseconds reset()
+        std::chrono::nanoseconds reset()
         {
             auto now = Clock::now();
             auto delta = now - _timepoint;
             _timepoint = now;
-            return std::chrono::duration_cast<std::chrono::milliseconds>(delta);
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(delta);
         }
 
         std::chrono::nanoseconds ticks()
@@ -90,7 +90,8 @@ namespace p3
         std::shared_ptr<UserInterface> _user_interface;
 
         Timer _timer;
-        float target_frame_rate = 60.f;
+        Timer _throttle_timer;
+        float target_frame_rate = 2000.f;
     };
 
 }

@@ -33,6 +33,7 @@
 
 #include <thread>
 #include <implot.h>
+#include <imgui_internal.h>
 
 namespace
 {
@@ -65,7 +66,7 @@ namespace p3
         }
 
         glfwMakeContextCurrent(_glfw_window.get());
-        glfwSwapInterval(1); // Enable vsync
+        // glfwSwapInterval(1); // Enable vsync
         gladLoadGL(glfwGetProcAddress);
     }
 
@@ -117,10 +118,16 @@ namespace p3
         glfwSwapBuffers(_glfw_window.get());
         glfwPollEvents();
 
-        auto ms = _timer.reset().count();
-        auto ms_minimum = static_cast<decltype(ms)>(1000.0f / target_frame_rate);
+        if (_timer.ticks() > std::chrono::milliseconds(1000))
+        {
+            std::cout << "fps: " << ImGui::GetIO().Framerate << std::endl;
+            _timer.reset();
+        }
+        auto ms = _throttle_timer.ticks().count();
+        auto ms_minimum = static_cast<decltype(ms)>(1000000000.0 / target_frame_rate);
         if (ms < ms_minimum)
-            std::this_thread::sleep_for(std::chrono::milliseconds(ms_minimum - ms));
+            std::this_thread::sleep_for(std::chrono::nanoseconds(ms_minimum - ms));
+        _throttle_timer.reset();
     }
 
     void Window::loop(UpdateCallback update_callback)
