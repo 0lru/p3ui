@@ -48,13 +48,11 @@ namespace p3::python
             .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
             .def("loop", [](Window& window, py::function f) {
                 Window::UpdateCallback on_frame;
-                if (f != py::none())
-                {
+                if (!f.is(py::none()))
                     on_frame = [f{std::move(f)}](auto window) {
                         py::gil_scoped_acquire acquire;
                             f(std::move(window));
                     };
-                }
                 py::gil_scoped_release release;
                 window.loop(on_frame);
             }, py::arg("on_frame")=py::none());
