@@ -307,7 +307,7 @@ namespace p3
         Length _grab_rounding{ 0 | px };
         Length _tab_rounding{ 2 | px };
         Float2 _button_text_align{ .5f, .5f };
-        Float2 _selectable_text_align{ .5f, .5f };
+        Float2 _selectable_text_align{ 0.f, 0.f };
         Color _text_color;
         Color _text_disabled_color;
         Color _window_background_color;
