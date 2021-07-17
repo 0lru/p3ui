@@ -82,10 +82,11 @@ namespace p3
         void set_circle_tessellation_maximum_error(float);
         float circle_tessellation_maximum_error() const;
 
+        void render(float width, float height) override;
+
     protected:
         void update_content() override;
         void update_restyle(Context&, bool whole_tree=false) override;
-        void render_impl(float width, float height) override;
 
     private:
         std::size_t _width = 1024;

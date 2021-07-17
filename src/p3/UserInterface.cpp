@@ -210,7 +210,7 @@ namespace p3
         Node::update_restyle(context, force_restyle);
     }
 
-    void UserInterface::render_impl(float width, float height)
+    void UserInterface::render(float width, float height)
     {
         ImGui::NewFrame();
 
