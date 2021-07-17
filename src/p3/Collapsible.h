@@ -37,21 +37,18 @@ namespace p3
 
         void render_impl(float width, float height) override;
 
-        void set_title(std::string);
-        std::string const& title() const;
-
         void set_content(std::shared_ptr<Node>);
         std::shared_ptr<Node> content();
 
-        // void set_collapsed(bool);
+        void set_collapsed(bool);
         bool is_collapsed() const;
 
         void update_content() override;
 
     private:
-        std::string _title;
         std::shared_ptr<Node> _content;
         bool _collapsed;
+        std::optional<bool> _force_open=false;
     };
 
 }
