@@ -35,13 +35,15 @@ namespace p3::python
     {
         py::class_<Collapsible, Node, std::shared_ptr<Collapsible>> collapsible(module, "Collapsible");
         
-        collapsible.def(py::init<>([](std::string title, py::kwargs kwargs) {
-            auto collapsible = std::make_shared<Collapsible>(std::move(title));
+        collapsible.def(py::init<>([](std::shared_ptr<Node> content, bool collapsed, py::kwargs kwargs) {
+            auto collapsible = std::make_shared<Collapsible>("");
+            collapsible->set_collapsed(collapsed);
             parse(kwargs, *collapsible);
+            if(content)
+                collapsible->set_content(std::move(content));
             return collapsible;
-        }));
+        }), py::kw_only(), py::arg("content")=py::none(), py::arg("collapsed")=true);
 
-        collapsible.def_property("title", &Collapsible::title, &Collapsible::set_title);
         collapsible.def_property("content", &Collapsible::content, &Collapsible::set_content);
     }
 
