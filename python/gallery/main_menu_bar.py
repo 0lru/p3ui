@@ -25,10 +25,3 @@ class MainMenuBar(MenuBar):
             )]
         ))
 
-        self.add(Menu(
-            'View',
-            children=[
-                MenuItem('Any')
-            ]
-        ))
-

@@ -48,6 +48,55 @@ namespace
 namespace p3
 {
 
+    VideoMode::VideoMode(GLFWmonitor* monitor, int width, int height, int hz)
+        : _monitor(monitor)
+        , _width(width)
+        , _height(height)
+        , _hz(hz)
+    {
+    }
+
+    int VideoMode::width() const
+    {
+        return _width;
+    }
+
+    int VideoMode::height() const
+    {
+        return _height;
+    }
+
+    int VideoMode::hz() const
+    {
+        return _hz;
+    }
+
+    GLFWmonitor * VideoMode::glfw_monitor() const
+    {
+        return _monitor;
+    }
+
+    Monitor::Monitor(GLFWmonitor* handle)
+        : _handle(handle)
+    {
+    }
+
+    VideoMode Monitor::mode() const
+    {
+        auto mode = glfwGetVideoMode(_handle);
+        return VideoMode(_handle, mode->width, mode->height, mode->refreshRate);
+    }
+
+    std::vector<VideoMode> Monitor::modes() const
+    {
+        int mode_count;
+        auto glfw_modes = glfwGetVideoModes(_handle, &mode_count);
+        std::vector<VideoMode> modes(mode_count);
+        for (int i = 0; i < mode_count; ++i)
+            modes[i] = VideoMode(_handle, glfw_modes[i].width, glfw_modes[i].height, glfw_modes[i].refreshRate);
+        return modes;
+    }
+
     Window::Window(std::string title, std::size_t width, std::size_t height)
     {
         if (!glfwInit())
@@ -106,14 +155,21 @@ namespace p3
         return glfwWindowShouldClose(_glfw_window.get());
     }
 
+    Window::Size Window::framebuffer_size() const
+    {
+        Size size;
+        glfwGetFramebufferSize(_glfw_window.get(), &size.width, &size.height);
+        return size;
+    }
+
     void Window::frame()
     {
-        glfwGetFramebufferSize(_glfw_window.get(), &_width, &_height);
+        auto framebuffer_size = this->framebuffer_size();
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         if (_user_interface)
-            _user_interface->render(float(_width), float(_height));
-        glViewport(0, 0, _width, _height);
+            _user_interface->render(float(framebuffer_size.width), float(framebuffer_size.height));
+        glViewport(0, 0, framebuffer_size.width, framebuffer_size.height);
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(_glfw_window.get());
         glfwPollEvents();
@@ -152,6 +208,88 @@ namespace p3
     std::optional<double> const& Window::target_framerate() const
     {
         return _target_framerate;
+    }
+
+    std::optional<VideoMode> Window::video_mode() const
+    {
+        auto monitor = glfwGetWindowMonitor(_glfw_window.get());
+        if (monitor)
+        {
+            auto mode = glfwGetVideoMode(monitor);
+            return VideoMode(monitor, mode->width, mode->height, mode->refreshRate);
+        }
+        return std::nullopt;
+    }
+
+    void Window::set_video_mode(std::optional<VideoMode> mode)
+    {
+        auto monitor = glfwGetWindowMonitor(_glfw_window.get());
+        if (mode)
+        {
+            if (!monitor)
+            {
+                glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
+                glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
+            }
+            glfwSetWindowMonitor(
+                _glfw_window.get(), 
+                mode.value().glfw_monitor(), 
+                0, 0, 
+                mode.value().width(), mode.value().height(), 
+                mode.value().hz());
+        }
+        else if(monitor)
+        {
+            glfwSetWindowMonitor(
+                _glfw_window.get(), 
+                nullptr, 
+                _position.x, _position.y, _size.width, _size.height, 0);
+        }
+    }
+
+    Window::Position Window::position() const
+    {
+        if (glfwGetWindowMonitor(_glfw_window.get()))
+            glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
+        return _position;
+    }
+
+    void Window::set_position(Position position)
+    {
+        if (glfwGetWindowMonitor(_glfw_window.get()))
+            _position = std::move(position);
+        else
+            glfwSetWindowPos(_glfw_window.get(), position.x, position.y);
+    }
+
+    Window::Size Window::size() const
+    {
+        if (glfwGetWindowMonitor(_glfw_window.get()))
+            glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
+        return _size;
+    }
+
+    void Window::set_size(Size size)
+    {
+        if (glfwGetWindowMonitor(_glfw_window.get()))
+            _size = std::move(size);
+        else
+            glfwSetWindowSize(_glfw_window.get(), size.width, size.height);
+    }
+
+    Monitor Window::primary_monitor()
+    {
+        return Monitor(glfwGetPrimaryMonitor());
+    }
+
+    std::vector<Monitor> Window::monitors()
+    {
+        int monitor_count;
+        GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitor_count);
+        std::vector<Monitor> monitors(monitor_count);
+        for (int i = 0; i < monitor_count; ++i)
+            monitors[i] = Monitor(glfw_monitors[i]);
+        return monitors;
     }
 
 }

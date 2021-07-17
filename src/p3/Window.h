@@ -34,6 +34,8 @@
 #include <optional>
 
 struct GLFWwindow;
+struct GLFWmonitor;
+struct GLFWvidmode;
 
 namespace p3
 {
@@ -65,10 +67,48 @@ namespace p3
         TimePoint _timepoint;
     };
 
+    class VideoMode
+    {
+    public:
+        VideoMode() = default;
+        VideoMode(VideoMode const&) = default;
+        VideoMode(GLFWmonitor *, int width, int height, int hz);
+        int width() const;
+        int height() const;
+        int hz() const;
+
+        GLFWmonitor* glfw_monitor() const;
+
+    private:
+        GLFWmonitor* _monitor = nullptr;
+        int _width;
+        int _height;
+        int _hz;
+    };
+
+    class Monitor
+    {
+    public:
+        Monitor() = default;
+        Monitor(Monitor const&) = default;
+        explicit Monitor(GLFWmonitor*);
+
+        VideoMode mode() const;
+        void set_mode(VideoMode);
+
+        std::vector<VideoMode> modes() const;
+
+    private:
+        GLFWmonitor* _handle = nullptr;
+    };
+
     class Window : public std::enable_shared_from_this<Window>
     {
     public:
         using UpdateCallback = std::function<void(std::shared_ptr<Window>)>;
+
+        struct Position { int x; int y; };
+        struct Size { int width; int height; };
 
         Window(std::string title, std::size_t width, std::size_t height);
         ~Window();
@@ -86,9 +126,24 @@ namespace p3
         void set_target_framerate(std::optional<double>);
         std::optional<double> const& target_framerate() const;
 
+        std::optional<VideoMode> video_mode() const;
+        void set_video_mode(std::optional<VideoMode>);
+
+        static Monitor primary_monitor();
+        static std::vector<Monitor> monitors();
+
+        Position position() const;
+        void set_position(Position);
+
+        Size size() const;
+        void set_size(Size);
+        
+        Size framebuffer_size() const;
+
     private:
         std::string _title;
-        int _width = 1024, _height = 768;
+        mutable Position _position{ 10, 10 };
+        mutable Size _size{ 1024, 768 };
         std::shared_ptr<GLFWwindow> _glfw_window;
 
         std::shared_ptr<UserInterface> _user_interface;

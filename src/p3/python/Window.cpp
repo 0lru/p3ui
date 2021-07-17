@@ -37,7 +37,28 @@ namespace p3::python
 
     void Definition<Window>::apply(py::module& module)
     {
-        py::class_<Window, std::shared_ptr<Window>>(module, "Window")
+        py::class_<VideoMode>(module, "VideoMode")
+            .def_property_readonly("width", &VideoMode::width)
+            .def_property_readonly("height", &VideoMode::height)
+            .def_property_readonly("hz", &VideoMode::hz);
+
+        py::class_<Monitor>(module, "Monitor")
+            .def_property_readonly("mode", &Monitor::mode)
+            .def_property_readonly("modes", &Monitor::modes);
+
+        py::class_<Window, std::shared_ptr<Window>> window(module, "Window");
+
+        py::class_<Window::Position>(window, "Position")
+            .def(py::init<>([](int x, int y) { return Window::Position{ .x = x, .y = y }; }))
+            .def_readwrite("x", &Window::Position::x)
+            .def_readwrite("y", &Window::Position::y);
+
+        py::class_<Window::Size>(window, "Size")
+            .def(py::init<>([](int width, int height) { return Window::Size{ .width = width, .height = height }; }))
+            .def_readwrite("width", &Window::Size::width)
+            .def_readwrite("height", &Window::Size::height);
+
+        window
             .def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
                 auto window = std::make_shared<Window>(std::move(title), width, height);
                 if (kwargs.contains("user_interface"))
@@ -47,6 +68,11 @@ namespace p3::python
             }), py::arg("title")="p3", py::arg("width")=1024, py::arg("height")=768)
             .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
             .def_property("target_framerate", &Window::target_framerate, &Window::set_target_framerate)
+            .def_static("monitors", &Window::monitors)
+            .def_property("position", &Window::position, &Window::set_position)
+            .def_property("size", &Window::size, &Window::set_size)
+            .def_static("primary_monitor", &Window::primary_monitor)
+            .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
             .def("loop", [](Window& window, py::object f) {
                 Window::UpdateCallback on_frame;
                 if (!f.is(py::none()))
