@@ -8,7 +8,8 @@ class StyleInput(Flexible):
             height=(auto, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
-            justify_content=Justification.Center
+            justify_content=Justification.Center,
+            padding=(0 | px, 0 | px)
         )
         self.__target = target
         self.__attribute = attribute
@@ -58,7 +59,8 @@ class Length2(Flexible):
             height=(auto, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
-            justify_content=Justification.SpaceBetween
+            justify_content=Justification.SpaceBetween,
+            padding=(0 | px, 0 | px)
         )
         self.__target = target
         self.__attribute = attribute
@@ -109,7 +111,8 @@ class Color4(Flexible):
             height=(auto, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
-            justify_content=Justification.SpaceBetween
+            justify_content=Justification.SpaceBetween,
+            padding=(0 | px, 0 | px)
         )
         self.__target = target
         self.__attribute = attribute
