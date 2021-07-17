@@ -54,6 +54,7 @@ namespace p3
                     first = false;
                     _automatic_height += child->height(0);
                 }
+                _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
             }
             if (!style_computation().width_basis())
             {
@@ -64,6 +65,7 @@ namespace p3
                         continue;
                     _automatic_width = std::max(_automatic_width, child->width(0));
                 }
+                _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
             }
         }
         else
@@ -81,6 +83,7 @@ namespace p3
                     first = false;
                     _automatic_width += child->width(0);
                 }
+                _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
             }
             if (!style_computation().height_basis())
             {
@@ -91,14 +94,20 @@ namespace p3
                         continue;
                     _automatic_height = std::max(_automatic_height, child->height(0));
                 }
+                _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
             }        
         }
     }
 
     void Flexible::render_impl(float w, float h)
     {
-        
         auto initial_cursor = ImGui::GetCursorPos();
+        auto const& frame_padding = ImGui::GetStyle().FramePadding;
+        initial_cursor.x += frame_padding.x;
+        w -= frame_padding.x * 2.f;
+        initial_cursor.y += frame_padding.y;
+        h -= frame_padding.y * 2.f;
+        ImGui::SetCursorPos(initial_cursor);
         auto cursor = initial_cursor;
         if (style_computation().direction == Direction::Horizontal)
         {
@@ -264,8 +273,8 @@ namespace p3
                 first = false;
             }
         }
-        cursor.x = initial_cursor.x + w;
-        cursor.y = initial_cursor.y + h;
+        cursor.x = initial_cursor.x + w + frame_padding.x;
+        cursor.y = initial_cursor.y + h + frame_padding.y;
         ImGui::SetCursorPos(cursor);
     }
 
