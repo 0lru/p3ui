@@ -43,6 +43,7 @@ namespace p3::python
             .def_property_readonly("hz", &VideoMode::hz);
 
         py::class_<Monitor>(module, "Monitor")
+            .def_property_readonly("name", &Monitor::name)
             .def_property_readonly("mode", &Monitor::mode)
             .def_property_readonly("modes", &Monitor::modes);
 
@@ -71,6 +72,7 @@ namespace p3::python
             .def_static("monitors", &Window::monitors)
             .def_property("position", &Window::position, &Window::set_position)
             .def_property("size", &Window::size, &Window::set_size)
+            .def_property("vsync", &Window::vsync, &Window::set_vsync)
             .def_static("primary_monitor", &Window::primary_monitor)
             .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
             .def("loop", [](Window& window, py::object f) {

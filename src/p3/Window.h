@@ -98,6 +98,8 @@ namespace p3
 
         std::vector<VideoMode> modes() const;
 
+        std::string name() const;
+
     private:
         GLFWmonitor* _handle = nullptr;
     };
@@ -140,7 +142,11 @@ namespace p3
         
         Size framebuffer_size() const;
 
+        void set_vsync(bool);
+        bool vsync() const;
+
     private:
+        bool _vsync = true;
         std::string _title;
         mutable Position _position{ 10, 10 };
         mutable Size _size{ 1024, 768 };

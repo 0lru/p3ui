@@ -71,7 +71,7 @@ namespace p3
         return _hz;
     }
 
-    GLFWmonitor * VideoMode::glfw_monitor() const
+    GLFWmonitor* VideoMode::glfw_monitor() const
     {
         return _monitor;
     }
@@ -79,6 +79,11 @@ namespace p3
     Monitor::Monitor(GLFWmonitor* handle)
         : _handle(handle)
     {
+    }
+
+    std::string Monitor::name() const
+    {
+        return glfwGetMonitorName(_handle);
     }
 
     VideoMode Monitor::mode() const
@@ -115,7 +120,7 @@ namespace p3
         }
 
         glfwMakeContextCurrent(_glfw_window.get());
-        // glfwSwapInterval(1); // Enable vsync
+        glfwSwapInterval(_vsync ? 1 : 0);
         gladLoadGL(glfwGetProcAddress);
     }
 
@@ -232,17 +237,17 @@ namespace p3
                 glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
             }
             glfwSetWindowMonitor(
-                _glfw_window.get(), 
-                mode.value().glfw_monitor(), 
-                0, 0, 
-                mode.value().width(), mode.value().height(), 
+                _glfw_window.get(),
+                mode.value().glfw_monitor(),
+                0, 0,
+                mode.value().width(), mode.value().height(),
                 mode.value().hz());
         }
-        else if(monitor)
+        else if (monitor)
         {
             glfwSetWindowMonitor(
-                _glfw_window.get(), 
-                nullptr, 
+                _glfw_window.get(),
+                nullptr,
                 _position.x, _position.y, _size.width, _size.height, 0);
         }
     }
@@ -290,6 +295,18 @@ namespace p3
         for (int i = 0; i < monitor_count; ++i)
             monitors[i] = Monitor(glfw_monitors[i]);
         return monitors;
+    }
+
+    void Window::set_vsync(bool vsync)
+    {
+        _vsync = vsync;
+        glfwMakeContextCurrent(_glfw_window.get());
+        glfwSwapInterval(_vsync ? 1 : 0);
+    }
+
+    bool Window::vsync() const
+    {
+        return _vsync;
     }
 
 }
