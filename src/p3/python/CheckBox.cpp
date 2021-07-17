@@ -45,11 +45,13 @@ namespace p3::python
     {
         py::class_<CheckBox, Node, std::shared_ptr<CheckBox>> check_box(module, "CheckBox");
 
-        check_box.def(py::init<>([](py::kwargs kwargs) {
+        check_box.def(py::init<>([](std::optional<bool> value, py::kwargs kwargs) {
             auto check_box = std::make_shared<CheckBox>();
             parse(kwargs, *check_box);
+            if (value)
+                check_box->set_value(value.value());
             return check_box;
-        }));
+        }), py::kw_only(), py::arg("value")=py::none());
 
         check_box.def_property("on_change", &CheckBox::on_change, [](CheckBox& check_box, py::function f) {
             check_box.set_on_change([f{ std::move(f) }](bool value) {
