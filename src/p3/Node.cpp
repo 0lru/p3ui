@@ -328,7 +328,13 @@ namespace p3
     void Node::render(float width, float height)
     {
         auto compiled_guard = _apply_style_compiled();
+        auto &work_rect = GImGui->CurrentWindow->WorkRect;
+        ImVec2 work_rect_max = work_rect.Min;
+        work_rect_max.x += width;
+        work_rect_max.y += height;
+        std::swap(work_rect.Max, work_rect_max);
         render_impl(width, height);
+        std::swap(work_rect.Max, work_rect_max);
     }
 
     void Node::set_label(std::optional<std::string> label)
