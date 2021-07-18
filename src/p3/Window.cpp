@@ -174,7 +174,7 @@ namespace p3
         _render_backend->new_frame();
         ImGui_ImplGlfw_NewFrame();
         if (_user_interface)
-            _user_interface->render(float(framebuffer_size.width), float(framebuffer_size.height));
+            _user_interface->render(*_render_backend, float(framebuffer_size.width), float(framebuffer_size.height));
         glViewport(0, 0, framebuffer_size.width, framebuffer_size.height);
         _render_backend->render(*_user_interface);
         glfwSwapBuffers(_glfw_window.get());

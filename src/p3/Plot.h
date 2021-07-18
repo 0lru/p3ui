@@ -158,7 +158,7 @@ namespace p3
         std::optional<TickLabels> const& y_tick_labels() const;
 
         void update_content() override;
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void add(std::shared_ptr<Item>);
         void remove(std::shared_ptr<Item>);

@@ -37,7 +37,7 @@ namespace p3
         using Callback = std::function<void()>;
 
         Tab();
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
         void update_content() override;
     };
 
@@ -48,7 +48,7 @@ namespace p3
 
         std::shared_ptr<Node> content() const;
         void set_content(std::shared_ptr<Node>);
-        void render(float width, float height) override;
+        void render(Context&, float width, float height) override;
         
         void update_content();
 

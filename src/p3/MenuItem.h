@@ -38,7 +38,7 @@ namespace p3
 
         MenuItem(std::string label);
         void update_content() override;
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_enabled(bool);
         bool enabled() const;

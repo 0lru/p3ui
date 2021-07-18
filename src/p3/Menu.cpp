@@ -39,7 +39,7 @@ namespace p3
         _automatic_width = _automatic_height = 0.f;
     }
 
-    void Menu::render_impl(float width, float height)
+    void Menu::render_impl(Context& context, float width, float height)
     {
         
         if (ImGui::BeginMenu(imgui_label().c_str()))
@@ -51,7 +51,7 @@ namespace p3
                     postpone(_on_open);
             }
             for (auto& node : children())
-                node->render(width, height);
+                node->render(context, width, height);
             ImGui::EndMenu();
         }
         else if(_opened)

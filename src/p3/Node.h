@@ -123,8 +123,8 @@ namespace p3
         bool hovered() const;
 
         // ##### render ########################################################
-
-        virtual void render(float width, float height);
+        
+        virtual void render(Context&, float width, float height);
         virtual void update_content() {};
 
         void set_label(std::optional<std::string>);
@@ -142,7 +142,7 @@ namespace p3
         void update_status();
 
         // node specific render implementation
-        virtual void render_impl(float width, float height) {};
+        virtual void render_impl(Context&, float width, float height) {};
 
         // dom must not be modified during an update traversal of imgui, user callbacks need to be "postponed"
         void postpone(std::function<void()>);

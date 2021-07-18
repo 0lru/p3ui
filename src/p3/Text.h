@@ -39,7 +39,7 @@ namespace p3
         Text(std::string text, std::optional<std::string> label=std::optional<std::string>());
 
         StyleStrategy& style_strategy() const override;        
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_text(std::string);
         std::string const& text() const;

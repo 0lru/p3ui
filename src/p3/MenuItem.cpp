@@ -40,7 +40,7 @@ namespace p3
         _automatic_width = _automatic_height = 0.f;
     }
 
-    void MenuItem::render_impl(float width, float height)
+    void MenuItem::render_impl(Context&, float width, float height)
     {
         
         if (ImGui::MenuItem(imgui_label().c_str(),

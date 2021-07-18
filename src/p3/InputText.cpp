@@ -58,7 +58,7 @@ namespace p3
         set_label(std::move(label));
     }
 
-    void InputText::render_impl(float width, float height)
+    void InputText::render_impl(Context&, float width, float height)
     {
         ImGui::SetNextItemWidth(label() ? width* GoldenRatio : width);
         if(_hint)

@@ -136,7 +136,7 @@ namespace p3
         return _y_tick_labels;
     }
 
-    void Plot::render_impl(float width, float height)
+    void Plot::render_impl(Context&, float width, float height)
     {
         ImVec2 size(width, height);
 

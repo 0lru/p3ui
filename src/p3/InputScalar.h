@@ -38,7 +38,7 @@ namespace p3
 
         InputScalar() : Node("InputScalar") {};
 
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_on_change(OnChange);
         OnChange on_change() const;

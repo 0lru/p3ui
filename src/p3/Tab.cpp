@@ -34,13 +34,13 @@ namespace p3
     {
     }
 
-    void Tab::render_impl(float width, float height)
-    {
+    void Tab::render_impl(Context& context, float width, float height)
+    { 
         ImVec2 size(width, height);
         ImGui::BeginChild(imgui_label().c_str(), size, false, ImGuiWindowFlags_NoScrollbar);
         ImGui::BeginTabBar((imgui_label() + "_tab").c_str());
         for (auto& child : children())
-            child->render(width, height);
+            child->render(context, width, height);
         ImGui::EndTabBar();
         ImGui::EndChild();
         update_status();
@@ -75,7 +75,7 @@ namespace p3
             add(_content);
     }
 
-    void Tab::Item::render(float width, float height)
+    void Tab::Item::render(Context& context, float width, float height)
     {
         if (!ImGui::BeginTabItem(label() ? label().value().c_str() : ""))
             return;
@@ -83,7 +83,7 @@ namespace p3
         if (_content)
         {
             auto region = ImGui::GetContentRegionAvail();
-            _content->render(region.x, region.y);
+            _content->render(context, region.x, region.y);
         }
         ImGui::EndTabItem();
     }

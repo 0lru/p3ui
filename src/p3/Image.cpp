@@ -59,12 +59,12 @@ namespace p3
     {
     }
 
-    void Image::render_impl(float width, float height)
+    void Image::render_impl(Context& context, float width, float height)
     {
         if (!_texture)
             return;
         ImVec2 size(width, height);
-        ImTextureID id = reinterpret_cast<void *>(std::size_t(_texture->id()));
+        auto id = reinterpret_cast<ImTextureID>(_texture->use(context));
         ImGui::Image(id, size);
         update_status();
     }

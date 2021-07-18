@@ -16,6 +16,7 @@ namespace p3
     class Popup;
     class ChildWindow;
     class MenuBar;
+    class RenderBackend;
 
     class UserInterface
         : public Node
@@ -82,7 +83,7 @@ namespace p3
         void set_circle_tessellation_maximum_error(float);
         float circle_tessellation_maximum_error() const;
 
-        void render(float width, float height) override;
+        void render(RenderBackend&, float width, float height);
 
     protected:
         void update_content() override;

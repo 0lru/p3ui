@@ -55,7 +55,7 @@ namespace p3
     {
     }
 
-    void ProgressBar::render_impl(float width, float height)
+    void ProgressBar::render_impl(Context&, float width, float height)
     {
         
         ImVec2 size(label() ? width * GoldenRatio : width, height);

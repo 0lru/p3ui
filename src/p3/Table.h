@@ -34,7 +34,7 @@ namespace p3
     {
     public:
         Table();
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
         void update_content() override;
 
     private:

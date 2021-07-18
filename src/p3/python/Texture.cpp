@@ -79,13 +79,13 @@ namespace p3::python
         })).def(py::init<>([](py::array_t<std::uint8_t> data) {
             auto texture = std::make_shared<Texture>(0, 0);
             copy(*texture, data);
-            texture->update();
+            texture->set_dirty();
             return texture;
         })).def_property("data", [](std::shared_ptr<Texture> texture) {
             return wrap<std::uint8_t>(encapsulate(texture), texture->data(), texture->height(), texture->width(), 4);
         }, [](std::shared_ptr<Texture> texture, py::array_t<std::uint8_t> data) {
             copy(*texture, data);
-            texture->update();
+            texture->set_dirty();
         });
     }
 

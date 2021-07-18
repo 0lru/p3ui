@@ -39,7 +39,7 @@ namespace p3
             child->update_content();
     }
 
-    void MenuBar::render_impl(float width, float height)
+    void MenuBar::render_impl(Context&, float width, float height)
     {
     }
 

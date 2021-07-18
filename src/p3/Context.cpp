@@ -31,8 +31,9 @@ namespace p3
         thread_local Context* current_context = nullptr;
     }
 
-    Context::Context(UserInterface& user_interface, MouseMove mouse_move)
+    Context::Context(UserInterface& user_interface, RenderBackend& render_backend, MouseMove mouse_move)
         : _user_interface(user_interface)
+        , _render_backend(render_backend)
         , _mouse_move(std::move(mouse_move))
     {
         current_context = this;
@@ -54,6 +55,11 @@ namespace p3
     UserInterface& Context::user_interface() const
     {
         return _user_interface;
+    }
+
+    RenderBackend& Context::render_backend() const
+    {
+        return _render_backend;
     }
 
     Context::MouseMove const& Context::mouse_move() const

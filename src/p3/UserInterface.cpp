@@ -210,7 +210,7 @@ namespace p3
         Node::update_restyle(context, force_restyle);
     }
 
-    void UserInterface::render(float width, float height)
+    void UserInterface::render(RenderBackend& render_backend, float width, float height)
     {
         ImGui::NewFrame();
 
@@ -244,7 +244,7 @@ namespace p3
         //
         // it is important that the destr. is executed after tree
         // traversal
-        Context context(*this, std::move(mouse_move));
+        Context context(*this, render_backend, std::move(mouse_move));
         update_restyle(context);
 
         //
@@ -269,7 +269,7 @@ namespace p3
             if (ImGui::BeginMenuBar())
             {
                 for (auto& menu : _menu_bar->children())
-                    menu->render(0, 0);
+                    menu->render(context, 0, 0);
                 ImGui::EndMenuBar();
             }
         }
@@ -278,19 +278,20 @@ namespace p3
         // draw optional content
         auto content_region = ImGui::GetContentRegionAvail();
         if (_content)
-            _content->render(content_region.x, content_region.y);
+            _content->render(context, content_region.x, content_region.y);
 
         //
         // draw optional child windows
         for (auto& child_window : _child_windows)
             child_window->render(
+                context,
                 child_window->width(content_region.x),
                 child_window->height(content_region.y));
 
         //
         // draw optional popups
         _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& popup) {
-            popup->render(popup->width(content_region.x), popup->height(content_region.y));
+            popup->render(context, popup->width(content_region.x), popup->height(content_region.y));
             return !popup->opened();
         }), _popups.end());
 

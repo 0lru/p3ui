@@ -21,6 +21,7 @@
 /******************************************************************************/
 
 #include "Texture.h"
+#include "Context.h"
 
 #include <iostream>
 
@@ -30,12 +31,10 @@ namespace p3
     Texture::Texture(std::size_t width, std::size_t height)
     {
         resize(width, height);
-        glGenTextures(1, &_id);
     }
 
     Texture::~Texture()
     {
-        glDeleteTextures(1, &_id);
     }
 
     bool Texture::empty() const
@@ -43,22 +42,32 @@ namespace p3
         return _width * _height == 0;
     }
 
-    GLuint Texture::id() const
+    bool Texture::dirty() const
     {
-        return _id;
+        return _dirty;
     }
 
-    void Texture::update()
+    void Texture::set_dirty()
     {
-        if (empty())
-            return;
-        glBindTexture(GL_TEXTURE_2D, _id);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GLsizei(width()), GLsizei(height()), 0, GL_RGBA, GL_UNSIGNED_BYTE, data());
+        _dirty = true;
+    }
+
+    TextureId Texture::use(Context& context)
+    {
+        auto& backend = context.render_backend();
+        if (!_texture_id)
+        {
+            _texture_id = context.render_backend().create_texture();
+            _on_exit = OnScopeExit([texture_id = _texture_id.value(), backend = context.render_backend().shared_from_this()](){
+                backend->delete_texture(texture_id);
+            });
+        }
+        if (_dirty)
+        {
+            context.render_backend().update_texture(_texture_id.value(), _width, _height, _data.get());
+            _dirty = false;
+        }
+        return _texture_id.value();
     }
 
     void Texture::resize(std::size_t width, std::size_t height)

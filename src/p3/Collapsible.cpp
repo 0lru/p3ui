@@ -35,7 +35,7 @@ namespace p3
         set_label(std::move(title));
     }
 
-    void Collapsible::render_impl(float width, float height)
+    void Collapsible::render_impl(Context& context, float width, float height)
     {
         if (_force_open)
         {
@@ -70,6 +70,7 @@ namespace p3
             pos.y += _child_offset;
             ImGui::SetCursorPos(pos);
             _content->render(
+                context,
                 width,
                 height - (font_size + 2 * frame_padding.y) - ImGui::GetStyle().ItemSpacing.y);
         }

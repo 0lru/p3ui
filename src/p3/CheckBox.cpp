@@ -55,9 +55,8 @@ namespace p3
         set_label(std::move(label));
     }
 
-    void CheckBox::render_impl(float width, float height)
+    void CheckBox::render_impl(Context&,  float width, float height)
     {
-        
         ImVec2 size(width, height);
         if (ImGui::Checkbox(imgui_label().c_str(), &_value) && _on_change)
             postpone([f = _on_change, value = _value]() {

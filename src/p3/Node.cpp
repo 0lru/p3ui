@@ -323,7 +323,7 @@ namespace p3
         id_pool::free(_imgui_id);
     }
 
-    void Node::render(float width, float height)
+    void Node::render(Context& context, float width, float height)
     {
         auto compiled_guard = _apply_style_compiled();
         auto &work_rect = GImGui->CurrentWindow->WorkRect;
@@ -331,7 +331,7 @@ namespace p3
         work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x;
         work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y;
         std::swap(work_rect.Max, work_rect_max);
-        render_impl(width, height);
+        render_impl(context, width, height);
         std::swap(work_rect.Max, work_rect_max);
     }
 

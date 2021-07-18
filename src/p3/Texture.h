@@ -22,12 +22,17 @@
 
 #pragma once
 
+#include "RenderBackend.h"
+#include "OnScopeExit.h"
+
 #include <string>
 #include <memory>
-#include <glad/gl.h>
+#include <optional>
 
 namespace p3
 {
+
+    class Context;
 
     class Texture
     {
@@ -39,18 +44,23 @@ namespace p3
 
         std::size_t width() const;
         std::size_t height() const;
-        
+
         std::uint8_t* data();
 
         bool empty() const;
-        GLuint id() const;
-        void update();
+
+        bool dirty() const;
+        void set_dirty();
+
+        TextureId use(Context&);
 
     private:
         std::size_t _width;
         std::size_t _height;
         std::unique_ptr<std::uint8_t[]> _data;
-        GLuint _id;
+        bool _dirty = true;
+        std::optional<TextureId> _texture_id = std::nullopt;
+        std::optional<OnScopeExit> _on_exit = std::nullopt;
     };
 
 }

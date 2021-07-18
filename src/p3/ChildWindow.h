@@ -35,7 +35,7 @@ namespace p3
     public:
         ChildWindow(std::string title);
 
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_title(std::string);
         std::string const& title() const;

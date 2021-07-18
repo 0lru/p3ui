@@ -53,7 +53,7 @@ namespace p3
         set_label(std::move(label));
     }
 
-    void Button::render_impl(float width, float height)
+    void Button::render_impl(Context&, float width, float height)
     {
         
         ImVec2 size(width, height);

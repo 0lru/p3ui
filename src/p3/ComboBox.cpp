@@ -53,7 +53,7 @@ namespace p3
     {
     }
 
-    void ComboBox::render_impl(float width, float height)
+    void ComboBox::render_impl(Context&, float width, float height)
     {
         if (label())
             ImGui::SetNextItemWidth(width * GoldenRatio);

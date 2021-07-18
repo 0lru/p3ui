@@ -34,7 +34,7 @@ namespace p3
     {
     }
 
-    void Table::render_impl(float width, float height)
+    void Table::render_impl(Context&, float width, float height)
     {
         
         ImVec2 size(width, height);

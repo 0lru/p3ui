@@ -36,7 +36,7 @@ namespace p3
         Flexible();
 
         void update_content() override;
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
     };
 
 }

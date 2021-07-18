@@ -102,7 +102,7 @@ namespace p3
         }
     }
 
-    void Flexible::render_impl(float w, float h)
+    void Flexible::render_impl(Context& context, float w, float h)
     {
         auto initial_cursor = ImGui::GetCursorPos();
         auto const& frame_padding = ImGui::GetStyle().FramePadding;
@@ -194,7 +194,7 @@ namespace p3
                 if (x) cursor.x += x.value();
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
-                child->render(width, height);
+                child->render(context, width, height);
                 cursor.x += width + ImGui::GetStyle().ItemSpacing.x;
                 cursor.y = initial_cursor.y;
                 first = false;
@@ -271,7 +271,7 @@ namespace p3
                 if (x) cursor.x += x.value();
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
-                child->render(width, height);
+                child->render(context, width, height);
                 cursor.y += height + ImGui::GetStyle().ItemSpacing.y;
                 cursor.x = initial_cursor.x;
                 first = false;

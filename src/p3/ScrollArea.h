@@ -38,7 +38,7 @@ namespace p3
 
         ScrollArea();
 
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_content(std::shared_ptr<Node>);
         std::shared_ptr<Node> const& content() const;

@@ -35,7 +35,7 @@ namespace p3
         MenuBar();
 
         void update_content() override;
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         std::shared_ptr<MenuBar> add(std::shared_ptr<Menu>);
         void remove(std::shared_ptr<Menu> const&);

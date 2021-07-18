@@ -36,7 +36,7 @@ namespace p3
     {
     }
 
-    void ChildWindow::render_impl(float width, float height)
+    void ChildWindow::render_impl(Context& context, float width, float height)
     {
 
         bool open;
@@ -48,7 +48,7 @@ namespace p3
         // state.content_width = state.width = avail.x;
         // state.content_height = state.height = avail.y;
         if (_content)
-            _content->render(avail.x, avail.y);
+            _content->render(context, avail.x, avail.y);
         ImGui::End();
         update_status();
     }

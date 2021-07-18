@@ -46,7 +46,7 @@ namespace p3
     }
 
     template<typename DataType>
-    inline void InputScalar<DataType>::render_impl(float width, float height)
+    inline void InputScalar<DataType>::render_impl(Context&, float width, float height)
     {
         if (label())
             ImGui::SetNextItemWidth(width * 0.65f);

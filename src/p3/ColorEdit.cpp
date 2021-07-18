@@ -60,7 +60,7 @@ namespace p3
     {
     }
 
-    void ColorEdit::render_impl(float width, float height)
+    void ColorEdit::render_impl(Context&, float width, float height)
     {
         
         ImGui::SetNextItemWidth(width);

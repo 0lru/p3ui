@@ -36,7 +36,7 @@ namespace p3
     {
     }
 
-    void ScrollArea::render_impl(float width, float height)
+    void ScrollArea::render_impl(Context& context, float width, float height)
     {
         ImVec2 size(width, height);
         ImGuiWindowFlags flags = 0;
@@ -53,7 +53,7 @@ namespace p3
         if (_content)
         {
             auto available = ImGui::GetContentRegionAvail();
-            _content->render(_content->width(available.x), _content->height(available.y));
+            _content->render(context, _content->width(available.x), _content->height(available.y));
         }
         ImGui::EndChild();
         update_status();

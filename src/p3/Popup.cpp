@@ -59,7 +59,7 @@ namespace p3
     {
     }
 
-    void Popup::render_impl(float width, float height)
+    void Popup::render_impl(Context& context, float width, float height)
     {
         if (!_opened)
         {
@@ -68,7 +68,7 @@ namespace p3
         }
         if (ImGui::BeginPopup(imgui_label().c_str()))
         {
-            _content->render(this->width(0), this->height(0));
+            _content->render(context, this->width(0), this->height(0));
             ImGui::EndPopup();
         }
         else

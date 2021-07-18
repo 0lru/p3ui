@@ -38,7 +38,7 @@ namespace p3
         InputText(std::size_t size=1024, std::optional<std::string> label=std::optional<std::string>());
 
         StyleStrategy& style_strategy() const override;
-        void render_impl(float width, float height) override;
+        void render_impl(Context&, float width, float height) override;
 
         void set_hint(std::optional<std::string>);
         std::optional<std::string> const& hint(std::string) const;
