@@ -37,22 +37,24 @@ namespace p3
 
     void Collapsible::render_impl(float width, float height)
     {
-        // children alignment is ok, justification is also
-        // fine, if collapsible has a well defined height
         if (_force_open)
         {
             ImGui::SetNextTreeNodeOpen(_force_open.value());
             _force_open.reset();
+/*                postpone([self = shared_from_this()]() {
+                    self->set_needs_restyle();
+                });*/
         }
-        // ImGui::SetNextItemWidth(width);
+        auto window = ImGui::GetCurrentWindow();
 
+        auto pos = ImGui::GetCursorPos();
         auto collapsed = !ImGui::CollapsingHeader(imgui_label().c_str());
         if (collapsed != _collapsed)
         {
             if (_content)
             {
-                postpone([content = _content]() {
-                    content->set_needs_restyle();
+                postpone([self = shared_from_this()]() {
+                    self->set_needs_restyle();
                 });
             }
             _collapsed = collapsed;
@@ -65,7 +67,10 @@ namespace p3
             auto const context_ptr = ImGui::GetCurrentContext();
             auto const font_size = context_ptr->FontSize;
             auto const frame_padding = context_ptr->Style.FramePadding;
-            _content->render(width, 
+            pos.y += _child_offset;
+            ImGui::SetCursorPos(pos);
+            _content->render(
+                width,
                 height - (font_size + 2 * frame_padding.y) - ImGui::GetStyle().ItemSpacing.y);
         }
     }
@@ -96,16 +101,16 @@ namespace p3
 
     void Collapsible::update_content()
     {
-        auto const &context= *ImGui::GetCurrentContext();
+        auto const& context = *ImGui::GetCurrentContext();
         auto const font_size = context.FontSize;
         auto const frame_padding = context.Style.FramePadding;
-        _automatic_width = DefaultItemWidthEm * font_size;
+        _automatic_width = 5 * font_size;
         _automatic_height = font_size + 2 * frame_padding.y;
-        if (_content && !_collapsed)
+        _child_offset = _automatic_height + context.Style.ItemSpacing.y;
+        if (_content && !this->is_collapsed())
         {
-            _content->update_content();
-            _automatic_width = std::max(50.f, _content->automatic_width());
-            _automatic_height +=  _content->height(0) + frame_padding.y * 2.f;
+            _automatic_width = std::max(_automatic_width, _content->automatic_width());
+            _automatic_height += _content->height(0) + context.Style.ItemSpacing.y;
         }
     }
 

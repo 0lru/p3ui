@@ -48,6 +48,7 @@ namespace p3
     private:
         std::shared_ptr<Node> _content;
         bool _collapsed;
+        float _child_offset;
         std::optional<bool> _force_open=false;
     };
 

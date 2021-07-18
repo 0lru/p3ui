@@ -24,16 +24,19 @@
 
 #include <numeric>
 #include <optional>
+
 #include <iostream>
+#include <format>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 namespace p3
 {
 
 
     Flexible::Flexible()
-        : Node("Flexible") 
+        : Node("Flexible")
     {
     }
 
@@ -49,7 +52,7 @@ namespace p3
                 {
                     if (!child->visible())
                         continue;
-                    if(!first)
+                    if (!first)
                         _automatic_height += ImGui::GetStyle().ItemSpacing.y;
                     first = false;
                     _automatic_height += child->height(0);
@@ -78,7 +81,7 @@ namespace p3
                 {
                     if (!child->visible())
                         continue;
-                    if(!first)
+                    if (!first)
                         _automatic_width += ImGui::GetStyle().ItemSpacing.y;
                     first = false;
                     _automatic_width += child->width(0);
@@ -95,7 +98,7 @@ namespace p3
                     _automatic_height = std::max(_automatic_height, child->height(0));
                 }
                 _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
-            }        
+            }
         }
     }
 
@@ -107,6 +110,7 @@ namespace p3
         w -= frame_padding.x * 2.f;
         initial_cursor.y += frame_padding.y;
         h -= frame_padding.y * 2.f;
+
         ImGui::SetCursorPos(initial_cursor);
         auto cursor = initial_cursor;
         if (style_computation().direction == Direction::Horizontal)
@@ -141,7 +145,7 @@ namespace p3
                 float height;
                 if (remaining >= 0. && child->style_computation().width_grow() != 0.f)
                     width += remaining * (child->style_computation().width_grow() / grow_total);
-                else if(remaining <0.f && child->style_computation().width_shrink() != 0.f)
+                else if (remaining < 0.f && child->style_computation().width_shrink() != 0.f)
                     width -= std::max(.1f, remaining * (child->style_computation().width_shrink() / grow_total));
                 if (!first)
                     ImGui::SameLine();
@@ -212,8 +216,8 @@ namespace p3
                 occupied += child->height(content);
                 grow_total += child->style_computation().height_grow();
             }
-            if(visible_count > 1)
-                occupied += (visible_count -1 ) * ImGui::GetStyle().ItemSpacing.y;
+            if (visible_count > 1)
+                occupied += (visible_count - 1) * ImGui::GetStyle().ItemSpacing.y;
             auto remaining = content - occupied;
             first = true;
             for (auto& child : children())
@@ -224,7 +228,7 @@ namespace p3
                 float width = 0.f;
                 if (remaining >= 0.f && child->style_computation().height_grow() != 0.f)
                     height += remaining * (child->style_computation().height_grow() / grow_total);
-                else if(remaining < 0.f && child->style_computation().height_shrink() != 0.f)
+                else if (remaining < 0.f && child->style_computation().height_shrink() != 0.f)
                     height -= std::max(0.0001f, remaining * (child->style_computation().height_shrink() / grow_total));
                 std::optional<float> x;
                 switch (style_computation().align_items)

@@ -32,8 +32,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <iostream>
-
 namespace p3
 {
 
@@ -193,11 +191,11 @@ namespace p3
             context.to_actual(_style_computation.spacing[0]),
             context.to_actual(_style_computation.spacing[1])
         );
-        if (spacing != GImGui->Style.ItemInnerSpacing)
+        if (spacing != GImGui->Style.ItemSpacing)
         {
             log_verbose("-style- <{}>\"{}\" changes spacing to ({}, {})", _element_name, label() ? label().value() : "", spacing.x, spacing.y);
             _style_compiled.push_back([spacing{ std::move(spacing) }]() mutable {
-                std::swap(spacing, GImGui->Style.ItemInnerSpacing);
+                std::swap(spacing, GImGui->Style.ItemSpacing);
             });
         }
         ImVec2 padding(
@@ -224,29 +222,29 @@ namespace p3
         // set both to true if subtree is forced to restyle
         _needs_restyle = _needs_restyle || force;
         _needs_update = _needs_update || force;
-        //
-        // nothing happened..
+        
         if (!_needs_update)
+        {
             return;
-        if (_needs_restyle)
+        }
+        else if (_needs_restyle)
         {
             _perform_style_cascade(context);
+            //
+            // at this point the anchestor-style is still applied
             _compile_style_computation(context);
         }
+
         {
             //
             // needs to be done before update_content()
             auto compiled_guard = _apply_style_compiled();
             for (auto& child : _children)
                 if (child->visible())
-                    child->update_restyle(context, _needs_restyle);
+                    child->update_restyle(context, 
+                        _needs_restyle /* force restyle of child if this was restyled*/);
+            update_content();
         }
-        //
-        // verbose debug log..
-        // log_verbose("-style- updated <{}>\"{}\"", _element_name,  label() ? label().value() : "");
-        //
-        // update automatic values on way back
-        update_content();
         //
         // clear flags
         _needs_update = _needs_restyle = false;
@@ -330,8 +328,8 @@ namespace p3
         auto compiled_guard = _apply_style_compiled();
         auto &work_rect = GImGui->CurrentWindow->WorkRect;
         ImVec2 work_rect_max = work_rect.Min;
-        work_rect_max.x += width;
-        work_rect_max.y += height;
+        work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x;
+        work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y;
         std::swap(work_rect.Max, work_rect_max);
         render_impl(width, height);
         std::swap(work_rect.Max, work_rect_max);

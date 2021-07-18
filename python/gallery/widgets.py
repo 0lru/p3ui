@@ -26,13 +26,13 @@ class Widgets(ScrollArea):
                     justify_content=Justification.Start
                 ),
                 children=[
-                    Text(f'Text'),
-                    Text(f'Green Text', style=Style(color='green')),
-                    Text(f'Red Text', style=Style(color='#ff0000')),
                     Button(
                         label='Button',
                         on_click=lambda: user_interface.add(Popup(content=Text('button clicked!')))
                     ),
+                    Text(f'Text'),
+                    Text(f'Green Text', style=Style(color='green')),
+                    Text(f'Red Text', style=Style(color='#ff0000')),
                     Button(
                         label=f"{icon_char} Icon Button",
                         on_click=lambda: print('icon button clicked')

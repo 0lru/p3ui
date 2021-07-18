@@ -92,8 +92,7 @@ namespace p3
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;
-        _automatic_height = font_size + 2 * frame_padding.y;
-        _automatic_width = 50.f;
+        _automatic_width = _automatic_height = font_size + 2 * frame_padding.y;
         if (label())
         {
             const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);

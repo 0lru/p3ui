@@ -7,6 +7,7 @@ from widgets import Widgets
 from flexibles import Flexibles
 from style_editor import StyleEditor
 from main_menu_bar import MainMenuBar
+from view_options import ViewOptions
 
 assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
@@ -15,6 +16,11 @@ ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
 ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
 plots = Plots()
 window = Window(user_interface=ui)
+
+
+# ui.theme.item_spacing = (0 | em, 0 | em)
+# ui.theme.window_padding = (0 | em, 0 | em)
+# ui.theme.inner_item_spacing = (0 | em, 0 | em)
 
 
 def set_video_mode(video_mode):
@@ -26,26 +32,17 @@ def set_windowed():
     window.video_mode = None
 
 
-display_menu = p3.Menu('View')
-ui.menu_bar.add(display_menu)
-display_menu.add(p3.MenuItem('Windowed', on_click=set_windowed))
-for index, monitor in enumerate(window.monitors()):
-    monitor_menu = p3.Menu(f'Monitor {index} ')
-    display_menu.add(monitor_menu)
-    for mode in monitor.modes:
-        monitor_menu.add(p3.MenuItem(
-            f'  {mode.width}x{mode.height} {mode.hz}Hz',
-            on_click=lambda x=mode: set_video_mode(x)))
-
 ui.content = Tab(
     style=Style(padding=(1.5 | em, 0.5 | em)),
     children=[
         TabItem("Flexible", content=Flexibles()),
         TabItem("Widgets", content=Widgets(ui, assets)),
         TabItem("Plots", content=plots),
-        TabItem("Style", content=StyleEditor(ui))
+        TabItem("Style", content=StyleEditor(ui)),
+        TabItem("View Options", content=ViewOptions(window))
     ]
 )
+
 
 #
 # enter main loop

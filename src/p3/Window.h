@@ -93,6 +93,9 @@ namespace p3
         Monitor(Monitor const&) = default;
         explicit Monitor(GLFWmonitor*);
 
+        bool operator==(Monitor const&) const = default;
+        bool operator!=(Monitor const&) const = default;
+
         VideoMode mode() const;
         void set_mode(VideoMode);
 

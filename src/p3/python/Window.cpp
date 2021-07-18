@@ -45,7 +45,10 @@ namespace p3::python
         py::class_<Monitor>(module, "Monitor")
             .def_property_readonly("name", &Monitor::name)
             .def_property_readonly("mode", &Monitor::mode)
-            .def_property_readonly("modes", &Monitor::modes);
+            .def_property_readonly("modes", &Monitor::modes)
+            .def("__eq__", [](Monitor& monitor, Monitor& other) {
+                return monitor == other;
+            });
 
         py::class_<Window, std::shared_ptr<Window>> window(module, "Window");
 
