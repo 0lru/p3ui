@@ -1,5 +1,4 @@
-from p3ui import UserInterface, Window, Tab, TabItem, Style, em, px
-import p3ui as p3
+from p3ui import UserInterface, Window, Tab, TabItem, Style, em
 
 import pathlib
 from plots import Plots
@@ -14,24 +13,10 @@ assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 ui = UserInterface(menu_bar=MainMenuBar())
 ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
 ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
-plots = Plots()
+
 window = Window(user_interface=ui)
 
-
-# ui.theme.item_spacing = (0 | em, 0 | em)
-# ui.theme.window_padding = (0 | em, 0 | em)
-# ui.theme.inner_item_spacing = (0 | em, 0 | em)
-
-
-def set_video_mode(video_mode):
-    print(f'set mode {video_mode.width}x{video_mode.height}')
-    window.video_mode = video_mode
-
-
-def set_windowed():
-    window.video_mode = None
-
-
+plots = Plots()
 ui.content = Tab(
     style=Style(padding=(1.5 | em, 0.5 | em)),
     children=[
@@ -43,7 +28,4 @@ ui.content = Tab(
     ]
 )
 
-
-#
-# enter main loop
 window.loop(on_frame=lambda _: plots.update())

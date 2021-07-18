@@ -35,7 +35,6 @@ class ViewOptions(p3.ScrollArea):
             style=p3.Style(
                 width=(100 | p3.percent, 1, 1),
                 height=(None, 0, 0),
-                spacing=(0 | p3.px, 0 | p3.px),
                 direction=p3.Direction.Vertical,
                 align_items=p3.Alignment.Stretch,
                 justify_content=p3.Justification.Start
@@ -45,15 +44,13 @@ class ViewOptions(p3.ScrollArea):
                     label='Video Mode',
                     collapsed=False,
                     style=p3.Style(
-                        padding=None
                     ),
                     content=p3.Flexible(
                         style=p3.Style(
                             direction=p3.Direction.Vertical,
                             justify_content=p3.Justification.Start,
                             align_items=p3.Alignment.Stretch,
-                            padding=(1 | p3.em, 1 | p3.em),
-                            spacing=(0.618 | p3.em, 0.618 | p3.em)
+                            padding=(1 | p3.em, 0 | p3.em),
                         ),
                         children=[
                             self.monitor_combo_box,
@@ -91,7 +88,7 @@ class ViewOptions(p3.ScrollArea):
                         style=p3.Style(
                             justify_content=p3.Justification.Start,
                             align_items=p3.Alignment.Stretch,
-                            padding=(1 | p3.em, 0.618 | p3.em)
+                            padding=(1 | p3.em, 0 | p3.em)
                         ),
                         children=[
                             self.vsync_checkbox
@@ -123,18 +120,3 @@ class ViewOptions(p3.ScrollArea):
         self.window.vsync = vsync
 
 
-"""
-        monitors = window.monitors()
-
-        p3.ComboBox()
-display_menu = p3.Menu('View')
-ui.menu_bar.add(display_menu)
-display_menu.add(p3.MenuItem('Windowed', on_click=set_windowed))
-for index, monitor in enumerate(window.monitors()):
-    monitor_menu = p3.Menu(f'Monitor {index} ')
-    display_menu.add(monitor_menu)
-    for mode in monitor.modes:
-        monitor_menu.add(p3.MenuItem(
-            f'  {mode.width}x{mode.height} {mode.hz}Hz',
-            on_click=lambda x=mode: set_video_mode(x)))
-"""
