@@ -1,13 +1,15 @@
-from p3ui import Flexible, ComboBox, Direction, Justification, Alignment, px, Button
+from p3ui import Flexible, ComboBox, Direction, Justification, Alignment, px, Button, Style, ScrollArea
 
 
-class Flexibles(Flexible):
+class TabFlexible(Flexible):
 
     def __init__(self):
         super().__init__(
-            direction=Direction.Vertical,
-            justify_content=Justification.Center,
-            align_items=Alignment.Stretch)
+            style=Style(
+                direction=Direction.Vertical,
+                justify_content=Justification.Center,
+                align_items=Alignment.Stretch
+            ))
 
         justifications = [key for key, value in Justification.__members__.items()]
 
@@ -34,16 +36,6 @@ class Flexibles(Flexible):
             selected_index=1,
             on_change=lambda index: set_alignment(Alignment.__members__[alignments[index]])
         ))
-
-        #
-        # container for flexible demo
-        self.main = Flexible(
-            direction=Direction.Horizontal,
-            justify_content=Justification.Center,
-            align_items=Alignment.Stretch
-        )
-
-        self.add(self.main)
 
         self.vertical = Flexible(
             width=(1 | px, 1, 1),
@@ -74,7 +66,6 @@ class Flexibles(Flexible):
                 )
             ]
         )
-        self.main.add(self.vertical)
 
         self.horizontal = Flexible(
             width=(1 | px, 1, 1),
@@ -105,4 +96,13 @@ class Flexibles(Flexible):
                 )
             ]
         )
-        self.main.add(self.horizontal)
+
+        self.add(Flexible(
+            direction=Direction.Horizontal,
+            justify_content=Justification.Center,
+            align_items=Alignment.Stretch,
+            children=[
+                self.vertical,
+                self.horizontal
+            ]
+        ))

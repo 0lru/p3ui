@@ -1,13 +1,11 @@
-from p3ui import Flexible, ScrollArea, Plot, Style, percent, auto, px, \
+from p3ui import Flexible, ScrollArea, Plot, Style, auto, px, \
     percent, Direction, Alignment, Justification, MarkerStyle
 import numpy as np
 
 
-class Plots(ScrollArea):
+class TabPlots(ScrollArea):
 
     def __init__(self):
-        #
-        # create scroll area with scrolled vertical, flexible
         super().__init__(
             content=Flexible(
                 width=(100 | percent, 0, 0),
@@ -18,7 +16,7 @@ class Plots(ScrollArea):
 
         #
         # sinus generator
-        self.sin_signal = Plots.create_sin_signal()
+        self.sin_signal = TabPlots.create_sin_signal()
 
         #
         # define sinus plot with height of 300 pixels, not allowed to shrink (vertically)
@@ -69,7 +67,6 @@ class Plots(ScrollArea):
         #
         # stems
         #
-        # define sinus plot with height of 300 pixels, not allowed to shrink (vertically)
         plot = Plot(
             label='Stems',
             y_limits=(-0.1, 1.1),
@@ -89,5 +86,5 @@ class Plots(ScrollArea):
         shift = 0.0
         while True:
             shift += 0.01
-            x = np.arange(10000 + shift, 10010.0 + shift, 0.001)
+            x = np.arange(0 + shift, 10.0 + shift, 0.001)
             yield x, np.sin(x)

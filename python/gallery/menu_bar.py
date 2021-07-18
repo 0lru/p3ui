@@ -1,7 +1,7 @@
 from p3ui import MenuBar, Menu, MenuItem
 
 
-class MainMenuBar(MenuBar):
+class MenuBar(MenuBar):
 
     def __init__(self):
         super().__init__()

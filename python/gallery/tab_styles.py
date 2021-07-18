@@ -1,11 +1,13 @@
-from p3ui import *
+from p3ui import Flexible, Direction, Alignment, Justification, \
+    px, em, rem, InputFloat, ComboBox, ScrollArea, ColorEdit, Text, \
+    Pixels, Em, Color
 
 
 class StyleInput(Flexible):
     def __init__(self, label, target, attribute):
         super().__init__(
             width=(100 | em, 1, 0),
-            height=(auto, 0, 0),
+            height=(None, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
             justify_content=Justification.Center,
@@ -56,7 +58,7 @@ class Length2(Flexible):
     def __init__(self, label, target, attribute):
         super().__init__(
             width=(100 | em, 1, 0),
-            height=(auto, 0, 0),
+            height=(None, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
             justify_content=Justification.SpaceBetween,
@@ -108,7 +110,7 @@ class Color4(Flexible):
     def __init__(self, label, target, attribute):
         super().__init__(
             width=(12 | em, 1, 0),
-            height=(auto, 0, 0),
+            height=(None, 0, 0),
             direction=Direction.Horizontal,
             align_items=Alignment.Center,
             justify_content=Justification.SpaceBetween,
@@ -120,7 +122,7 @@ class Color4(Flexible):
         self.__text = Text(label + ' ', width=(14 | em, 0, 0))
         self.__edit = ColorEdit(
             width=(30 | em, 1, 0),
-            height=(auto, 0, 0),
+            height=(None, 0, 0),
             on_change=self.on_change
         )
         self.add(self.__text)
@@ -131,7 +133,7 @@ class Color4(Flexible):
         setattr(self.__target, self.__attribute, self.__edit.value)
 
 
-class StyleEditor(ScrollArea):
+class TabStyles(ScrollArea):
 
     def __init__(self, ui):
         super().__init__(content=Flexible(

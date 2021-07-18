@@ -1,7 +1,7 @@
 import p3ui as p3
 
 
-class ViewOptions(p3.ScrollArea):
+class TabSystem(p3.ScrollArea):
 
     def __init__(self, window):
         self.window = window
