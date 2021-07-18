@@ -34,11 +34,11 @@ namespace p3::python
     {
         py::class_<ChildWindow, Node, std::shared_ptr<ChildWindow>> window(module, "ChildWindow");
 
-        window.def(py::init<>([](std::string title, py::kwargs kwargs) {
+        window.def(py::init<>([](std::string title, std::shared_ptr<Node> content, py::kwargs kwargs) {
             auto window = std::make_shared<ChildWindow>(std::move(title));
-            parse(kwargs, *window);
+            window->set_content(std::move(content));
             return window;
-        }));
+        }), py::arg("title"), py::kw_only(), py::arg("content")=py::none());
 
         window.def_property("title", &ChildWindow::title, &ChildWindow::set_title);
     }

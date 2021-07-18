@@ -23,6 +23,7 @@
 #include "p3ui.h"
 #include <p3/UserInterface.h>
 #include <p3/Popup.h>
+#include <p3/ChildWindow.h>
 #include <p3/Theme.h>
 #include <p3/MenuBar.h>
 
@@ -53,6 +54,9 @@ namespace p3::python
             .def_property("content", &UserInterface::content, &UserInterface::set_content)
             .def("add", [](UserInterface& user_interface, std::shared_ptr<Popup> popup) {
                 user_interface.add(std::move(popup));
+            })
+            .def("add", [](UserInterface& user_interface, std::shared_ptr<ChildWindow> child_window) {
+                user_interface.add(std::move(child_window));
             })
             .def_property("menu_bar", &UserInterface::menu_bar, &UserInterface::set_menu_bar)
             .def_property("theme", &UserInterface::theme, &UserInterface::set_theme)

@@ -289,7 +289,7 @@ namespace p3
         Length _window_rounding{ 2 | px };
         Length _window_border_size{ 1 | px };
         Length2 _window_min_size{ 10 | px, 10 | px };
-        Float2 _window_title_align{ .5f };
+        Float2 _window_title_align{ 0.f, 0.5f };
         Length _child_rounding{ 2 | px };
         Length _child_border_size{ 1 | px };
         Length _popup_rounding{ 2 | px };
