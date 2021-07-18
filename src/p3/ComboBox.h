@@ -51,8 +51,12 @@ namespace p3
         int selected_index() const;
         void set_selected_index(int);
 
+        std::string const& hint() const;
+        void set_hint(std::string);
+
     private:
         int _selected_index = -1;
+        std::string _hint;
         std::vector<std::string> _options;
         OnChange _on_change;
     };

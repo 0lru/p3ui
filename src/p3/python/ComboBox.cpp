@@ -62,6 +62,7 @@ namespace p3::python
         });
         combo.def_property("options", &ComboBox::options, &ComboBox::set_options);
         combo.def_property("selected_index", &ComboBox::selected_index, &ComboBox::set_selected_index);
+        combo.def_property("hint", &ComboBox::hint, &ComboBox::set_hint);
     }
 
 }

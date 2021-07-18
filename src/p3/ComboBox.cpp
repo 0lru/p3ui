@@ -26,9 +26,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <iostream>
-
-
 namespace p3
 {
 
@@ -39,7 +36,7 @@ namespace p3
         public:
             FlexibleLength const& initial_height() override
             {
-                static auto initial = FlexibleLength{std::nullopt, 0.f, 1.f};
+                static auto initial = FlexibleLength{ std::nullopt, 0.f, 1.f };
                 return initial;
             }
         };
@@ -62,18 +59,21 @@ namespace p3
             ImGui::SetNextItemWidth(width * GoldenRatio);
         else
             ImGui::SetNextItemWidth(width);
-        int selected_index = _selected_index;
-        if (ImGui::Combo(imgui_label().c_str(), &selected_index, [](void* data, int index, const char** out) {
-            auto& options = *reinterpret_cast<std::vector<std::string> *>(data);
-            *out = options[index].c_str();
-            return true;
-        }, &_options, int(_options.size())))
+        auto& selected_option = _selected_index >= 0 ? _options[_selected_index] : _hint;
+        if (ImGui::BeginCombo(imgui_label().c_str(), selected_option.c_str()))
         {
-            _selected_index = selected_index;
-            if (_on_change)
-                postpone([f=_on_change, index=selected_index]() {
-                    f(index);
-                });
+            for (std::size_t i = 0; i < _options.size(); ++i)
+            {
+                ImGui::PushID((void*)&_options[i]);
+                if (ImGui::Selectable(_options[i].c_str(), i == _selected_index))
+                {
+                    if (_on_change)
+                        postpone([f = _on_change, index = int(i)]() { f(index); });
+                    _selected_index = int(i);
+                }
+                ImGui::PopID();
+            }
+            ImGui::EndCombo();
         }
         update_status();
     }
@@ -105,10 +105,17 @@ namespace p3
 
     void ComboBox::set_selected_index(int selected_index)
     {
-        bool changed = _selected_index != selected_index;
         _selected_index = selected_index;
-        if (changed && _on_change)
-            _on_change(_selected_index);
+    }
+
+    std::string const& ComboBox::hint() const
+    {
+        return _hint;
+    }
+
+    void ComboBox::set_hint(std::string hint)
+    {
+        _hint = std::move(hint);
     }
 
     void ComboBox::update_content()
