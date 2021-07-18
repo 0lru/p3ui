@@ -63,13 +63,24 @@ namespace p3::python
             .def_readwrite("height", &Window::Size::height);
 
         window
-            .def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
+            .def(py::init<>([](
+                std::string title, 
+                std::size_t width, 
+                std::size_t height,
+                bool vsync,
+                py::kwargs kwargs) {
                 auto window = std::make_shared<Window>(std::move(title), width, height);
                 if (kwargs.contains("user_interface"))
                     window->set_user_interface(kwargs["user_interface"].cast<std::shared_ptr<UserInterface>>());
+                window->set_vsync(vsync);
                 parse(kwargs, *window);
                 return window;
-            }), py::arg("title")="p3", py::arg("width")=1024, py::arg("height")=768)
+            }), 
+                py::kw_only(), 
+                py::arg("title")="p3", 
+                py::arg("width")=1024, 
+                py::arg("height")=768,
+                py::arg("vsync") = false)
             .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
             .def_property("target_framerate", &Window::target_framerate, &Window::set_target_framerate)
             .def_static("monitors", &Window::monitors)
@@ -78,6 +89,8 @@ namespace p3::python
             .def_property("vsync", &Window::vsync, &Window::set_vsync)
             .def_static("primary_monitor", &Window::primary_monitor)
             .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
+            .def("frame", &Window::frame)
+            .def_property_readonly("closed", &Window::closed)
             .def("loop", [](Window& window, py::object f) {
                 Window::UpdateCallback on_frame;
                 if (!f.is(py::none()))
