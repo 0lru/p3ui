@@ -66,7 +66,7 @@ class ViewOptions(p3.ScrollArea):
                                 ),
                                 children=[
                                     p3.Button(
-                                        label='set',
+                                        label='apply',
                                         style=p3.Style(
                                             width=(100 | p3.px, 0, 0),
                                         ),
@@ -103,7 +103,7 @@ class ViewOptions(p3.ScrollArea):
 
     def update_video_modes(self):
         self.mode_combo_box.options = [f'{mode.width}x{mode.height} {mode.hz}Hz' for mode in self.selected_monitor.modes]
-        self.monitor_combo_box.selected_index = 0
+        self.mode_combo_box.selected_index = len(self.mode_combo_box.options) - 1
 
     @property
     def selected_monitor(self):
@@ -111,7 +111,7 @@ class ViewOptions(p3.ScrollArea):
 
     @property
     def selected_video_mode(self):
-        return self.selected_monitor.modes[self.monitor_combo_box.selected_index]
+        return self.selected_monitor.modes[self.mode_combo_box.selected_index]
 
     def set_video_mode(self):
         self.window.video_mode = self.selected_video_mode
