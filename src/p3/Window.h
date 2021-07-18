@@ -43,6 +43,7 @@ namespace p3
     class ChildWindow;
     class MenuBar;
     class Popup;
+    class RenderBackend;
 
     class Timer
     {
@@ -151,6 +152,9 @@ namespace p3
     private:
         bool _vsync = true;
         std::string _title;
+
+        std::shared_ptr<RenderBackend> _render_backend;
+
         mutable Position _position{ 10, 10 };
         mutable Size _size{ 1024, 768 };
         std::shared_ptr<GLFWwindow> _glfw_window;

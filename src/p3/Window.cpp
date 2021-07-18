@@ -23,13 +23,13 @@
 #include "Window.h"
 #include "UserInterface.h"
 #include "log.h"
+#include "backend/OpenGL2RenderBackend.h"
 
 #define GLFW_INCLUDE_NONE
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 #include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl2.h>
 
 #include <thread>
 #include <implot.h>
@@ -103,6 +103,7 @@ namespace p3
     }
 
     Window::Window(std::string title, std::size_t width, std::size_t height)
+        : _render_backend(std::make_shared<OpenGL2RenderBackend>())
     {
         if (!glfwInit())
             throw std::runtime_error("could not init glfw");
@@ -147,7 +148,7 @@ namespace p3
         ImGui::SetCurrentContext(&_user_interface->im_gui_context());
         ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
         ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), true);
-        ImGui_ImplOpenGL2_Init();
+        _render_backend->init();
     }
 
     std::shared_ptr<UserInterface> const& Window::user_interface() const
@@ -170,12 +171,12 @@ namespace p3
     void Window::frame()
     {
         auto framebuffer_size = this->framebuffer_size();
-        ImGui_ImplOpenGL2_NewFrame();
+        _render_backend->new_frame();
         ImGui_ImplGlfw_NewFrame();
         if (_user_interface)
             _user_interface->render(float(framebuffer_size.width), float(framebuffer_size.height));
         glViewport(0, 0, framebuffer_size.width, framebuffer_size.height);
-        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        _render_backend->render(*_user_interface);
         glfwSwapBuffers(_glfw_window.get());
         glfwPollEvents();
 

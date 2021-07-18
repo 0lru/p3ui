@@ -1,4 +1,4 @@
-file(GLOB SOURCES p3/*.cpp)
+file(GLOB SOURCES p3/*.cpp p3/backend/*.cpp)
 set(SOURCES ${SOURCES})
 add_library(p3 STATIC ${SOURCES})
 target_link_libraries(p3 PUBLIC glad imgui implot glfw ${OPENGL_LIBRARIES})
