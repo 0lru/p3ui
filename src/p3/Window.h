@@ -23,6 +23,7 @@
 #include "Context.h"
 #include "Node.h"
 #include "Theme.h"
+#include "Timer.h"
 
 #include <imgui.h>
 
@@ -45,35 +46,12 @@ namespace p3
     class Popup;
     class RenderBackend;
 
-    class Timer
-    {
-    public:
-        using Clock = std::chrono::high_resolution_clock;
-        using TimePoint = Clock::time_point;
-
-        std::chrono::nanoseconds reset()
-        {
-            auto now = Clock::now();
-            auto delta = now - _timepoint;
-            _timepoint = now;
-            return std::chrono::duration_cast<std::chrono::nanoseconds>(delta);
-        }
-
-        std::chrono::nanoseconds ticks()
-        {
-            return std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - _timepoint);
-        }
-
-    private:
-        TimePoint _timepoint;
-    };
-
     class VideoMode
     {
     public:
         VideoMode() = default;
         VideoMode(VideoMode const&) = default;
-        VideoMode(GLFWmonitor *, int width, int height, int hz);
+        VideoMode(GLFWmonitor*, int width, int height, int hz);
         int width() const;
         int height() const;
         int hz() const;
@@ -111,7 +89,9 @@ namespace p3
     class Window : public std::enable_shared_from_this<Window>
     {
     public:
+        using MousePosition = std::array<double, 2>;
         using UpdateCallback = std::function<void(std::shared_ptr<Window>)>;
+        using Seconds = std::chrono::duration<double>;
 
         struct Position { int x; int y; };
         struct Size { int width; int height; };
@@ -129,9 +109,6 @@ namespace p3
         void loop(UpdateCallback);
         bool closed() const;
 
-        void set_target_framerate(std::optional<double>);
-        std::optional<double> const& target_framerate() const;
-
         std::optional<VideoMode> video_mode() const;
         void set_video_mode(std::optional<VideoMode>);
 
@@ -143,11 +120,22 @@ namespace p3
 
         Size size() const;
         void set_size(Size);
-        
+
         Size framebuffer_size() const;
 
         void set_vsync(bool);
         bool vsync() const;
+
+        /// this uses this_thread::sleep_for which is "inaccurate" (should
+        /// only be used for "low fps situations".
+        std::chrono::nanoseconds render_timeout_on_idle() const;
+        void set_render_timeout_on_dile(std::chrono::nanoseconds);
+
+        void set_idle_timeout(std::optional<Seconds>);
+        std::optional<Seconds> idle_timeout() const;
+
+        void set_idle_frame_time(Seconds);
+        Seconds idle_frame_time() const;
 
     private:
         bool _vsync = true;
@@ -161,9 +149,18 @@ namespace p3
 
         std::shared_ptr<UserInterface> _user_interface;
 
-        Timer _timer;
-        Timer _throttle_timer;
-        std::optional<double> _target_framerate = std::nullopt;
+        Timer _fps_timer;
+        Timer _frame_timer;
+        Timer _idle_timer;
+        std::optional<Seconds> _idle_timeout = std::nullopt;
+        Seconds _idle_frame_time = Seconds(1);
+
+    private:
+        static void GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+        static void GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+        static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        static void GlfwCharCallback(GLFWwindow* window, unsigned int c);
+        MousePosition _mouse_position{0.f, 0.f};
     };
 
 }

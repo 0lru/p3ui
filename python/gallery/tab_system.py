@@ -6,6 +6,8 @@ class TabSystem(p3.ScrollArea):
     def __init__(self, window):
         self.window = window
 
+        window.idle_timeout = 60.0
+        window.idle_frame_time = 1.0
         super().__init__()
 
         self.monitors = window.monitors()
@@ -91,7 +93,19 @@ class TabSystem(p3.ScrollArea):
                             padding=(1 | p3.em, 0 | p3.em)
                         ),
                         children=[
-                            self.vsync_checkbox
+                            p3.InputDouble(
+                                label='Idle Timeout (seconds)',
+                                value=60.0,
+                                step=1.0,
+                                on_change=lambda value: setattr(window, 'idle_timeout', value)
+                            ),
+                            p3.InputDouble(
+                                label='Idle Frame Time (seconds)',
+                                value=1.0,
+                                step=0.1,
+                                on_change=lambda value: setattr(window, 'idle_frame_time', value)
+                            ),
+                            self.vsync_checkbox,
                         ]
                     )
                 )

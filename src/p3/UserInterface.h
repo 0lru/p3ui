@@ -83,7 +83,7 @@ namespace p3
         void set_circle_tessellation_maximum_error(float);
         float circle_tessellation_maximum_error() const;
 
-        void render(RenderBackend&, float width, float height);
+        void render(Context&, float width, float height) override;
 
     protected:
         void update_content() override;
@@ -104,8 +104,6 @@ namespace p3
 
         std::shared_ptr<ImGuiContext> _im_gui_context;
         std::shared_ptr<ImPlotContext> _im_plot_context;
-
-        MousePosition _mouse_position{0.f, 0.f};
     };
 
 }

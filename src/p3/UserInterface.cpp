@@ -210,20 +210,12 @@ namespace p3
         Node::update_restyle(context, force_restyle);
     }
 
-    void UserInterface::render(RenderBackend& render_backend, float width, float height)
+    void UserInterface::render(
+        Context& context, 
+        float width, 
+        float height)
     {
         ImGui::NewFrame();
-
-        auto mouse_position = this->mouse_position();
-        Context::MouseMove mouse_move = std::nullopt;
-        if (_mouse_position[0] != mouse_position[0] ||
-            _mouse_position[1] != mouse_position[1])
-        {
-            mouse_move = std::array<float, 2>{
-                mouse_position[0] - _mouse_position[0], mouse_position[1] - _mouse_position[1]
-            };
-            std::swap(_mouse_position, mouse_position);
-        }
 
         // TODO: remove this
         auto& style = ImPlot::GetStyle();
@@ -244,7 +236,6 @@ namespace p3
         //
         // it is important that the destr. is executed after tree
         // traversal
-        Context context(*this, render_backend, std::move(mouse_move));
         update_restyle(context);
 
         //

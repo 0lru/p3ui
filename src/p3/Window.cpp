@@ -111,6 +111,7 @@ namespace p3
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
         glfwSetErrorCallback(error_callback);
+
         _glfw_window = std::shared_ptr<GLFWwindow>(
             glfwCreateWindow(int(width), int(height), title.c_str(), nullptr/*glfwGetPrimaryMonitor()*/, nullptr),
             glfwDestroyWindow);
@@ -123,6 +124,14 @@ namespace p3
         glfwMakeContextCurrent(_glfw_window.get());
         glfwSwapInterval(_vsync ? 1 : 0);
         gladLoadGL(glfwGetProcAddress);
+
+        //
+        // imgui user-callbacks "hook" into, but do not delete these callbacks
+        glfwSetWindowUserPointer(_glfw_window.get(), this);
+        glfwSetMouseButtonCallback(_glfw_window.get(), GlfwMouseButtonCallback);
+        glfwSetScrollCallback(_glfw_window.get(), GlfwScrollCallback);
+        glfwSetKeyCallback(_glfw_window.get(), GlfwKeyCallback);
+        glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);        
     }
 
     Window::~Window()
@@ -170,28 +179,46 @@ namespace p3
 
     void Window::frame()
     {
+        MousePosition mouse_position;
+        glfwGetCursorPos(_glfw_window.get(), &(mouse_position[0]), &mouse_position[1]);
+        Context::MouseMove mouse_move = std::nullopt;
+        if (_mouse_position[0] != mouse_position[0] ||
+            _mouse_position[1] != mouse_position[1])
+        {
+            mouse_move = std::array<float, 2>{
+                float(mouse_position[0] - _mouse_position[0]), 
+                float(mouse_position[1] - _mouse_position[1])
+            };
+            std::swap(_mouse_position, mouse_position);
+        }
+        if (mouse_move)
+            _idle_timer.reset();
+        Context context(*_user_interface, *_render_backend, std::move(mouse_move));
+
+        if (_idle_timeout)
+        {
+            if (_idle_timer.time() > _idle_timeout.value() &&
+                _frame_timer.time() < _idle_frame_time)
+            {
+                return;
+            }
+        }
+
+        _frame_timer.reset();
         auto framebuffer_size = this->framebuffer_size();
         _render_backend->new_frame();
         ImGui_ImplGlfw_NewFrame();
         if (_user_interface)
-            _user_interface->render(*_render_backend, float(framebuffer_size.width), float(framebuffer_size.height));
+            _user_interface->render(context, float(framebuffer_size.width), float(framebuffer_size.height));
         glViewport(0, 0, framebuffer_size.width, framebuffer_size.height);
         _render_backend->render(*_user_interface);
         glfwSwapBuffers(_glfw_window.get());
         glfwPollEvents();
 
-        if (_timer.ticks() > std::chrono::milliseconds(1000))
+        if (_fps_timer.time() > std::chrono::milliseconds(1000))
         {
             std::cout << "fps: " << ImGui::GetIO().Framerate << std::endl;
-            _timer.reset();
-        }
-        if (_target_framerate)
-        {
-            auto ms = _throttle_timer.ticks().count();
-            auto ms_minimum = static_cast<decltype(ms)>(1000000000.0 / _target_framerate.value());
-            if (ms < ms_minimum)
-                std::this_thread::sleep_for(std::chrono::nanoseconds(ms_minimum - ms));
-            _throttle_timer.reset();
+            _fps_timer.reset();
         }
     }
 
@@ -203,17 +230,6 @@ namespace p3
                 update_callback(std::static_pointer_cast<Window>(shared_from_this()));
             frame();
         }
-    }
-
-    void Window::set_target_framerate(std::optional<double> target_framerate)
-    {
-        _target_framerate = std::move(target_framerate);
-        _throttle_timer.reset();
-    }
-
-    std::optional<double> const& Window::target_framerate() const
-    {
-        return _target_framerate;
     }
 
     std::optional<VideoMode> Window::video_mode() const
@@ -308,6 +324,46 @@ namespace p3
     bool Window::vsync() const
     {
         return _vsync;
+    }
+
+    void Window::GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+    {
+        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+    }
+
+    void Window::GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+    }
+
+    void Window::GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+    }
+
+    void Window::GlfwCharCallback(GLFWwindow* window, unsigned int c) 
+    {
+        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+    }
+
+    void Window::set_idle_timeout(std::optional<Seconds> idle_timeout)
+    {
+        _idle_timeout = idle_timeout;
+    }
+
+    std::optional<Window::Seconds> Window::idle_timeout() const
+    {
+        return _idle_timeout;
+    }
+
+    void Window::set_idle_frame_time(Seconds idle_frame_time)
+    {
+        _idle_frame_time = idle_frame_time;
+    }
+
+    Window::Seconds Window::idle_frame_time() const
+    {
+        return _idle_frame_time;
     }
 
 }
