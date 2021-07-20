@@ -126,11 +126,6 @@ namespace p3
         void set_vsync(bool);
         bool vsync() const;
 
-        /// this uses this_thread::sleep_for which is "inaccurate" (should
-        /// only be used for "low fps situations".
-        std::chrono::nanoseconds render_timeout_on_idle() const;
-        void set_render_timeout_on_dile(std::chrono::nanoseconds);
-
         void set_idle_timeout(std::optional<Seconds>);
         std::optional<Seconds> idle_timeout() const;
 
