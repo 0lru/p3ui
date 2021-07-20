@@ -57,7 +57,7 @@ namespace p3
     {
         
         ImVec2 size(width, height);
-        if (ImGui::Button(imgui_label().c_str(), size) && _on_click)
+        if (ImGui::Button(imgui_label().c_str(), size) && _on_click && !disabled())
             postpone([f=_on_click]() {
                 f();
             });

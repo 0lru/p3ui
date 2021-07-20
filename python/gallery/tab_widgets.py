@@ -39,7 +39,7 @@ class TabWidgets(ScrollArea):
                         on_click=lambda: print('icon button clicked')
                     ),
                     Button(
-                        disabled = True,
+                        disabled=True,
                         label=f"{icon_char} Icon Button",
                         on_click=lambda: print('icon button clicked')
                     ),
@@ -100,7 +100,7 @@ class TabWidgets(ScrollArea):
                         min=0, max=100, value=20, label='InputU8',
                         on_change=lambda value: print(f'InputU8 value: {value}')
                     ),
-                    InputU16(min=0, max=100, value=20, label='InputU16', step=1),
+                    InputU16(disabled=True, min=0, max=100, value=20, label='InputU16', step=1),
                     InputU32(min=0, max=100, value=20, label='InputU32', step=2),
                     InputU64(min=0, max=100, value=20, label='InputU64'),
                     InputS16(min=0, max=100, value=20, label='InputS16'),

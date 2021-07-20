@@ -52,14 +52,16 @@ namespace p3
             ImGui::SetNextItemWidth(width * 0.65f);
         else
             ImGui::SetNextItemWidth(width);
+        DataType value = _value;
+        auto vptr = disabled() ? &value : &_value;
         bool change = ImGui::SliderScalar(
             imgui_label().c_str(),
             imgui_datatype<DataType>, 
-            &_value, 
+            vptr, 
             &_min, 
             &_max,
             _format ? _format.value().c_str() : nullptr);
-        if (change && _on_change)
+        if (change && _on_change && !disabled())
             postpone([f = _on_change, value = _value]() {
                 f(value);
             });
