@@ -325,6 +325,7 @@ namespace p3
 
     void Node::render(Context& context, float width, float height)
     {
+        ImGui::GetStyle().Alpha = _disabled ? 0.2f : 1.0f;
         auto compiled_guard = _apply_style_compiled();
         auto &work_rect = GImGui->CurrentWindow->WorkRect;
         ImVec2 work_rect_max = work_rect.Min;
@@ -355,6 +356,16 @@ namespace p3
     std::string const& Node::imgui_label() const
     {
         return _imgui_label;
+    }
+
+    void Node::set_disabled(bool disabled)
+    {
+        _disabled = disabled;
+    }
+
+    bool Node::disabled() const
+    {
+        return _disabled;
     }
 
     void Node::set_mouse_tracking_enabled(bool mouse_tracking_enabled)

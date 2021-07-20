@@ -133,6 +133,9 @@ namespace p3
         std::uint64_t imgui_id() const;
         std::string const& imgui_label() const;
 
+        void set_disabled(bool);
+        bool disabled() const;
+
     protected:
         Node(std::string element_name);
 
@@ -160,6 +163,7 @@ namespace p3
         std::vector<std::shared_ptr<Node>> _children;
 
         bool _visible = true; // NOTE: style..
+        bool _disabled = false;
 
         // needed for det. of the node specific imgui state
         int _status_flag;

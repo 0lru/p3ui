@@ -38,6 +38,11 @@ class TabWidgets(ScrollArea):
                         label=f"{icon_char} Icon Button",
                         on_click=lambda: print('icon button clicked')
                     ),
+                    Button(
+                        disabled = True,
+                        label=f"{icon_char} Icon Button",
+                        on_click=lambda: print('icon button clicked')
+                    ),
                     Text(f'Some Text', label='Label'),
                     CheckBox(
                         label='CheckBox',
@@ -81,7 +86,7 @@ class TabWidgets(ScrollArea):
                     SliderU32(min=0, max=100, value=20, label='SliderU32'),
                     SliderU64(min=0, max=100, value=20, label='SliderU64'),
                     SliderS8(min=0, max=100, value=20, label='SliderS8'),
-                    SliderS16(min=0, max=100, value=20, label='SliderS16'),
+                    SliderS16(disabled=True, min=0, max=100, value=20, label='SliderS16'),
                     SliderS32(min=0, max=100, value=20, label='SliderS32'),
                     SliderS64(min=0, max=100, value=20, label='SliderS64'),
                     SliderFloat(min=0, max=100, value=20, label='SliderFloat'),
