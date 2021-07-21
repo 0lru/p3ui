@@ -21,10 +21,12 @@
 /******************************************************************************/
 #include "Theme.h"
 #include "Context.h"
+#include "convert.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <implot.h>
+#include <implot_internal.h>
 
 namespace p3
 {
@@ -40,10 +42,19 @@ namespace p3
                 std::uint8_t(src.w * 255.f)
             );
         }
-    }
 
-    namespace
-    {
+        void convert_color(std::optional<Color>& color, ImVec4 const& src)
+        {
+            if (src == IMPLOT_AUTO_COL)
+                color = std::nullopt;
+            else
+                color = Color(
+                    std::uint8_t(src.x * 255.f),
+                    std::uint8_t(src.y * 255.f),
+                    std::uint8_t(src.z * 255.f),
+                    std::uint8_t(src.w * 255.f)
+                );
+        }
 
         ImVec2 to_actual(Context const& context, Length2 const& length)
         {
@@ -63,6 +74,19 @@ namespace p3
                 color.blue() / 255.f,
                 color.alpha() / 255.f
             );
+        }
+
+        ImVec4 to_actual(std::optional<Color> const& color)
+        {
+            if (color)
+                return ImVec4(
+                    color.value().red() / 255.f,
+                    color.value().green() / 255.f,
+                    color.value().blue() / 255.f,
+                    color.value().alpha() / 255.f
+                );
+            else
+                return IMPLOT_AUTO_COL;
         }
     }
 
@@ -155,8 +179,35 @@ namespace p3
         im_gui_style->Colors[ImGuiCol_NavWindowingDimBg] = to_actual(_nav_windowing_dim_background_color);
         im_gui_style->Colors[ImGuiCol_ModalWindowDimBg] = to_actual(_modal_window_dim_background_color);
 
-        auto apply = [im_gui_style{ std::move(im_gui_style) }]() mutable {
+        auto im_plot_style = std::make_shared<ImPlotStyle>();
+        im_plot_style->Colors[ImPlotCol_Line] = to_actual(_plot_line_color);
+        im_plot_style->Colors[ImPlotCol_Fill] = to_actual(_plot_fill_color);
+        im_plot_style->Colors[ImPlotCol_MarkerOutline] = to_actual(_plot_marker_outline_color);
+        im_plot_style->Colors[ImPlotCol_MarkerFill] = to_actual(_plot_marker_fill_color);
+        im_plot_style->Colors[ImPlotCol_ErrorBar] = to_actual(_plot_error_bar_color);
+        im_plot_style->Colors[ImPlotCol_FrameBg] = to_actual(_plot_frame_background_color);
+        im_plot_style->Colors[ImPlotCol_PlotBg] = to_actual(_plot_background_color);
+        im_plot_style->Colors[ImPlotCol_PlotBorder] = to_actual(_plot_border_color);
+        im_plot_style->Colors[ImPlotCol_LegendBg] = to_actual(_plot_legend_background_color);
+        im_plot_style->Colors[ImPlotCol_LegendBorder] = to_actual(_plot_legend_border_color);
+        im_plot_style->Colors[ImPlotCol_LegendText] = to_actual(_plot_legend_text_color);
+        im_plot_style->Colors[ImPlotCol_TitleText] = to_actual(_plot_title_text_color);
+        im_plot_style->Colors[ImPlotCol_InlayText] = to_actual(_plot_inlay_text_color);
+        im_plot_style->Colors[ImPlotCol_XAxis] = to_actual(_plot_x_axis_color);
+        im_plot_style->Colors[ImPlotCol_XAxisGrid] = to_actual(_plot_x_axis_grid_color);
+        im_plot_style->Colors[ImPlotCol_YAxis] = to_actual(_plot_y_axis_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid] = to_actual(_plot_y_axis_grid_color);
+        im_plot_style->Colors[ImPlotCol_YAxis2] = to_actual(_plot_y_axis2_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid2] = to_actual(_plot_y_axis_grid2_color);
+        im_plot_style->Colors[ImPlotCol_YAxis3] = to_actual(_plot_y_axis3_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid3] = to_actual(_plot_y_axis_grid3_color);
+        im_plot_style->Colors[ImPlotCol_Selection] = to_actual(_plot_selection_color);
+        im_plot_style->Colors[ImPlotCol_Query] = to_actual(_plot_query_color);
+        im_plot_style->Colors[ImPlotCol_Crosshairs] = to_actual(_plot_crosshairs_color);
+        auto apply = [im_gui_style{ std::move(im_gui_style) }, im_plot_style{ std::move(im_plot_style) }]() mutable
+        {
             std::swap(*im_gui_style, GImGui->Style);
+            std::swap(*im_plot_style, GImPlot->Style);
         };
 
         return [apply]() mutable {
@@ -969,8 +1020,271 @@ namespace p3
     }
 
 
+    std::optional<Color> Theme::plot_line_color() const
+    {
+        return _plot_line_color;
+    }
 
-    void Theme::assign_colors(ImGuiStyle const& im_gui_style)
+    void Theme::set_plot_line_color(std::optional<Color> plot_line_color)
+    {
+        _plot_line_color = std::move(plot_line_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_fill_color() const
+    {
+        return _plot_fill_color;
+    }
+
+    void Theme::set_plot_fill_color(std::optional<Color> plot_fill_color)
+    {
+        _plot_fill_color = std::move(plot_fill_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_marker_outline_color() const
+    {
+        return _plot_marker_outline_color;
+    }
+
+    void Theme::set_plot_marker_outline_color(std::optional<Color> plot_marker_outline_color)
+    {
+        _plot_marker_outline_color = std::move(plot_marker_outline_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_marker_fill_color() const
+    {
+        return _plot_marker_fill_color;
+    }
+
+    void Theme::set_plot_marker_fill_color(std::optional<Color> plot_marker_fill_color)
+    {
+        _plot_marker_fill_color = std::move(plot_marker_fill_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_error_bar_color() const
+    {
+        return _plot_error_bar_color;
+    }
+
+    void Theme::set_plot_error_bar_color(std::optional<Color> plot_error_bar_color)
+    {
+        _plot_error_bar_color = std::move(plot_error_bar_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_frame_background_color() const
+    {
+        return _plot_frame_background_color;
+    }
+
+    void Theme::set_plot_frame_background_color(std::optional<Color> plot_frame_background_color)
+    {
+        _plot_frame_background_color = std::move(plot_frame_background_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_background_color() const
+    {
+        return _plot_background_color;
+    }
+
+    void Theme::set_plot_background_color(std::optional<Color> plot_background_color)
+    {
+        _plot_background_color = std::move(plot_background_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_border_color() const
+    {
+        return _plot_border_color;
+    }
+
+    void Theme::set_plot_border_color(std::optional<Color> plot_border_color)
+    {
+        _plot_border_color = std::move(plot_border_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_legend_background_color() const
+    {
+        return _plot_legend_background_color;
+    }
+
+    void Theme::set_plot_legend_background_color(std::optional<Color> plot_legend_background_color)
+    {
+        _plot_legend_background_color = std::move(plot_legend_background_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_legend_border_color() const
+    {
+        return _plot_legend_border_color;
+    }
+
+    void Theme::set_plot_legend_border_color(std::optional<Color> plot_legend_border_color)
+    {
+        _plot_legend_border_color = std::move(plot_legend_border_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_legend_text_color() const
+    {
+        return _plot_legend_text_color;
+    }
+
+    void Theme::set_plot_legend_text_color(std::optional<Color> plot_legend_text_color)
+    {
+        _plot_legend_text_color = std::move(plot_legend_text_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_title_text_color() const
+    {
+        return _plot_title_text_color;
+    }
+
+    void Theme::set_plot_title_text_color(std::optional<Color> plot_title_text_color)
+    {
+        _plot_title_text_color = std::move(plot_title_text_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_inlay_text_color() const
+    {
+        return _plot_inlay_text_color;
+    }
+
+    void Theme::set_plot_inlay_text_color(std::optional<Color> plot_inlay_text_color)
+    {
+        _plot_inlay_text_color = std::move(plot_inlay_text_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_x_axis_color() const
+    {
+        return _plot_x_axis_color;
+    }
+
+    void Theme::set_plot_x_axis_color(std::optional<Color> plot_x_axis_color)
+    {
+        _plot_x_axis_color = std::move(plot_x_axis_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_x_axis_grid_color() const
+    {
+        return _plot_x_axis_grid_color;
+    }
+
+    void Theme::set_plot_x_axis_grid_color(std::optional<Color> plot_x_axis_grid_color)
+    {
+        _plot_x_axis_grid_color = std::move(plot_x_axis_grid_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis_color() const
+    {
+        return _plot_y_axis_color;
+    }
+
+    void Theme::set_plot_y_axis_color(std::optional<Color> plot_y_axis_color)
+    {
+        _plot_y_axis_color = std::move(plot_y_axis_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis_grid_color() const
+    {
+        return _plot_y_axis_grid_color;
+    }
+
+    void Theme::set_plot_y_axis_grid_color(std::optional<Color> plot_y_axis_grid_color)
+    {
+        _plot_y_axis_grid_color = std::move(plot_y_axis_grid_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis2_color() const
+    {
+        return _plot_y_axis2_color;
+    }
+
+    void Theme::set_plot_y_axis2_color(std::optional<Color> plot_y_axis2_color)
+    {
+        _plot_y_axis2_color = std::move(plot_y_axis2_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis_grid2_color() const
+    {
+        return _plot_y_axis_grid2_color;
+    }
+
+    void Theme::set_plot_y_axis_grid2_color(std::optional<Color> plot_y_axis_grid2_color)
+    {
+        _plot_y_axis_grid2_color = std::move(plot_y_axis_grid2_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis3_color() const
+    {
+        return _plot_y_axis3_color;
+    }
+
+    void Theme::set_plot_y_axis3_color(std::optional<Color> plot_y_axis3_color)
+    {
+        _plot_y_axis3_color = std::move(plot_y_axis3_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_y_axis_grid3_color() const
+    {
+        return _plot_y_axis_grid3_color;
+    }
+
+    void Theme::set_plot_y_axis_grid3_color(std::optional<Color> plot_y_axis_grid3_color)
+    {
+        _plot_y_axis_grid3_color = std::move(plot_y_axis_grid3_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_selection_color() const
+    {
+        return _plot_selection_color;
+    }
+
+    void Theme::set_plot_selection_color(std::optional<Color> plot_selection_color)
+    {
+        _plot_selection_color = std::move(plot_selection_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_query_color() const
+    {
+        return _plot_query_color;
+    }
+
+    void Theme::set_plot_query_color(std::optional<Color> plot_query_color)
+    {
+        _plot_query_color = std::move(plot_query_color);
+        _on_change();
+    }
+
+    std::optional<Color> Theme::plot_crosshairs_color() const
+    {
+        return _plot_crosshairs_color;
+    }
+
+    void Theme::set_plot_crosshairs_color(std::optional<Color> plot_crosshairs_color)
+    {
+        _plot_crosshairs_color = std::move(plot_crosshairs_color);
+        _on_change();
+    }
+
+    void Theme::assign_colors(ImGuiStyle const& im_gui_style, ImPlotStyle const& im_plot_style)
     {
         convert_color(_text_color, im_gui_style.Colors[ImGuiCol_Text]);
         convert_color(_text_disabled_color, im_gui_style.Colors[ImGuiCol_TextDisabled]);
@@ -1021,34 +1335,68 @@ namespace p3
         convert_color(_nav_windowing_highlight_color, im_gui_style.Colors[ImGuiCol_NavWindowingHighlight]);
         convert_color(_nav_windowing_dim_background_color, im_gui_style.Colors[ImGuiCol_NavWindowingDimBg]);
         convert_color(_modal_window_dim_background_color, im_gui_style.Colors[ImGuiCol_ModalWindowDimBg]);
+        // implot
+        convert_color(_plot_line_color, im_plot_style.Colors[ImPlotCol_Line]);
+        convert_color(_plot_fill_color, im_plot_style.Colors[ImPlotCol_Fill]);
+        convert_color(_plot_marker_outline_color, im_plot_style.Colors[ImPlotCol_MarkerOutline]);
+        convert_color(_plot_marker_fill_color, im_plot_style.Colors[ImPlotCol_MarkerFill]);
+        convert_color(_plot_error_bar_color, im_plot_style.Colors[ImPlotCol_ErrorBar]);
+        convert_color(_plot_frame_background_color, im_plot_style.Colors[ImPlotCol_FrameBg]);
+        convert_color(_plot_background_color, im_plot_style.Colors[ImPlotCol_PlotBg]);
+        convert_color(_plot_border_color, im_plot_style.Colors[ImPlotCol_PlotBorder]);
+        convert_color(_plot_legend_background_color, im_plot_style.Colors[ImPlotCol_LegendBg]);
+        convert_color(_plot_legend_border_color, im_plot_style.Colors[ImPlotCol_LegendBorder]);
+        convert_color(_plot_legend_text_color, im_plot_style.Colors[ImPlotCol_LegendText]);
+        convert_color(_plot_title_text_color, im_plot_style.Colors[ImPlotCol_TitleText]);
+        convert_color(_plot_inlay_text_color, im_plot_style.Colors[ImPlotCol_InlayText]);
+        convert_color(_plot_x_axis_color, im_plot_style.Colors[ImPlotCol_XAxis]);
+        convert_color(_plot_x_axis_grid_color, im_plot_style.Colors[ImPlotCol_XAxisGrid]);
+        convert_color(_plot_y_axis_color, im_plot_style.Colors[ImPlotCol_YAxis]);
+        convert_color(_plot_y_axis_grid_color, im_plot_style.Colors[ImPlotCol_YAxisGrid]);
+        convert_color(_plot_y_axis2_color, im_plot_style.Colors[ImPlotCol_YAxis2]);
+        convert_color(_plot_y_axis_grid2_color, im_plot_style.Colors[ImPlotCol_YAxisGrid2]);
+        convert_color(_plot_y_axis3_color, im_plot_style.Colors[ImPlotCol_YAxis3]);
+        convert_color(_plot_y_axis_grid3_color, im_plot_style.Colors[ImPlotCol_YAxisGrid3]);
+        convert_color(_plot_selection_color, im_plot_style.Colors[ImPlotCol_Selection]);
+        convert_color(_plot_query_color, im_plot_style.Colors[ImPlotCol_Query]);
+        convert_color(_plot_crosshairs_color, im_plot_style.Colors[ImPlotCol_Crosshairs]);
     }
 
     void Theme::make_light()
     {
-        ImGuiStyle theme;
-        ImGui::StyleColorsLight(&theme);
-        assign_colors(theme);
+        ImGuiStyle im_gui_style;
+        ImPlotStyle im_plot_style;
+        ImGui::StyleColorsLight(&im_gui_style);
+        ImPlot::StyleColorsLight(&im_plot_style);
+        assign_colors(im_gui_style, im_plot_style);
+        _on_change();
     }
 
     void Theme::make_dark()
     {
-        ImGuiStyle theme;
-        ImGui::StyleColorsDark(&theme);
-        assign_colors(theme);
+        ImGuiStyle im_gui_style;
+        ImPlotStyle im_plot_style;
+        ImGui::StyleColorsDark(&im_gui_style);
+        ImPlot::StyleColorsDark(&im_plot_style);
+        assign_colors(im_gui_style, im_plot_style);
+        _on_change();
     }
 
     void Theme::make_classic()
     {
-        ImGuiStyle theme;
-        ImGui::StyleColorsClassic(&theme);
-        assign_colors(theme);
+        ImGuiStyle im_gui_style;
+        ImPlotStyle im_plot_style;
+        ImPlot::StyleColorsAuto(&im_plot_style);
+        ImGui::StyleColorsClassic(&im_gui_style);
+        ImPlot::StyleColorsClassic(&im_plot_style);
+        assign_colors(im_gui_style, im_plot_style);
+        _on_change();
     }
 
     std::unique_ptr<Theme> Theme::make_default()
     {
         auto theme = std::make_unique<Theme>();
         theme->make_light();
-        // ImPlot::StyleColorsClassic();
         return theme;
     }
 

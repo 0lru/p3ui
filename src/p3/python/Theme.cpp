@@ -115,8 +115,32 @@ namespace p3::python
             .def_property("nav_highlight_color", &Theme::nav_highlight_color, &Theme::set_nav_highlight_color)
             .def_property("nav_windowing_highlight_color", &Theme::nav_windowing_highlight_color, &Theme::set_nav_windowing_highlight_color)
             .def_property("nav_windowing_dim_background_color", &Theme::nav_windowing_dim_background_color, &Theme::set_nav_windowing_dim_background_color)
-            .def_property("modal_window_dim_background_color", &Theme::modal_window_dim_background_color, &Theme::set_modal_window_dim_background_color);
-
+            .def_property("modal_window_dim_background_color", &Theme::modal_window_dim_background_color, &Theme::set_modal_window_dim_background_color)
+            // plot
+            .def_property("plot_line_color", &Theme::plot_line_color, &Theme::set_plot_line_color)
+            .def_property("plot_fill_color", &Theme::plot_fill_color, &Theme::set_plot_fill_color)
+            .def_property("plot_marker_outline_color", &Theme::plot_marker_outline_color, &Theme::set_plot_marker_outline_color)
+            .def_property("plot_marker_fill_color", &Theme::plot_marker_fill_color, &Theme::set_plot_marker_fill_color)
+            .def_property("plot_error_bar_color", &Theme::plot_error_bar_color, &Theme::set_plot_error_bar_color)
+            .def_property("plot_frame_background_color", &Theme::plot_frame_background_color, &Theme::set_plot_frame_background_color)
+            .def_property("plot_background_color", &Theme::plot_background_color, &Theme::set_plot_background_color)
+            .def_property("plot_border_color", &Theme::plot_border_color, &Theme::set_plot_border_color)
+            .def_property("plot_legend_background_color", &Theme::plot_legend_background_color, &Theme::set_plot_legend_background_color)
+            .def_property("plot_legend_border_color", &Theme::plot_legend_border_color, &Theme::set_plot_legend_border_color)
+            .def_property("plot_legend_text_color", &Theme::plot_legend_text_color, &Theme::set_plot_legend_text_color)
+            .def_property("plot_title_text_color", &Theme::plot_title_text_color, &Theme::set_plot_title_text_color)
+            .def_property("plot_inlay_text_color", &Theme::plot_inlay_text_color, &Theme::set_plot_inlay_text_color)
+            .def_property("plot_x_axis_color", &Theme::plot_x_axis_color, &Theme::set_plot_x_axis_color)
+            .def_property("plot_x_axis_grid_color", &Theme::plot_x_axis_grid_color, &Theme::set_plot_x_axis_grid_color)
+            .def_property("plot_y_axis_color", &Theme::plot_y_axis_color, &Theme::set_plot_y_axis_color)
+            .def_property("plot_y_axis_grid_color", &Theme::plot_y_axis_grid_color, &Theme::set_plot_y_axis_grid_color)
+            .def_property("plot_y_axis2_color", &Theme::plot_y_axis2_color, &Theme::set_plot_y_axis2_color)
+            .def_property("plot_y_axis_grid2_color", &Theme::plot_y_axis_grid2_color, &Theme::set_plot_y_axis_grid2_color)
+            .def_property("plot_y_axis3_color", &Theme::plot_y_axis3_color, &Theme::set_plot_y_axis3_color)
+            .def_property("plot_y_axis_grid3_color", &Theme::plot_y_axis_grid3_color, &Theme::set_plot_y_axis_grid3_color)
+            .def_property("plot_selection_color", &Theme::plot_selection_color, &Theme::set_plot_selection_color)
+            .def_property("plot_query_color", &Theme::plot_query_color, &Theme::set_plot_query_color)
+            .def_property("plot_crosshairs_color", &Theme::plot_crosshairs_color, &Theme::set_plot_crosshairs_color);
     }
 
 }

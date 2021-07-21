@@ -118,6 +118,7 @@ namespace p3::python
 
         py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
         node.def_property("visible", &Node::visible, &Node::set_visible);
+        node.def_property_readonly("children", &Node::children);
         node.def_property("disabled", &Node::disabled, &Node::set_disabled);
         node.def_property("label", &Node::label, &Node::set_label);
         node.def_property("mouse_tracking_enabled", &Node::mouse_tracking_enabled, &Node::set_mouse_tracking_enabled);

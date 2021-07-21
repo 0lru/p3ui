@@ -1,6 +1,6 @@
 from p3ui import Flexible, Direction, Alignment, Justification, \
     px, em, rem, InputFloat, ComboBox, ScrollArea, ColorEdit, Text, \
-    Pixels, Em, Color
+    Pixels, Em, Color, Style, Button
 
 
 class StyleInput(Flexible):
@@ -35,6 +35,9 @@ class Float1(StyleInput):
             value=self.value,
             step=0.1))
 
+    def initialize_value(self):
+        self.content[0].value = self.value
+
 
 class Length1(StyleInput):
 
@@ -48,6 +51,9 @@ class Length1(StyleInput):
             options=['px', 'em', 'rem'])
         self.add(self.__input)
         self.add(self.__combo)
+
+    def initialize_value(self):
+        self.__combo.selected_index = 0 if isinstance(self.value, Pixels) else 1 if isinstance(self.value, Em) else 2
 
     def on_change(self, _):
         self.value = self.__input.value | [px, em, rem][self.__combo.selected_index]
@@ -74,7 +80,16 @@ class Length2(Flexible):
         self.__combo2 = ComboBox(on_change=self.on_change, width=(4 | em, 0, 0), selected_index=0,
                                  options=['px', 'em', 'rem'])
 
-        initial = getattr(target, attribute)
+        self.add(self.__text)
+        self.add(self.__input1)
+        self.add(self.__combo1)
+        self.add(self.__input2)
+        self.add(self.__combo2)
+
+        self.initialize_value()
+
+    def initialize_value(self):
+        initial = getattr(self.__target, self.__attribute)
         self.__input1.value = initial[0].value
         if isinstance(initial[0], Pixels):
             self.__combo1.selected_index = 0
@@ -90,12 +105,6 @@ class Length2(Flexible):
             self.__combo2.selected_index = 1
         else:
             self.__combo2.selected_index = 2
-
-        self.add(self.__text)
-        self.add(self.__input1)
-        self.add(self.__combo1)
-        self.add(self.__input2)
-        self.add(self.__combo2)
 
     def on_change(self, _):
         l2 = (
@@ -132,8 +141,28 @@ class Color4(Flexible):
     def on_change(self, _):
         setattr(self.__target, self.__attribute, self.__edit.value)
 
+    def initialize_value(self):
+        self.__edit.value = getattr(self.__target, self.__attribute)
+
 
 class TabStyles(ScrollArea):
+
+    def initialize_values(self):
+        for child in self.content.children:
+            if hasattr(child, 'initialize_value'):
+                child.initialize_value()
+
+    def make_light(self):
+        self.ui.theme.make_light()
+        self.initialize_values()
+
+    def make_dark(self):
+        self.ui.theme.make_dark()
+        self.initialize_values()
+
+    def make_classic(self):
+        self.ui.theme.make_classic()
+        self.initialize_values()
 
     def __init__(self, ui):
         super().__init__(content=Flexible(
@@ -141,6 +170,27 @@ class TabStyles(ScrollArea):
             direction=Direction.Vertical,
             align_items=Alignment.Stretch,
             justify_content=Justification.Start))
+        self.ui = ui
+        self.content.add(Flexible(
+            style=Style(
+                direction=Direction.Horizontal,
+                padding=(0 | px, 0.5 | em)
+            ),
+            children=[
+                Button(
+                    label='make light',
+                    on_click=self.make_light
+                ),
+                Button(
+                    label='make dark',
+                    on_click=self.make_dark
+                ),
+                Button(
+                    label='make classic',
+                    on_click=self.make_classic
+                )
+            ]
+        ))
         for name in [x for x in dir(ui.theme) if not x.startswith('_')]:
             value = getattr(ui.theme, name)
             label = ' '.join([c.title() for c in (name.split('_'))])

@@ -33,6 +33,7 @@
 #include <vector>
 
 struct ImGuiStyle;
+struct ImPlotStyle;
 
 namespace p3
 {
@@ -274,7 +275,80 @@ namespace p3
         Color modal_window_dim_background_color() const;
         void set_modal_window_dim_background_color(Color);
 
-        void assign_colors(ImGuiStyle const&);
+        // plot
+        std::optional<Color> plot_line_color() const;
+        void set_plot_line_color(std::optional<Color>);
+
+        std::optional<Color> plot_fill_color() const;
+        void set_plot_fill_color(std::optional<Color>);
+
+        std::optional<Color> plot_marker_outline_color() const;
+        void set_plot_marker_outline_color(std::optional<Color>);
+
+        std::optional<Color> plot_marker_fill_color() const;
+        void set_plot_marker_fill_color(std::optional<Color>);
+
+        std::optional<Color> plot_error_bar_color() const;
+        void set_plot_error_bar_color(std::optional<Color>);
+
+        std::optional<Color> plot_frame_background_color() const;
+        void set_plot_frame_background_color(std::optional<Color>);
+
+        std::optional<Color> plot_background_color() const;
+        void set_plot_background_color(std::optional<Color>);
+
+        std::optional<Color> plot_border_color() const;
+        void set_plot_border_color(std::optional<Color>);
+
+        std::optional<Color> plot_legend_background_color() const;
+        void set_plot_legend_background_color(std::optional<Color>);
+
+        std::optional<Color> plot_legend_border_color() const;
+        void set_plot_legend_border_color(std::optional<Color>);
+
+        std::optional<Color> plot_legend_text_color() const;
+        void set_plot_legend_text_color(std::optional<Color>);
+
+        std::optional<Color> plot_title_text_color() const;
+        void set_plot_title_text_color(std::optional<Color>);
+
+        std::optional<Color> plot_inlay_text_color() const;
+        void set_plot_inlay_text_color(std::optional<Color>);
+
+        std::optional<Color> plot_x_axis_color() const;
+        void set_plot_x_axis_color(std::optional<Color>);
+
+        std::optional<Color> plot_x_axis_grid_color() const;
+        void set_plot_x_axis_grid_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis_color() const;
+        void set_plot_y_axis_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis_grid_color() const;
+        void set_plot_y_axis_grid_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis2_color() const;
+        void set_plot_y_axis2_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis_grid2_color() const;
+        void set_plot_y_axis_grid2_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis3_color() const;
+        void set_plot_y_axis3_color(std::optional<Color>);
+
+        std::optional<Color> plot_y_axis_grid3_color() const;
+        void set_plot_y_axis_grid3_color(std::optional<Color>);
+
+        std::optional<Color> plot_selection_color() const;
+        void set_plot_selection_color(std::optional<Color>);
+
+        std::optional<Color> plot_query_color() const;
+        void set_plot_query_color(std::optional<Color>);
+
+        std::optional<Color> plot_crosshairs_color() const;
+        void set_plot_crosshairs_color(std::optional<Color>);
+
+        void assign_colors(ImGuiStyle const&, ImPlotStyle const&);
         void make_light();
         void make_dark();
         void make_classic();
@@ -357,6 +431,31 @@ namespace p3
         Color _nav_windowing_highlight_color;
         Color _nav_windowing_dim_background_color;
         Color _modal_window_dim_background_color;
+        // implot
+        std::optional<Color> _plot_line_color;
+        std::optional<Color> _plot_fill_color;
+        std::optional<Color> _plot_marker_outline_color;
+        std::optional<Color> _plot_marker_fill_color;
+        std::optional<Color> _plot_error_bar_color;
+        std::optional<Color> _plot_frame_background_color;
+        std::optional<Color> _plot_background_color;
+        std::optional<Color> _plot_border_color;
+        std::optional<Color> _plot_legend_background_color;
+        std::optional<Color> _plot_legend_border_color;
+        std::optional<Color> _plot_legend_text_color;
+        std::optional<Color> _plot_title_text_color;
+        std::optional<Color> _plot_inlay_text_color;
+        std::optional<Color> _plot_x_axis_color;
+        std::optional<Color> _plot_x_axis_grid_color;
+        std::optional<Color> _plot_y_axis_color;
+        std::optional<Color> _plot_y_axis_grid_color;
+        std::optional<Color> _plot_y_axis2_color;
+        std::optional<Color> _plot_y_axis_grid2_color;
+        std::optional<Color> _plot_y_axis3_color;
+        std::optional<Color> _plot_y_axis_grid3_color;
+        std::optional<Color> _plot_selection_color;
+        std::optional<Color> _plot_query_color;
+        std::optional<Color> _plot_crosshairs_color;
     };
 
     /*
