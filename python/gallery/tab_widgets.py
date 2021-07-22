@@ -6,9 +6,7 @@ icon_char = b'\xee\x8b\x88'.decode('utf-8')
 
 
 def load_texture_data(path):
-    rgb = (imread(path) * 255).astype(np.uint8)
-    rgba = np.concatenate((rgb, np.ones((rgb.shape[0], rgb.shape[1], 1)) * 255), axis=2)
-    return rgba
+    return (imread(path) * 255).astype(np.uint8)
 
 
 def show_popup(window):
