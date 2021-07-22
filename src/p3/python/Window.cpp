@@ -108,10 +108,12 @@ namespace p3::python
                 : std::nullopt);
         })
             .def_property("idle_frame_time", [](Window& window) {
-            return window.idle_frame_time().count();
-        }, [](Window& window, double idle_frame_time) {
-            window.set_idle_frame_time(Window::Seconds(idle_frame_time));
-        })
+                return window.idle_frame_time().count();
+            }, [](Window& window, double idle_frame_time) {
+                window.set_idle_frame_time(Window::Seconds(idle_frame_time));
+            })
+            .def_property_readonly("time_till_enter_idle_mode", &Window::time_till_enter_idle_mode)
+            .def_property_readonly("frames_per_second", &Window::frames_per_second)
             .def_static("primary_monitor", &Window::primary_monitor)
             .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
             .def("frame", &Window::frame)

@@ -132,6 +132,9 @@ namespace p3
         void set_idle_frame_time(Seconds);
         Seconds idle_frame_time() const;
 
+        double frames_per_second() const;
+        double time_till_enter_idle_mode() const;
+
     private:
         bool _vsync = true;
         std::string _title;
@@ -144,7 +147,6 @@ namespace p3
 
         std::shared_ptr<UserInterface> _user_interface;
 
-        Timer _fps_timer;
         Timer _frame_timer;
         Timer _idle_timer;
         std::optional<Seconds> _idle_timeout = std::nullopt;

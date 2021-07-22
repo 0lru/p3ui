@@ -19,7 +19,7 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 /******************************************************************************/
-
+#define NOMINMAX
 #include "Window.h"
 #include "UserInterface.h"
 #include "log.h"
@@ -131,7 +131,7 @@ namespace p3
         glfwSetMouseButtonCallback(_glfw_window.get(), GlfwMouseButtonCallback);
         glfwSetScrollCallback(_glfw_window.get(), GlfwScrollCallback);
         glfwSetKeyCallback(_glfw_window.get(), GlfwKeyCallback);
-        glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);        
+        glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);
     }
 
     Window::~Window()
@@ -186,8 +186,8 @@ namespace p3
             _mouse_position[1] != mouse_position[1])
         {
             mouse_move = std::array<float, 2>{
-                float(mouse_position[0] - _mouse_position[0]), 
-                float(mouse_position[1] - _mouse_position[1])
+                float(mouse_position[0] - _mouse_position[0]),
+                    float(mouse_position[1] - _mouse_position[1])
             };
             std::swap(_mouse_position, mouse_position);
         }
@@ -214,12 +214,18 @@ namespace p3
         _render_backend->render(*_user_interface);
         glfwSwapBuffers(_glfw_window.get());
         glfwPollEvents();
+    }
 
-        if (_fps_timer.time() > std::chrono::milliseconds(1000))
-        {
-            std::cout << "fps: " << ImGui::GetIO().Framerate << std::endl;
-            _fps_timer.reset();
-        }
+    double Window::frames_per_second() const
+    {
+        return ImGui::GetIO().Framerate;
+    }
+
+    double Window::time_till_enter_idle_mode() const
+    {
+        return _idle_timeout
+            ? std::max(0., std::chrono::duration<double>(_idle_timeout.value() - _idle_timer.time()).count())
+            : 0.;
     }
 
     void Window::loop(UpdateCallback update_callback)
@@ -329,22 +335,22 @@ namespace p3
 
     void Window::GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
-        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
     }
 
     void Window::GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     {
-        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
     }
 
     void Window::GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
     }
 
-    void Window::GlfwCharCallback(GLFWwindow* window, unsigned int c) 
+    void Window::GlfwCharCallback(GLFWwindow* window, unsigned int c)
     {
-        static_cast<Window *>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
     }
 
     void Window::set_idle_timeout(std::optional<Seconds> idle_timeout)
