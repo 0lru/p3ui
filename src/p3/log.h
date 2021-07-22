@@ -46,7 +46,7 @@ namespace logger
 #elif _DEBUG
         constexpr std::uint32_t current = verbose;
 #else
-        constexpr std::uint32_t current = verbose;
+        constexpr std::uint32_t current = info;
 #endif
     }
 

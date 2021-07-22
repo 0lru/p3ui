@@ -56,12 +56,35 @@ namespace p3
     {
         ImVec2 size(width, height);
 
-        ImPlotAxisFlags x_flags, y_flags = 0;
+        ImPlotAxisFlags x_flags = 0;
+        if (x_axis()->type() != Axis::Type::Numeric)
+        {
+            if (x_axis()->type() == Axis::Type::Logarithmic)
+                x_flags |= ImPlotAxisFlags_LogScale;
+            else
+            {
+                x_flags |= ImPlotAxisFlags_Time;
+                ImPlot::GetStyle().UseLocalTime = x_axis()->type() == Axis::Type::LocalTime;
+            }
+        }
+
+        ImPlotAxisFlags y_flags = 0;
+        if (y_axis()->type() != Axis::Type::Numeric)
+        {
+            if (y_axis()->type() == Axis::Type::Logarithmic)
+                y_flags |= ImPlotAxisFlags_LogScale;
+            else
+            {
+                y_flags |= ImPlotAxisFlags_Time;
+                ImPlot::GetStyle().UseLocalTime = y_axis()->type() == Axis::Type::LocalTime;
+            }
+        }
 
         if (_x_axis->limits())
             ImPlot::SetNextPlotLimitsX(_x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
         else
             x_flags |= ImPlotAxisFlags_AutoFit;
+
         if (_y_axis->limits())
             ImPlot::SetNextPlotLimitsY(_y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
         else
@@ -99,8 +122,8 @@ namespace p3
             _y_axis->label() ? _y_axis->label().value().c_str() : 0,
             size,
             0,
-            ImPlotAxisFlags_AutoFit,
-            ImPlotAxisFlags_AutoFit))
+            x_flags,
+            y_flags))
         {
             for (auto& item : _items)
                 item->render();
@@ -159,6 +182,16 @@ namespace p3
     Plot::Axis::Axis()
         : Node("PlotAxis")
     {
+    }
+
+    void Plot::Axis::set_type(Type type)
+    {
+        _type = type;
+    }
+
+    Plot::Axis::Type Plot::Axis::type() const
+    {
+        return _type;
     }
 
     Plot::Limits const& Plot::Axis::limits() const

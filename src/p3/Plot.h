@@ -153,7 +153,18 @@ namespace p3
     class Plot::Axis : public Node
     {
     public:
+        enum class Type
+        {
+            Numeric,
+            Logarithmic,
+            UniversalTime,
+            LocalTime
+        };
+
         Axis();
+
+        void set_type(Type);
+        Type type() const;
 
         void set_label(Label);
         Label const& label() const;
@@ -169,10 +180,11 @@ namespace p3
         std::optional<TickLabels> const& tick_labels() const;
 
     private:
+        Type _type = Type::Numeric;
         Label _label;
         Limits _limits;
-        std::optional<Ticks> _ticks;
-        std::optional<TickLabels> _tick_labels;
+        std::optional<Ticks> _ticks = std::nullopt;
+        std::optional<TickLabels> _tick_labels = std::nullopt;
     };
 
     template<typename T>

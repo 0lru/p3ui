@@ -78,6 +78,10 @@ namespace p3::python
         Definition<Node>::parse(kwargs, plot);
         if (kwargs.contains("x_label"))
             plot.x_axis()->set_label(kwargs["x_label"].cast<Plot::Label>());
+        if (kwargs.contains("x_type"))
+            plot.x_axis()->set_type(kwargs["x_type"].cast<Plot::Axis::Type>());
+        if (kwargs.contains("y_type"))
+            plot.y_axis()->set_type(kwargs["y_type"].cast<Plot::Axis::Type>());
         if (kwargs.contains("y_label"))
             plot.y_axis()->set_label(kwargs["y_label"].cast<Plot::Label>());
         if (kwargs.contains("x_limits"))
@@ -316,22 +320,33 @@ namespace p3::python
                 parse(kwargs, *plot);
                 return plot;
             }))
+            .def_property_readonly("x_axis", &Plot::x_axis)
+            .def_property_readonly("y_axis", &Plot::y_axis)
             .def("add", &Plot::add)
             .def("remove", &Plot::remove)
             .def("clear", &Plot::clear);
 
-        py::class_< Plot::Axis, Node, std::shared_ptr<Plot::Axis>>(plot, "Axis")
-            .def_property("ticks", [](std::shared_ptr<Plot::Axis> axis) {
-                using ResultType = std::optional<py::array_t<double>>;
-                return axis->ticks()
-                    ? ResultType(make_guarded_array_overlay(axis, axis->ticks().value()))
-                    : ResultType();
-            }, [](std::shared_ptr<Plot::Axis> axis, std::optional<py::array_t<double>> array) {
-                copy(array, axis->ticks());
-            })
-            .def_property("tick_labels", &Plot::Axis::tick_labels, &Plot::Axis::set_tick_labels)
+            py::class_< Plot::Axis, Node, std::shared_ptr<Plot::Axis>> axis(plot, "Axis");
+            axis
+                .def_property("type", &Plot::Axis::type, &Plot::Axis::set_type)
+                .def_property("ticks", [](std::shared_ptr<Plot::Axis> axis) {
+                    using ResultType = std::optional<py::array_t<double>>;
+                    return axis->ticks()
+                        ? ResultType(make_guarded_array_overlay(axis, axis->ticks().value()))
+                        : ResultType();
+                }, [](std::shared_ptr<Plot::Axis> axis, std::optional<py::array_t<double>> array) {
+                    copy(array, axis->ticks());
+                })
+                .def_property("tick_labels", &Plot::Axis::tick_labels, &Plot::Axis::set_tick_labels)
                 .def_property("label", &Plot::Axis::label, &Plot::Axis::set_label)
                 .def_property("limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
+
+       py::enum_<Plot::Axis::Type>(axis, "Type")
+            .value("Numeric", Plot::Axis::Type::Numeric)
+            .value("Logarithmic", Plot::Axis::Type::Logarithmic)
+            .value("LocalTime", Plot::Axis::Type::LocalTime)
+            .value("UniversalTime", Plot::Axis::Type::UniversalTime)
+            .export_values();
 
         auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item");
 
