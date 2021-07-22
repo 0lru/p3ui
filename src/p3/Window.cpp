@@ -267,6 +267,7 @@ namespace p3
                 nullptr,
                 _position.x, _position.y, _size.width, _size.height, 0);
         }
+        glfwSwapInterval(_vsync ? 1 : 0);
     }
 
     Window::Position Window::position() const
