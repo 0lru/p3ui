@@ -100,10 +100,6 @@ class TabSystem(p3.ScrollArea):
 
         self.monitors = window.monitors()
 
-        primary_monitor = window.primary_monitor()
-        for monitor in self.monitors:
-            print(f'EQUAL{monitor == primary_monitor}')
-
         self.monitor_combo_box = p3.ComboBox(
             label='Monitor',
             selected_index=0,
