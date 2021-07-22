@@ -14,7 +14,7 @@ assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
 def set_default_font(ui):
     ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
-    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 24)
+    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
 
 
 ui = UserInterface(menu_bar=MenuBar())
