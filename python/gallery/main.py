@@ -1,3 +1,4 @@
+import asyncio
 from p3ui import UserInterface, Window, Tab, TabItem, Style, em, ChildWindow, Button
 
 import pathlib
@@ -20,17 +21,30 @@ ui = UserInterface(menu_bar=MenuBar())
 set_default_font(ui)
 window = Window(user_interface=ui)
 
-plots = TabPlots()
+tab_plots = TabPlots()
+tab_system = TabSystem(window)
 
 ui.content = Tab(
     style=Style(padding=(1.5 | em, 0.5 | em)),
     children=[
         TabItem("Flexible", content=TabFlexible()),
         TabItem("Widgets", content=TabWidgets(ui, assets)),
-        TabItem("Plots", content=plots),
+        TabItem("Plots", content=tab_plots),
         TabItem("Styles", content=TabStyles(ui)),
-        TabItem("System", content=TabSystem(window))
+        TabItem("System", content=tab_system)
     ]
 )
 
-window.loop(on_frame=lambda _: plots.update())
+
+async def main():
+    asyncio.get_event_loop().create_task(tab_system.update())
+    while not window.closed:
+        tab_plots.update()
+        window.frame()
+        await asyncio.sleep(0)
+    print('shutting down')
+
+
+asyncio.run(main())
+# sync would be:
+# window.loop(on_frame=lambda _: plots.update())
