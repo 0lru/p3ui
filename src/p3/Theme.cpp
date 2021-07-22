@@ -1372,6 +1372,11 @@ namespace p3
         ImPlotStyle im_plot_style;
         ImGui::StyleColorsLight(&im_gui_style);
         ImPlot::StyleColorsLight(&im_plot_style);
+        im_plot_style.Colors[ImPlotCol_PlotBg] = convert(Color::named::white);
+        im_plot_style.Colors[ImPlotCol_FrameBg] = convert(Color(0xF5F5F5FF));
+        im_plot_style.Colors[ImPlotCol_XAxisGrid] = im_gui_style.Colors[ImGuiCol_Border];
+        im_plot_style.Colors[ImPlotCol_YAxisGrid] = im_gui_style.Colors[ImGuiCol_Border];
+        im_plot_style.Colors[ImPlotCol_PlotBorder] = im_gui_style.Colors[ImGuiCol_Border];
         assign_colors(im_gui_style, im_plot_style);
         _on_change();
     }
