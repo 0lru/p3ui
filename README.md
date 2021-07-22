@@ -6,5 +6,9 @@ This project aims at fast prototyping and data visualization for applications wr
 
 Sourcecode is [provided here](python/gallery)
 
+![flexible](doc/flexible.png)
 ![widgets](doc/widgets.png)
 ![plots](doc/plots.png)
+![styles](doc/styles.png)
+![system](doc/system.png)
+
