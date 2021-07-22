@@ -142,7 +142,10 @@ class Color4(Flexible):
         setattr(self.__target, self.__attribute, self.__edit.value)
 
     def initialize_value(self):
-        self.__edit.value = getattr(self.__target, self.__attribute)
+        color = getattr(self.__target, self.__attribute)
+        if color is None:
+            color = [0, 0, 0, 0]
+        self.__edit.value = color
 
 
 class TabStyles(ScrollArea):
