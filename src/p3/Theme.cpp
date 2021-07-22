@@ -204,6 +204,10 @@ namespace p3
         im_plot_style->Colors[ImPlotCol_Selection] = to_actual(_plot_selection_color);
         im_plot_style->Colors[ImPlotCol_Query] = to_actual(_plot_query_color);
         im_plot_style->Colors[ImPlotCol_Crosshairs] = to_actual(_plot_crosshairs_color);
+        im_plot_style->LineWeight = 3.0f;
+        im_plot_style->AntiAliasedLines = true;
+        im_gui_style->AntiAliasedLines = true;
+        im_gui_style->AntiAliasedFill = true;
         auto apply = [im_gui_style{ std::move(im_gui_style) }, im_plot_style{ std::move(im_plot_style) }]() mutable
         {
             std::swap(*im_gui_style, GImGui->Style);
