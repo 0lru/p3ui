@@ -1400,7 +1400,7 @@ namespace p3
     std::unique_ptr<Theme> Theme::make_default()
     {
         auto theme = std::make_unique<Theme>();
-        theme->make_light();
+        theme->make_classic();
         return theme;
     }
 
