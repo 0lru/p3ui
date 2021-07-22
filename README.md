@@ -4,7 +4,7 @@ This project aims at fast prototyping and data visualization for applications wr
 
 #  Example
 
-Sourcecode is [provided here](python/gallery)
+Sourcecode for the example is [provided here](python/gallery)
 
 ![flexible](doc/flexible.png)
 ![widgets](doc/widgets.png)
