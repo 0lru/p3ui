@@ -77,26 +77,26 @@ namespace p3::python
     {
         Definition<Node>::parse(kwargs, plot);
         if (kwargs.contains("x_label"))
-            plot.set_x_label(kwargs["x_label"].cast<Plot::Label>());
+            plot.x_axis()->set_label(kwargs["x_label"].cast<Plot::Label>());
         if (kwargs.contains("y_label"))
-            plot.set_y_label(kwargs["y_label"].cast<Plot::Label>());
+            plot.y_axis()->set_label(kwargs["y_label"].cast<Plot::Label>());
         if (kwargs.contains("x_limits"))
-            plot.set_x_limits(kwargs["x_limits"].cast<Plot::Limits>());
+            plot.x_axis()->set_limits(kwargs["x_limits"].cast<Plot::Limits>());
         if (kwargs.contains("y_limits"))
-            plot.set_y_limits(kwargs["y_limits"].cast<Plot::Limits>());
+            plot.y_axis()->set_limits(kwargs["y_limits"].cast<Plot::Limits>());
         if (kwargs.contains("x_tick_labels"))
-            plot.set_x_tick_labels(kwargs["x_tick_labels"].cast<std::optional<Plot::TickLabels>>());
+            plot.x_axis()->set_tick_labels(kwargs["x_tick_labels"].cast<std::optional<Plot::TickLabels>>());
         if (kwargs.contains("y_tick_labels"))
-            plot.set_y_tick_labels(kwargs["y_tick_labels"].cast<std::optional<Plot::TickLabels>>());
+            plot.y_axis()->set_tick_labels(kwargs["y_tick_labels"].cast<std::optional<Plot::TickLabels>>());
         if (kwargs.contains("x_ticks"))
         {
             auto x_ticks = kwargs["x_ticks"].cast<std::optional<py::array_t<double>>>();
-            copy(x_ticks, plot.x_ticks());
+            copy(x_ticks, plot.x_axis()->ticks());
         }
         if (kwargs.contains("y_ticks"))
         {
             auto y_ticks = kwargs["y_ticks"].cast<std::optional<py::array_t<double>>>();
-            copy(y_ticks, plot.y_ticks());
+            copy(y_ticks, plot.y_axis()->ticks());
         }
     }
 
@@ -316,31 +316,22 @@ namespace p3::python
                 parse(kwargs, *plot);
                 return plot;
             }))
-            .def_property("x_ticks", [](std::shared_ptr<Plot> plot) {
-                using ResultType = std::optional<py::array_t<double>>;
-                return plot->x_ticks()
-                    ? ResultType(make_guarded_array_overlay(plot, plot->x_ticks().value()))
-                    : ResultType();
-            }, [](std::shared_ptr<Plot> plot, std::optional<py::array_t<double>> array) {
-                copy(array, plot->x_ticks());
-            })
-            .def_property("x_tick_labels", &Plot::x_tick_labels, &Plot::set_x_tick_labels)
-            .def_property("y_tick_labels", &Plot::y_tick_labels, &Plot::set_y_tick_labels)
-            .def_property("y_ticks", [](std::shared_ptr<Plot> plot) {
-                using ResultType = std::optional<py::array_t<double>>;
-                return plot->y_ticks()
-                    ? ResultType(make_guarded_array_overlay(plot, plot->y_ticks().value()))
-                    : ResultType();
-            }, [](std::shared_ptr<Plot> plot, std::optional<py::array_t<double>> array) {
-                copy(array, plot->y_ticks());
-            })
-            .def_property("x_label", &Plot::x_label, &Plot::set_x_label)
-            .def_property("y_label", &Plot::y_label, &Plot::set_y_label)
-            .def_property("x_limits", &Plot::x_limits, &Plot::set_x_limits)
-            .def_property("y_limits", &Plot::y_limits, &Plot::set_y_limits)
             .def("add", &Plot::add)
             .def("remove", &Plot::remove)
             .def("clear", &Plot::clear);
+
+        py::class_< Plot::Axis, Node, std::shared_ptr<Plot::Axis>>(plot, "Axis")
+            .def_property("ticks", [](std::shared_ptr<Plot::Axis> axis) {
+                using ResultType = std::optional<py::array_t<double>>;
+                return axis->ticks()
+                    ? ResultType(make_guarded_array_overlay(axis, axis->ticks().value()))
+                    : ResultType();
+            }, [](std::shared_ptr<Plot::Axis> axis, std::optional<py::array_t<double>> array) {
+                copy(array, axis->ticks());
+            })
+            .def_property("tick_labels", &Plot::Axis::tick_labels, &Plot::Axis::set_tick_labels)
+                .def_property("label", &Plot::Axis::label, &Plot::Axis::set_label)
+                .def_property("limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
 
         auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item");
 

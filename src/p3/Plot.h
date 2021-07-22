@@ -52,6 +52,8 @@ namespace p3
     class Plot : public Node
     {
     public:
+        class Axis;
+
         using Ticks = std::vector<double>;
         using TickLabels = std::vector<std::string>;
 
@@ -131,31 +133,8 @@ namespace p3
         using Limits = std::optional<std::array<float, 2>>;
         using Label = std::optional<std::string>;
 
-        void set_x_label(Label);
-        Label const& x_label() const;
-
-        void set_y_label(Label);
-        Label const& y_label() const;
-
-        void set_x_limits(Limits);
-        Limits const& x_limits() const;
-
-        void set_y_limits(Limits);
-        Limits const& y_limits() const;
-
-        void set_x_ticks(std::optional<Ticks>);
-        std::optional<Ticks> const& x_ticks() const;
-        std::optional<Ticks>& x_ticks();
-
-        void set_y_ticks(std::optional<Ticks>);
-        std::optional<Ticks> const& y_ticks() const;
-        std::optional<Ticks>& y_ticks();
-
-        void set_x_tick_labels(std::optional<TickLabels>);
-        std::optional<TickLabels> const& x_tick_labels() const;
-
-        void set_y_tick_labels(std::optional<TickLabels>);
-        std::optional<TickLabels> const& y_tick_labels() const;
+        std::shared_ptr<Axis> const& x_axis() const;
+        std::shared_ptr<Axis> const& y_axis() const;
 
         void update_content() override;
         void render_impl(Context&, float width, float height) override;
@@ -166,16 +145,34 @@ namespace p3
 
     private:
         std::string _title;
-        Label _x_label;
-        Label _y_label;
-        Limits _x_limits;
-        Limits _y_limits;
-        std::optional<Ticks> _x_ticks;
-        std::optional<Ticks> _y_ticks;
-        std::optional<TickLabels> _x_tick_labels;
-        std::optional<TickLabels> _y_tick_labels;
-        
+        std::shared_ptr<Axis> _x_axis;
+        std::shared_ptr<Axis> _y_axis;
         std::vector<std::shared_ptr<Item>> _items;
+    };
+
+    class Plot::Axis : public Node
+    {
+    public:
+        Axis();
+
+        void set_label(Label);
+        Label const& label() const;
+
+        void set_limits(Limits);
+        Limits const& limits() const;
+
+        void set_ticks(std::optional<Ticks>);
+        std::optional<Ticks> const& ticks() const;
+        std::optional<Ticks>& ticks();
+
+        void set_tick_labels(std::optional<TickLabels>);
+        std::optional<TickLabels> const& tick_labels() const;
+
+    private:
+        Label _label;
+        Limits _limits;
+        std::optional<Ticks> _ticks;
+        std::optional<TickLabels> _tick_labels;
     };
 
     template<typename T>

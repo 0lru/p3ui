@@ -43,97 +43,13 @@ namespace p3
 
     Plot::Plot()
         : Node("Plot")
+        , _x_axis(std::make_shared<Axis>())
+        , _y_axis(std::make_shared<Axis>())
     {
-    }
-
-    void Plot::set_x_label(Label x_label)
-    {
-        _x_label = std::move(x_label);
-    }
-
-    Plot::Label const& Plot::x_label() const
-    {
-        return _x_label;
-    }
-
-    void Plot::set_y_label(Label y_label)
-    {
-        _y_label = std::move(y_label);
-    }
-
-    Plot::Label const& Plot::y_label() const
-    {
-        return _y_label;
-    }
-
-    void Plot::set_x_limits(Limits x_limits)
-    {
-        _x_limits = std::move(x_limits);
-    }
-
-    Plot::Limits const& Plot::x_limits() const
-    {
-        return _x_limits;
-    }
-
-    void Plot::set_y_limits(Limits y_limits)
-    {
-        _y_limits = std::move(y_limits);
-    }
-
-    Plot::Limits const& Plot::y_limits() const
-    {
-        return _y_limits;
-    }
-
-    void Plot::set_x_ticks(std::optional<Ticks> x_ticks)
-    {
-        _x_ticks = std::move(x_ticks);
-    }
-
-    std::optional<Plot::Ticks> const& Plot::x_ticks() const
-    {
-        return _x_ticks;
-    }
-
-    std::optional<Plot::Ticks>& Plot::x_ticks()
-    {
-        return _x_ticks;
-    }
-
-    void Plot::set_y_ticks(std::optional<Ticks> y_ticks)
-    {
-        _y_ticks = std::move(y_ticks);
-    }
-
-    std::optional<Plot::Ticks> const& Plot::y_ticks() const
-    {
-        return _y_ticks;
-    }
-
-    std::optional<Plot::Ticks>& Plot::y_ticks()
-    {
-        return _y_ticks;
-    }
-
-    void Plot::set_x_tick_labels(std::optional<TickLabels> x_tick_labels)
-    {
-        _x_tick_labels = std::move(x_tick_labels);
-    }
-
-    std::optional<Plot::TickLabels> const& Plot::x_tick_labels() const
-    {
-        return _x_tick_labels;
-    }
-
-    void Plot::set_y_tick_labels(std::optional<TickLabels> y_tick_labels)
-    {
-        _y_tick_labels = std::move(y_tick_labels);
-    }
-
-    std::optional<Plot::TickLabels> const& Plot::y_tick_labels() const
-    {
-        return _y_tick_labels;
+        // 
+        // for styling..
+        Node::add(_x_axis);
+        Node::add(_y_axis);
     }
 
     void Plot::render_impl(Context&, float width, float height)
@@ -142,45 +58,45 @@ namespace p3
 
         ImPlotAxisFlags x_flags, y_flags = 0;
 
-        if (_x_limits)
-            ImPlot::SetNextPlotLimitsX(_x_limits.value()[0], _x_limits.value()[1], ImGuiCond_Always);
+        if (_x_axis->limits())
+            ImPlot::SetNextPlotLimitsX(_x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
         else
             x_flags |= ImPlotAxisFlags_AutoFit;
-        if (_y_limits)
-            ImPlot::SetNextPlotLimitsY(_y_limits.value()[0], _y_limits.value()[1], ImGuiCond_Always);
+        if (_y_axis->limits())
+            ImPlot::SetNextPlotLimitsY(_y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
         else
             y_flags |= ImPlotAxisFlags_AutoFit;
 
-        if (_x_ticks)
+        if (_x_axis->ticks())
         {
-            if (_x_tick_labels)
+            if (_x_axis->tick_labels())
             {
-                auto references = reference_tick_labels(_x_tick_labels.value());
-                auto count = int(std::min(_x_ticks.value().size(), _x_tick_labels.value().size()));
-                ImPlot::SetNextPlotTicksX(_x_ticks.value().data(), count, references.data(), false);
+                auto references = reference_tick_labels(_x_axis->tick_labels().value());
+                auto count = int(std::min(_x_axis->ticks().value().size(), _x_axis->tick_labels().value().size()));
+                ImPlot::SetNextPlotTicksX(_x_axis->ticks().value().data(), count, references.data(), false);
             }
             else
-                ImPlot::SetNextPlotTicksX(_x_ticks.value().data(), int(_x_ticks.value().size()), 0, false);
+                ImPlot::SetNextPlotTicksX(_x_axis->ticks().value().data(), int(_x_axis->ticks().value().size()), 0, false);
         }
 
-        if (_y_ticks)
+        if (_y_axis->ticks())
         {
-            if (_y_tick_labels)
+            if (_y_axis->tick_labels())
             {
-                auto references = reference_tick_labels(_y_tick_labels.value());
-                auto count = int(std::min(_y_ticks.value().size(), _y_tick_labels.value().size()));
-                ImPlot::SetNextPlotTicksY(_y_ticks.value().data(), count, references.data(), false);
+                auto references = reference_tick_labels(_y_axis->tick_labels().value());
+                auto count = int(std::min(_y_axis->ticks().value().size(), _y_axis->tick_labels().value().size()));
+                ImPlot::SetNextPlotTicksY(_y_axis->ticks().value().data(), count, references.data(), false);
             }
             else
             {
-                ImPlot::SetNextPlotTicksY(_y_ticks.value().data(), int(_y_ticks.value().size()), 0, false);
+                ImPlot::SetNextPlotTicksY(_y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
             }
         }
 
         if (ImPlot::BeginPlot(
             imgui_label().c_str(),
-            _x_label ? _x_label.value().c_str() : 0,
-            _y_label ? _y_label.value().c_str() : 0,
+            _x_axis->label() ? _x_axis->label().value().c_str() : 0,
+            _y_axis->label() ? _y_axis->label().value().c_str() : 0,
             size,
             0,
             ImPlotAxisFlags_AutoFit,
@@ -210,9 +126,69 @@ namespace p3
         _items.clear();
     }
 
+    std::shared_ptr<Plot::Axis> const& Plot::x_axis() const
+    {
+        return _x_axis;
+    }
+
+    std::shared_ptr<Plot::Axis> const& Plot::y_axis() const
+    {
+        return _y_axis;
+    }
+
     void Plot::update_content()
     {
         _automatic_height = _automatic_width = 0.f;
+    }
+
+    void Plot::Axis::set_label(Label label)
+    {
+        _label = std::move(label);
+    }
+
+    Plot::Label const& Plot::Axis::label() const
+    {
+        return _label;
+    }
+
+    void Plot::Axis::set_limits(Limits limits)
+    {
+        _limits = std::move(limits);
+    }
+
+    Plot::Axis::Axis()
+        : Node("PlotAxis")
+    {
+    }
+
+    Plot::Limits const& Plot::Axis::limits() const
+    {
+        return _limits;
+    }
+
+    void Plot::Axis::set_ticks(std::optional<Ticks> ticks)
+    {
+        _ticks = std::move(ticks);
+    }
+
+    std::optional<Plot::Ticks> const& Plot::Axis::ticks() const
+    {
+        return _ticks;
+    }
+
+    std::optional<Plot::Ticks>& Plot::Axis::ticks()
+    {
+        return _ticks;
+    }
+
+    void Plot::Axis::set_tick_labels(std::optional<TickLabels> tick_labels)
+    {
+        _tick_labels = std::move(tick_labels);
+    }
+
+    std::optional<Plot::TickLabels> const& Plot::Axis::tick_labels() const
+    {
+        return _tick_labels;
     }
 
 }
