@@ -1,10 +1,7 @@
-import time
-
 import p3ui as p3
 import asyncio
 
-user_interface = p3.UserInterface(content=p3.Text('Hello World!'))
-window = p3.Window(user_interface=user_interface)
+window = p3.Window(user_interface=p3.UserInterface(content=p3.Text('Hello World!')))
 
 
 async def per_second():
