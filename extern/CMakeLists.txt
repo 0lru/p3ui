@@ -6,11 +6,15 @@ set(SOURCES imgui/imgui.cpp
             imgui/backends/imgui_impl_glfw.cpp
             imgui/backends/imgui_impl_opengl2.cpp)
 add_library(imgui STATIC ${SOURCES})
+target_include_directories(imgui PUBLIC imgui/)
+target_link_libraries(imgui PUBLIC glfw)
 
 set(SOURCES implot/implot.cpp
 #            implot/implot_demo.cpp
             implot/implot_items.cpp)
 add_library(implot STATIC ${SOURCES})
+target_include_directories(implot PUBLIC implot/)
+target_link_libraries(implot PUBLIC imgui)
 
 #
 # this is header-only, but adds cmake definitions
@@ -26,3 +30,6 @@ add_subdirectory(glfw)
 #
 # not sure if this is really needed
 add_subdirectory(glad)
+
+add_library(rang INTERFACE)
+target_include_directories(rang INTERFACE rang/include)

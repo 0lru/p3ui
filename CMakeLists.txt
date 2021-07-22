@@ -35,13 +35,11 @@ if(CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 find_package(OpenGL)
-include_directories(src 
-    extern/imgui 
-    extern/implot 
-    extern/glfw/include 
-    extern/glad/include 
-    extern/pybind11/include
-    extern/rang/include)
 
 add_subdirectory(extern)
-add_subdirectory(lib)
+add_subdirectory(cpp)
+
+set_target_properties(p3ui
+    PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
