@@ -44,5 +44,4 @@ include_directories(src
     extern/rang/include)
 
 add_subdirectory(extern)
-add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory(lib)
