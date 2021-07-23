@@ -179,7 +179,8 @@ namespace p3
     void Node::_compile_style_computation(Context& context)
     {
         _style_compiled.clear();
-        auto color = convert(_style_computation.color);
+        ImVec4 color;
+        assign(color, _style_computation.color);
         if (color != GImGui->Style.Colors[ImGuiCol_Text])
         {
             log_verbose("-style- <{}>\"{}\" changes color to {}", _element_name, label() ? label().value() : "", to_string(_style_computation.color));
