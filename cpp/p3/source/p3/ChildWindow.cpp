@@ -38,15 +38,21 @@ namespace p3
 
     void ChildWindow::render_impl(Context& context, float width, float height)
     {
-
+        ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse;
+        ImGuiCond conditions = 0;
         bool open;
-        ImGui::Begin(_title.c_str(), &open, ImGuiWindowFlags_NoScrollbar);
+        if (!_movable)
+            flags |= ImGuiWindowFlags_NoMove;
+        if (!_resizeable)
+        {
+            flags |= ImGuiWindowFlags_NoResize;
+            conditions |= ImGuiCond_Appearing;
+        }        
+        ImVec2 size(width, height);
+        ImGui::SetNextWindowSize(size, 0);
+        ImGui::Begin(_title.c_str(), &open, flags);
         auto const& style = ImGui::GetStyle();
-        // state.content_width = state.width = ImGui::GetWindowContentRegionWidth();
-        // state.content_height = state.height = ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y - style.WindowPadding.y * 2;
         auto avail = ImGui::GetContentRegionAvail();
-        // state.content_width = state.width = avail.x;
-        // state.content_height = state.height = avail.y;
         if (_content)
             _content->render(context, avail.x, avail.y);
         ImGui::End();

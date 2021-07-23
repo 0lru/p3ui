@@ -45,10 +45,18 @@ namespace p3
 
         void update_content() override;
 
+        void set_moveable(bool);
+        bool moveable() const;
+
+        void set_resizeable(bool);
+        bool resizeable() const;
+
     private:
         std::string _title;
         std::shared_ptr<Node> _content;
         bool _collapsed;
+        bool _movable=true;
+        bool _resizeable=false;
     };
 
 }
