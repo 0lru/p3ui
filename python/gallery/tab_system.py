@@ -181,13 +181,13 @@ class TabSystem(p3.ScrollArea):
                         children=[
                             p3.InputDouble(
                                 label='Idle Timeout (seconds)',
-                                value=60.0,
+                                value=window.idle_timeout,
                                 step=1.0,
                                 on_change=lambda value: setattr(window, 'idle_timeout', value)
                             ),
                             p3.InputDouble(
                                 label='Idle Frame Time (seconds)',
-                                value=1.0,
+                                value=window.idle_frame_time,
                                 step=0.1,
                                 on_change=lambda value: setattr(window, 'idle_frame_time', value)
                             ),
