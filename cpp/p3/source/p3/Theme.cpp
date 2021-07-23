@@ -33,28 +33,6 @@ namespace p3
 
     namespace
     {
-        void convert_color(Color& color, ImVec4 const& src)
-        {
-            color = Color(
-                std::uint8_t(src.x * 255.f),
-                std::uint8_t(src.y * 255.f),
-                std::uint8_t(src.z * 255.f),
-                std::uint8_t(src.w * 255.f)
-            );
-        }
-
-        void convert_color(std::optional<Color>& color, ImVec4 const& src)
-        {
-            if (src == IMPLOT_AUTO_COL)
-                color = std::nullopt;
-            else
-                color = Color(
-                    std::uint8_t(src.x * 255.f),
-                    std::uint8_t(src.y * 255.f),
-                    std::uint8_t(src.z * 255.f),
-                    std::uint8_t(src.w * 255.f)
-                );
-        }
 
         ImVec2 to_actual(Context const& context, Length2 const& length)
         {
@@ -66,28 +44,6 @@ namespace p3
             return ImVec2(value[0], value[1]);
         }
 
-        ImVec4 to_actual(Color const& color)
-        {
-            return ImVec4(
-                color.red() / 255.f,
-                color.green() / 255.f,
-                color.blue() / 255.f,
-                color.alpha() / 255.f
-            );
-        }
-
-        ImVec4 to_actual(std::optional<Color> const& color)
-        {
-            if (color)
-                return ImVec4(
-                    color.value().red() / 255.f,
-                    color.value().green() / 255.f,
-                    color.value().blue() / 255.f,
-                    color.value().alpha() / 255.f
-                );
-            else
-                return IMPLOT_AUTO_COL;
-        }
     }
 
     void Theme::add_observer(Observer* observer)
@@ -129,81 +85,81 @@ namespace p3
         im_gui_style->TabRounding = context.to_actual(_tab_rounding);
         im_gui_style->ButtonTextAlign = to_actual(context, _button_text_align);
         im_gui_style->SelectableTextAlign = to_actual(context, _selectable_text_align);
-        im_gui_style->Colors[ImGuiCol_Text] = to_actual(_text_color);
-        im_gui_style->Colors[ImGuiCol_TextDisabled] = to_actual(_text_disabled_color);
-        im_gui_style->Colors[ImGuiCol_WindowBg] = to_actual(_window_background_color);
-        im_gui_style->Colors[ImGuiCol_ChildBg] = to_actual(_child_background_color);
-        im_gui_style->Colors[ImGuiCol_PopupBg] = to_actual(_popup_background_color);
-        im_gui_style->Colors[ImGuiCol_Border] = to_actual(_border_color);
-        im_gui_style->Colors[ImGuiCol_BorderShadow] = to_actual(_border_shadow_color);
-        im_gui_style->Colors[ImGuiCol_FrameBg] = to_actual(_frame_background_color);
-        im_gui_style->Colors[ImGuiCol_FrameBgHovered] = to_actual(_frame_background_hovered_color);
-        im_gui_style->Colors[ImGuiCol_FrameBgActive] = to_actual(_frame_background_active_color);
-        im_gui_style->Colors[ImGuiCol_TitleBg] = to_actual(_title_background_color);
-        im_gui_style->Colors[ImGuiCol_TitleBgActive] = to_actual(_title_background_active_color);
-        im_gui_style->Colors[ImGuiCol_TitleBgCollapsed] = to_actual(_title_background_collapsed_color);
-        im_gui_style->Colors[ImGuiCol_MenuBarBg] = to_actual(_menu_bar_background_color);
-        im_gui_style->Colors[ImGuiCol_ScrollbarBg] = to_actual(_scrollbar_background_color);
-        im_gui_style->Colors[ImGuiCol_ScrollbarGrab] = to_actual(_scrollbar_grab_color);
-        im_gui_style->Colors[ImGuiCol_ScrollbarGrabHovered] = to_actual(_scrollbar_grab_hovered_color);
-        im_gui_style->Colors[ImGuiCol_ScrollbarGrabActive] = to_actual(_scrollbar_grab_active_color);
-        im_gui_style->Colors[ImGuiCol_CheckMark] = to_actual(_check_mark_color);
-        im_gui_style->Colors[ImGuiCol_SliderGrab] = to_actual(_slider_grab_color);
-        im_gui_style->Colors[ImGuiCol_SliderGrabActive] = to_actual(_slider_grab_active_color);
-        im_gui_style->Colors[ImGuiCol_Button] = to_actual(_button_color);
-        im_gui_style->Colors[ImGuiCol_ButtonHovered] = to_actual(_button_hovered_color);
-        im_gui_style->Colors[ImGuiCol_ButtonActive] = to_actual(_button_active_color);
-        im_gui_style->Colors[ImGuiCol_Header] = to_actual(_header_color);
-        im_gui_style->Colors[ImGuiCol_HeaderHovered] = to_actual(_header_hovered_color);
-        im_gui_style->Colors[ImGuiCol_HeaderActive] = to_actual(_header_active_color);
-        im_gui_style->Colors[ImGuiCol_Separator] = to_actual(_separator_color);
-        im_gui_style->Colors[ImGuiCol_SeparatorHovered] = to_actual(_separator_hovered_color);
-        im_gui_style->Colors[ImGuiCol_SeparatorActive] = to_actual(_separator_active_color);
-        im_gui_style->Colors[ImGuiCol_ResizeGrip] = to_actual(_resize_grip_color);
-        im_gui_style->Colors[ImGuiCol_ResizeGripHovered] = to_actual(_resize_grip_hovered_color);
-        im_gui_style->Colors[ImGuiCol_ResizeGripActive] = to_actual(_resize_grip_active_color);
-        im_gui_style->Colors[ImGuiCol_Tab] = to_actual(_tab_color);
-        im_gui_style->Colors[ImGuiCol_TabHovered] = to_actual(_tab_hovered_color);
-        im_gui_style->Colors[ImGuiCol_TabActive] = to_actual(_tab_active_color);
-        im_gui_style->Colors[ImGuiCol_TabUnfocused] = to_actual(_tab_unfocused_color);
-        im_gui_style->Colors[ImGuiCol_TabUnfocusedActive] = to_actual(_tab_unfocused_active_color);
-        im_gui_style->Colors[ImGuiCol_TableHeaderBg] = to_actual(_table_header_background_color);
-        im_gui_style->Colors[ImGuiCol_TableBorderStrong] = to_actual(_table_border_strong_color);
-        im_gui_style->Colors[ImGuiCol_TableBorderLight] = to_actual(_table_border_light_color);
-        im_gui_style->Colors[ImGuiCol_TableRowBg] = to_actual(_table_row_background_color);
-        im_gui_style->Colors[ImGuiCol_TableRowBgAlt] = to_actual(_table_row_background_alt_color);
-        im_gui_style->Colors[ImGuiCol_TextSelectedBg] = to_actual(_text_selected_background_color);
-        im_gui_style->Colors[ImGuiCol_DragDropTarget] = to_actual(_drag_drop_target_color);
-        im_gui_style->Colors[ImGuiCol_NavHighlight] = to_actual(_nav_highlight_color);
-        im_gui_style->Colors[ImGuiCol_NavWindowingHighlight] = to_actual(_nav_windowing_highlight_color);
-        im_gui_style->Colors[ImGuiCol_NavWindowingDimBg] = to_actual(_nav_windowing_dim_background_color);
-        im_gui_style->Colors[ImGuiCol_ModalWindowDimBg] = to_actual(_modal_window_dim_background_color);
+        im_gui_style->Colors[ImGuiCol_Text] = convert(_text_color);
+        im_gui_style->Colors[ImGuiCol_TextDisabled] = convert(_text_disabled_color);
+        im_gui_style->Colors[ImGuiCol_WindowBg] = convert(_window_background_color);
+        im_gui_style->Colors[ImGuiCol_ChildBg] = convert(_child_background_color);
+        im_gui_style->Colors[ImGuiCol_PopupBg] = convert(_popup_background_color);
+        im_gui_style->Colors[ImGuiCol_Border] = convert(_border_color);
+        im_gui_style->Colors[ImGuiCol_BorderShadow] = convert(_border_shadow_color);
+        im_gui_style->Colors[ImGuiCol_FrameBg] = convert(_frame_background_color);
+        im_gui_style->Colors[ImGuiCol_FrameBgHovered] = convert(_frame_background_hovered_color);
+        im_gui_style->Colors[ImGuiCol_FrameBgActive] = convert(_frame_background_active_color);
+        im_gui_style->Colors[ImGuiCol_TitleBg] = convert(_title_background_color);
+        im_gui_style->Colors[ImGuiCol_TitleBgActive] = convert(_title_background_active_color);
+        im_gui_style->Colors[ImGuiCol_TitleBgCollapsed] = convert(_title_background_collapsed_color);
+        im_gui_style->Colors[ImGuiCol_MenuBarBg] = convert(_menu_bar_background_color);
+        im_gui_style->Colors[ImGuiCol_ScrollbarBg] = convert(_scrollbar_background_color);
+        im_gui_style->Colors[ImGuiCol_ScrollbarGrab] = convert(_scrollbar_grab_color);
+        im_gui_style->Colors[ImGuiCol_ScrollbarGrabHovered] = convert(_scrollbar_grab_hovered_color);
+        im_gui_style->Colors[ImGuiCol_ScrollbarGrabActive] = convert(_scrollbar_grab_active_color);
+        im_gui_style->Colors[ImGuiCol_CheckMark] = convert(_check_mark_color);
+        im_gui_style->Colors[ImGuiCol_SliderGrab] = convert(_slider_grab_color);
+        im_gui_style->Colors[ImGuiCol_SliderGrabActive] = convert(_slider_grab_active_color);
+        im_gui_style->Colors[ImGuiCol_Button] = convert(_button_color);
+        im_gui_style->Colors[ImGuiCol_ButtonHovered] = convert(_button_hovered_color);
+        im_gui_style->Colors[ImGuiCol_ButtonActive] = convert(_button_active_color);
+        im_gui_style->Colors[ImGuiCol_Header] = convert(_header_color);
+        im_gui_style->Colors[ImGuiCol_HeaderHovered] = convert(_header_hovered_color);
+        im_gui_style->Colors[ImGuiCol_HeaderActive] = convert(_header_active_color);
+        im_gui_style->Colors[ImGuiCol_Separator] = convert(_separator_color);
+        im_gui_style->Colors[ImGuiCol_SeparatorHovered] = convert(_separator_hovered_color);
+        im_gui_style->Colors[ImGuiCol_SeparatorActive] = convert(_separator_active_color);
+        im_gui_style->Colors[ImGuiCol_ResizeGrip] = convert(_resize_grip_color);
+        im_gui_style->Colors[ImGuiCol_ResizeGripHovered] = convert(_resize_grip_hovered_color);
+        im_gui_style->Colors[ImGuiCol_ResizeGripActive] = convert(_resize_grip_active_color);
+        im_gui_style->Colors[ImGuiCol_Tab] = convert(_tab_color);
+        im_gui_style->Colors[ImGuiCol_TabHovered] = convert(_tab_hovered_color);
+        im_gui_style->Colors[ImGuiCol_TabActive] = convert(_tab_active_color);
+        im_gui_style->Colors[ImGuiCol_TabUnfocused] = convert(_tab_unfocused_color);
+        im_gui_style->Colors[ImGuiCol_TabUnfocusedActive] = convert(_tab_unfocused_active_color);
+        im_gui_style->Colors[ImGuiCol_TableHeaderBg] = convert(_table_header_background_color);
+        im_gui_style->Colors[ImGuiCol_TableBorderStrong] = convert(_table_border_strong_color);
+        im_gui_style->Colors[ImGuiCol_TableBorderLight] = convert(_table_border_light_color);
+        im_gui_style->Colors[ImGuiCol_TableRowBg] = convert(_table_row_background_color);
+        im_gui_style->Colors[ImGuiCol_TableRowBgAlt] = convert(_table_row_background_alt_color);
+        im_gui_style->Colors[ImGuiCol_TextSelectedBg] = convert(_text_selected_background_color);
+        im_gui_style->Colors[ImGuiCol_DragDropTarget] = convert(_drag_drop_target_color);
+        im_gui_style->Colors[ImGuiCol_NavHighlight] = convert(_nav_highlight_color);
+        im_gui_style->Colors[ImGuiCol_NavWindowingHighlight] = convert(_nav_windowing_highlight_color);
+        im_gui_style->Colors[ImGuiCol_NavWindowingDimBg] = convert(_nav_windowing_dim_background_color);
+        im_gui_style->Colors[ImGuiCol_ModalWindowDimBg] = convert(_modal_window_dim_background_color);
 
         auto im_plot_style = std::make_shared<ImPlotStyle>();
-        im_plot_style->Colors[ImPlotCol_Line] = to_actual(_plot_line_color);
-        im_plot_style->Colors[ImPlotCol_Fill] = to_actual(_plot_fill_color);
-        im_plot_style->Colors[ImPlotCol_MarkerOutline] = to_actual(_plot_marker_outline_color);
-        im_plot_style->Colors[ImPlotCol_MarkerFill] = to_actual(_plot_marker_fill_color);
-        im_plot_style->Colors[ImPlotCol_ErrorBar] = to_actual(_plot_error_bar_color);
-        im_plot_style->Colors[ImPlotCol_FrameBg] = to_actual(_plot_frame_background_color);
-        im_plot_style->Colors[ImPlotCol_PlotBg] = to_actual(_plot_background_color);
-        im_plot_style->Colors[ImPlotCol_PlotBorder] = to_actual(_plot_border_color);
-        im_plot_style->Colors[ImPlotCol_LegendBg] = to_actual(_plot_legend_background_color);
-        im_plot_style->Colors[ImPlotCol_LegendBorder] = to_actual(_plot_legend_border_color);
-        im_plot_style->Colors[ImPlotCol_LegendText] = to_actual(_plot_legend_text_color);
-        im_plot_style->Colors[ImPlotCol_TitleText] = to_actual(_plot_title_text_color);
-        im_plot_style->Colors[ImPlotCol_InlayText] = to_actual(_plot_inlay_text_color);
-        im_plot_style->Colors[ImPlotCol_XAxis] = to_actual(_plot_x_axis_color);
-        im_plot_style->Colors[ImPlotCol_XAxisGrid] = to_actual(_plot_x_axis_grid_color);
-        im_plot_style->Colors[ImPlotCol_YAxis] = to_actual(_plot_y_axis_color);
-        im_plot_style->Colors[ImPlotCol_YAxisGrid] = to_actual(_plot_y_axis_grid_color);
-        im_plot_style->Colors[ImPlotCol_YAxis2] = to_actual(_plot_y_axis2_color);
-        im_plot_style->Colors[ImPlotCol_YAxisGrid2] = to_actual(_plot_y_axis_grid2_color);
-        im_plot_style->Colors[ImPlotCol_YAxis3] = to_actual(_plot_y_axis3_color);
-        im_plot_style->Colors[ImPlotCol_YAxisGrid3] = to_actual(_plot_y_axis_grid3_color);
-        im_plot_style->Colors[ImPlotCol_Selection] = to_actual(_plot_selection_color);
-        im_plot_style->Colors[ImPlotCol_Query] = to_actual(_plot_query_color);
-        im_plot_style->Colors[ImPlotCol_Crosshairs] = to_actual(_plot_crosshairs_color);
+        im_plot_style->Colors[ImPlotCol_Line] = convert(_plot_line_color);
+        im_plot_style->Colors[ImPlotCol_Fill] = convert(_plot_fill_color);
+        im_plot_style->Colors[ImPlotCol_MarkerOutline] = convert(_plot_marker_outline_color);
+        im_plot_style->Colors[ImPlotCol_MarkerFill] = convert(_plot_marker_fill_color);
+        im_plot_style->Colors[ImPlotCol_ErrorBar] = convert(_plot_error_bar_color);
+        im_plot_style->Colors[ImPlotCol_FrameBg] = convert(_plot_frame_background_color);
+        im_plot_style->Colors[ImPlotCol_PlotBg] = convert(_plot_background_color);
+        im_plot_style->Colors[ImPlotCol_PlotBorder] = convert(_plot_border_color);
+        im_plot_style->Colors[ImPlotCol_LegendBg] = convert(_plot_legend_background_color);
+        im_plot_style->Colors[ImPlotCol_LegendBorder] = convert(_plot_legend_border_color);
+        im_plot_style->Colors[ImPlotCol_LegendText] = convert(_plot_legend_text_color);
+        im_plot_style->Colors[ImPlotCol_TitleText] = convert(_plot_title_text_color);
+        im_plot_style->Colors[ImPlotCol_InlayText] = convert(_plot_inlay_text_color);
+        im_plot_style->Colors[ImPlotCol_XAxis] = convert(_plot_x_axis_color);
+        im_plot_style->Colors[ImPlotCol_XAxisGrid] = convert(_plot_x_axis_grid_color);
+        im_plot_style->Colors[ImPlotCol_YAxis] = convert(_plot_y_axis_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid] = convert(_plot_y_axis_grid_color);
+        im_plot_style->Colors[ImPlotCol_YAxis2] = convert(_plot_y_axis2_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid2] = convert(_plot_y_axis_grid2_color);
+        im_plot_style->Colors[ImPlotCol_YAxis3] = convert(_plot_y_axis3_color);
+        im_plot_style->Colors[ImPlotCol_YAxisGrid3] = convert(_plot_y_axis_grid3_color);
+        im_plot_style->Colors[ImPlotCol_Selection] = convert(_plot_selection_color);
+        im_plot_style->Colors[ImPlotCol_Query] = convert(_plot_query_color);
+        im_plot_style->Colors[ImPlotCol_Crosshairs] = convert(_plot_crosshairs_color);
         im_plot_style->LineWeight = 3.0f;
         im_plot_style->AntiAliasedLines = true;
         im_gui_style->AntiAliasedLines = true;
@@ -1290,80 +1246,80 @@ namespace p3
 
     void Theme::assign_colors(ImGuiStyle const& im_gui_style, ImPlotStyle const& im_plot_style)
     {
-        convert_color(_text_color, im_gui_style.Colors[ImGuiCol_Text]);
-        convert_color(_text_disabled_color, im_gui_style.Colors[ImGuiCol_TextDisabled]);
-        convert_color(_window_background_color, im_gui_style.Colors[ImGuiCol_WindowBg]);
-        convert_color(_child_background_color, im_gui_style.Colors[ImGuiCol_ChildBg]);
-        convert_color(_popup_background_color, im_gui_style.Colors[ImGuiCol_PopupBg]);
-        convert_color(_border_color, im_gui_style.Colors[ImGuiCol_Border]);
-        convert_color(_border_shadow_color, im_gui_style.Colors[ImGuiCol_BorderShadow]);
-        convert_color(_frame_background_color, im_gui_style.Colors[ImGuiCol_FrameBg]);
-        convert_color(_frame_background_hovered_color, im_gui_style.Colors[ImGuiCol_FrameBgHovered]);
-        convert_color(_frame_background_active_color, im_gui_style.Colors[ImGuiCol_FrameBgActive]);
-        convert_color(_title_background_color, im_gui_style.Colors[ImGuiCol_TitleBg]);
-        convert_color(_title_background_active_color, im_gui_style.Colors[ImGuiCol_TitleBgActive]);
-        convert_color(_title_background_collapsed_color, im_gui_style.Colors[ImGuiCol_TitleBgCollapsed]);
-        convert_color(_menu_bar_background_color, im_gui_style.Colors[ImGuiCol_MenuBarBg]);
-        convert_color(_scrollbar_background_color, im_gui_style.Colors[ImGuiCol_ScrollbarBg]);
-        convert_color(_scrollbar_grab_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrab]);
-        convert_color(_scrollbar_grab_hovered_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrabHovered]);
-        convert_color(_scrollbar_grab_active_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrabActive]);
-        convert_color(_check_mark_color, im_gui_style.Colors[ImGuiCol_CheckMark]);
-        convert_color(_slider_grab_color, im_gui_style.Colors[ImGuiCol_SliderGrab]);
-        convert_color(_slider_grab_active_color, im_gui_style.Colors[ImGuiCol_SliderGrabActive]);
-        convert_color(_button_color, im_gui_style.Colors[ImGuiCol_Button]);
-        convert_color(_button_hovered_color, im_gui_style.Colors[ImGuiCol_ButtonHovered]);
-        convert_color(_button_active_color, im_gui_style.Colors[ImGuiCol_ButtonActive]);
-        convert_color(_header_color, im_gui_style.Colors[ImGuiCol_Header]);
-        convert_color(_header_hovered_color, im_gui_style.Colors[ImGuiCol_HeaderHovered]);
-        convert_color(_header_active_color, im_gui_style.Colors[ImGuiCol_HeaderActive]);
-        convert_color(_separator_color, im_gui_style.Colors[ImGuiCol_Separator]);
-        convert_color(_separator_hovered_color, im_gui_style.Colors[ImGuiCol_SeparatorHovered]);
-        convert_color(_separator_active_color, im_gui_style.Colors[ImGuiCol_SeparatorActive]);
-        convert_color(_resize_grip_color, im_gui_style.Colors[ImGuiCol_ResizeGrip]);
-        convert_color(_resize_grip_hovered_color, im_gui_style.Colors[ImGuiCol_ResizeGripHovered]);
-        convert_color(_resize_grip_active_color, im_gui_style.Colors[ImGuiCol_ResizeGripActive]);
-        convert_color(_tab_color, im_gui_style.Colors[ImGuiCol_Tab]);
-        convert_color(_tab_hovered_color, im_gui_style.Colors[ImGuiCol_TabHovered]);
-        convert_color(_tab_active_color, im_gui_style.Colors[ImGuiCol_TabActive]);
-        convert_color(_tab_unfocused_color, im_gui_style.Colors[ImGuiCol_TabUnfocused]);
-        convert_color(_tab_unfocused_active_color, im_gui_style.Colors[ImGuiCol_TabUnfocusedActive]);
-        convert_color(_table_header_background_color, im_gui_style.Colors[ImGuiCol_TableHeaderBg]);
-        convert_color(_table_border_strong_color, im_gui_style.Colors[ImGuiCol_TableBorderStrong]);
-        convert_color(_table_border_light_color, im_gui_style.Colors[ImGuiCol_TableBorderLight]);
-        convert_color(_table_row_background_color, im_gui_style.Colors[ImGuiCol_TableRowBg]);
-        convert_color(_table_row_background_alt_color, im_gui_style.Colors[ImGuiCol_TableRowBgAlt]);
-        convert_color(_text_selected_background_color, im_gui_style.Colors[ImGuiCol_TextSelectedBg]);
-        convert_color(_drag_drop_target_color, im_gui_style.Colors[ImGuiCol_DragDropTarget]);
-        convert_color(_nav_highlight_color, im_gui_style.Colors[ImGuiCol_NavHighlight]);
-        convert_color(_nav_windowing_highlight_color, im_gui_style.Colors[ImGuiCol_NavWindowingHighlight]);
-        convert_color(_nav_windowing_dim_background_color, im_gui_style.Colors[ImGuiCol_NavWindowingDimBg]);
-        convert_color(_modal_window_dim_background_color, im_gui_style.Colors[ImGuiCol_ModalWindowDimBg]);
+        convert(_text_color, im_gui_style.Colors[ImGuiCol_Text]);
+        convert(_text_disabled_color, im_gui_style.Colors[ImGuiCol_TextDisabled]);
+        convert(_window_background_color, im_gui_style.Colors[ImGuiCol_WindowBg]);
+        convert(_child_background_color, im_gui_style.Colors[ImGuiCol_ChildBg]);
+        convert(_popup_background_color, im_gui_style.Colors[ImGuiCol_PopupBg]);
+        convert(_border_color, im_gui_style.Colors[ImGuiCol_Border]);
+        convert(_border_shadow_color, im_gui_style.Colors[ImGuiCol_BorderShadow]);
+        convert(_frame_background_color, im_gui_style.Colors[ImGuiCol_FrameBg]);
+        convert(_frame_background_hovered_color, im_gui_style.Colors[ImGuiCol_FrameBgHovered]);
+        convert(_frame_background_active_color, im_gui_style.Colors[ImGuiCol_FrameBgActive]);
+        convert(_title_background_color, im_gui_style.Colors[ImGuiCol_TitleBg]);
+        convert(_title_background_active_color, im_gui_style.Colors[ImGuiCol_TitleBgActive]);
+        convert(_title_background_collapsed_color, im_gui_style.Colors[ImGuiCol_TitleBgCollapsed]);
+        convert(_menu_bar_background_color, im_gui_style.Colors[ImGuiCol_MenuBarBg]);
+        convert(_scrollbar_background_color, im_gui_style.Colors[ImGuiCol_ScrollbarBg]);
+        convert(_scrollbar_grab_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrab]);
+        convert(_scrollbar_grab_hovered_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrabHovered]);
+        convert(_scrollbar_grab_active_color, im_gui_style.Colors[ImGuiCol_ScrollbarGrabActive]);
+        convert(_check_mark_color, im_gui_style.Colors[ImGuiCol_CheckMark]);
+        convert(_slider_grab_color, im_gui_style.Colors[ImGuiCol_SliderGrab]);
+        convert(_slider_grab_active_color, im_gui_style.Colors[ImGuiCol_SliderGrabActive]);
+        convert(_button_color, im_gui_style.Colors[ImGuiCol_Button]);
+        convert(_button_hovered_color, im_gui_style.Colors[ImGuiCol_ButtonHovered]);
+        convert(_button_active_color, im_gui_style.Colors[ImGuiCol_ButtonActive]);
+        convert(_header_color, im_gui_style.Colors[ImGuiCol_Header]);
+        convert(_header_hovered_color, im_gui_style.Colors[ImGuiCol_HeaderHovered]);
+        convert(_header_active_color, im_gui_style.Colors[ImGuiCol_HeaderActive]);
+        convert(_separator_color, im_gui_style.Colors[ImGuiCol_Separator]);
+        convert(_separator_hovered_color, im_gui_style.Colors[ImGuiCol_SeparatorHovered]);
+        convert(_separator_active_color, im_gui_style.Colors[ImGuiCol_SeparatorActive]);
+        convert(_resize_grip_color, im_gui_style.Colors[ImGuiCol_ResizeGrip]);
+        convert(_resize_grip_hovered_color, im_gui_style.Colors[ImGuiCol_ResizeGripHovered]);
+        convert(_resize_grip_active_color, im_gui_style.Colors[ImGuiCol_ResizeGripActive]);
+        convert(_tab_color, im_gui_style.Colors[ImGuiCol_Tab]);
+        convert(_tab_hovered_color, im_gui_style.Colors[ImGuiCol_TabHovered]);
+        convert(_tab_active_color, im_gui_style.Colors[ImGuiCol_TabActive]);
+        convert(_tab_unfocused_color, im_gui_style.Colors[ImGuiCol_TabUnfocused]);
+        convert(_tab_unfocused_active_color, im_gui_style.Colors[ImGuiCol_TabUnfocusedActive]);
+        convert(_table_header_background_color, im_gui_style.Colors[ImGuiCol_TableHeaderBg]);
+        convert(_table_border_strong_color, im_gui_style.Colors[ImGuiCol_TableBorderStrong]);
+        convert(_table_border_light_color, im_gui_style.Colors[ImGuiCol_TableBorderLight]);
+        convert(_table_row_background_color, im_gui_style.Colors[ImGuiCol_TableRowBg]);
+        convert(_table_row_background_alt_color, im_gui_style.Colors[ImGuiCol_TableRowBgAlt]);
+        convert(_text_selected_background_color, im_gui_style.Colors[ImGuiCol_TextSelectedBg]);
+        convert(_drag_drop_target_color, im_gui_style.Colors[ImGuiCol_DragDropTarget]);
+        convert(_nav_highlight_color, im_gui_style.Colors[ImGuiCol_NavHighlight]);
+        convert(_nav_windowing_highlight_color, im_gui_style.Colors[ImGuiCol_NavWindowingHighlight]);
+        convert(_nav_windowing_dim_background_color, im_gui_style.Colors[ImGuiCol_NavWindowingDimBg]);
+        convert(_modal_window_dim_background_color, im_gui_style.Colors[ImGuiCol_ModalWindowDimBg]);
         // implot
-        convert_color(_plot_line_color, im_plot_style.Colors[ImPlotCol_Line]);
-        convert_color(_plot_fill_color, im_plot_style.Colors[ImPlotCol_Fill]);
-        convert_color(_plot_marker_outline_color, im_plot_style.Colors[ImPlotCol_MarkerOutline]);
-        convert_color(_plot_marker_fill_color, im_plot_style.Colors[ImPlotCol_MarkerFill]);
-        convert_color(_plot_error_bar_color, im_plot_style.Colors[ImPlotCol_ErrorBar]);
-        convert_color(_plot_frame_background_color, im_plot_style.Colors[ImPlotCol_FrameBg]);
-        convert_color(_plot_background_color, im_plot_style.Colors[ImPlotCol_PlotBg]);
-        convert_color(_plot_border_color, im_plot_style.Colors[ImPlotCol_PlotBorder]);
-        convert_color(_plot_legend_background_color, im_plot_style.Colors[ImPlotCol_LegendBg]);
-        convert_color(_plot_legend_border_color, im_plot_style.Colors[ImPlotCol_LegendBorder]);
-        convert_color(_plot_legend_text_color, im_plot_style.Colors[ImPlotCol_LegendText]);
-        convert_color(_plot_title_text_color, im_plot_style.Colors[ImPlotCol_TitleText]);
-        convert_color(_plot_inlay_text_color, im_plot_style.Colors[ImPlotCol_InlayText]);
-        convert_color(_plot_x_axis_color, im_plot_style.Colors[ImPlotCol_XAxis]);
-        convert_color(_plot_x_axis_grid_color, im_plot_style.Colors[ImPlotCol_XAxisGrid]);
-        convert_color(_plot_y_axis_color, im_plot_style.Colors[ImPlotCol_YAxis]);
-        convert_color(_plot_y_axis_grid_color, im_plot_style.Colors[ImPlotCol_YAxisGrid]);
-        convert_color(_plot_y_axis2_color, im_plot_style.Colors[ImPlotCol_YAxis2]);
-        convert_color(_plot_y_axis_grid2_color, im_plot_style.Colors[ImPlotCol_YAxisGrid2]);
-        convert_color(_plot_y_axis3_color, im_plot_style.Colors[ImPlotCol_YAxis3]);
-        convert_color(_plot_y_axis_grid3_color, im_plot_style.Colors[ImPlotCol_YAxisGrid3]);
-        convert_color(_plot_selection_color, im_plot_style.Colors[ImPlotCol_Selection]);
-        convert_color(_plot_query_color, im_plot_style.Colors[ImPlotCol_Query]);
-        convert_color(_plot_crosshairs_color, im_plot_style.Colors[ImPlotCol_Crosshairs]);
+        convert(_plot_line_color, im_plot_style.Colors[ImPlotCol_Line]);
+        convert(_plot_fill_color, im_plot_style.Colors[ImPlotCol_Fill]);
+        convert(_plot_marker_outline_color, im_plot_style.Colors[ImPlotCol_MarkerOutline]);
+        convert(_plot_marker_fill_color, im_plot_style.Colors[ImPlotCol_MarkerFill]);
+        convert(_plot_error_bar_color, im_plot_style.Colors[ImPlotCol_ErrorBar]);
+        convert(_plot_frame_background_color, im_plot_style.Colors[ImPlotCol_FrameBg]);
+        convert(_plot_background_color, im_plot_style.Colors[ImPlotCol_PlotBg]);
+        convert(_plot_border_color, im_plot_style.Colors[ImPlotCol_PlotBorder]);
+        convert(_plot_legend_background_color, im_plot_style.Colors[ImPlotCol_LegendBg]);
+        convert(_plot_legend_border_color, im_plot_style.Colors[ImPlotCol_LegendBorder]);
+        convert(_plot_legend_text_color, im_plot_style.Colors[ImPlotCol_LegendText]);
+        convert(_plot_title_text_color, im_plot_style.Colors[ImPlotCol_TitleText]);
+        convert(_plot_inlay_text_color, im_plot_style.Colors[ImPlotCol_InlayText]);
+        convert(_plot_x_axis_color, im_plot_style.Colors[ImPlotCol_XAxis]);
+        convert(_plot_x_axis_grid_color, im_plot_style.Colors[ImPlotCol_XAxisGrid]);
+        convert(_plot_y_axis_color, im_plot_style.Colors[ImPlotCol_YAxis]);
+        convert(_plot_y_axis_grid_color, im_plot_style.Colors[ImPlotCol_YAxisGrid]);
+        convert(_plot_y_axis2_color, im_plot_style.Colors[ImPlotCol_YAxis2]);
+        convert(_plot_y_axis_grid2_color, im_plot_style.Colors[ImPlotCol_YAxisGrid2]);
+        convert(_plot_y_axis3_color, im_plot_style.Colors[ImPlotCol_YAxis3]);
+        convert(_plot_y_axis_grid3_color, im_plot_style.Colors[ImPlotCol_YAxisGrid3]);
+        convert(_plot_selection_color, im_plot_style.Colors[ImPlotCol_Selection]);
+        convert(_plot_query_color, im_plot_style.Colors[ImPlotCol_Query]);
+        convert(_plot_crosshairs_color, im_plot_style.Colors[ImPlotCol_Crosshairs]);
     }
 
     void Theme::make_light()

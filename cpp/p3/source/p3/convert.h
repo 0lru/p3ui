@@ -22,24 +22,10 @@
 #include "Color.h"
 
 #include <imgui.h>
+#include <implot.h>
 
 namespace p3
 {
-
-        inline void convert(ImVec4 &im, Color const& oo)
-        {
-            im.x = std::round(oo.red() / 255.f);
-            im.y = std::round(oo.green() / 255.f);
-            im.z = std::round(oo.blue() / 255.f);
-            im.w = std::round(oo.alpha() / 255.f);
-        }
-
-        inline ImVec4 convert(Color const& oo)
-        {
-            ImVec4 im;
-            convert(im, oo);
-            return im;
-        }
 
         inline bool operator==(ImVec4 const& v1, ImVec4 const& v2)
         {
@@ -61,5 +47,58 @@ namespace p3
             return !(v1 == v2);
         }
 
+        inline void convert(ImVec4 &im, Color const& color)
+        {
+            im.x = color.red() / 255.f;
+            im.y = color.green() / 255.f;
+            im.z = color.blue() / 255.f;
+            im.w = color.alpha() / 255.f;
+        }
+
+        inline void convert(Color& color, ImVec4 const& src)
+        {
+            color = Color(
+                std::uint8_t(src.x * 255.f),
+                std::uint8_t(src.y * 255.f),
+                std::uint8_t(src.z * 255.f),
+                std::uint8_t(src.w * 255.f)
+            );
+        }
+
+        inline ImVec4 convert(Color const& color)
+        {
+            return ImVec4(
+                color.red() / 255.f,
+                color.green() / 255.f,
+                color.blue() / 255.f,
+                color.alpha() / 255.f
+            );
+        }
+
+        inline void convert(std::optional<Color>& color, ImVec4 const& src)
+        {
+            if (src == IMPLOT_AUTO_COL)
+                color = std::nullopt;
+            else
+                color = Color(
+                    std::uint8_t(src.x * 255.f),
+                    std::uint8_t(src.y * 255.f),
+                    std::uint8_t(src.z * 255.f),
+                    std::uint8_t(src.w * 255.f)
+                );
+        }
+
+        inline ImVec4 convert(std::optional<Color> const& color)
+        {
+            if (color)
+                return ImVec4(
+                    color.value().red() / 255.f,
+                    color.value().green() / 255.f,
+                    color.value().blue() / 255.f,
+                    color.value().alpha() / 255.f
+                );
+            else
+                return IMPLOT_AUTO_COL;
+        }
 
 }

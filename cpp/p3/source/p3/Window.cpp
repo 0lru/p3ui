@@ -193,7 +193,6 @@ namespace p3
         }
         if (mouse_move)
             _idle_timer.reset();
-        Context context(*_user_interface, *_render_backend, std::move(mouse_move));
 
         if (_idle_timeout)
         {
@@ -203,13 +202,18 @@ namespace p3
                 return;
             }
         }
-
-        _frame_timer.reset();
         auto framebuffer_size = this->framebuffer_size();
-        _render_backend->new_frame();
-        ImGui_ImplGlfw_NewFrame();
-        if (_user_interface)
-            _user_interface->render(context, float(framebuffer_size.width), float(framebuffer_size.height));
+        _frame_timer.reset();
+        {
+            Context context(*_user_interface, *_render_backend, std::move(mouse_move));
+            // ?
+            // GImGui->IO.DeltaTime += std::chrono::duration<double>(_frame_timer.time()).count();
+
+            _render_backend->new_frame();
+            ImGui_ImplGlfw_NewFrame();
+            if (_user_interface)
+                _user_interface->render(context, float(framebuffer_size.width), float(framebuffer_size.height));
+        }
         glViewport(0, 0, framebuffer_size.width, framebuffer_size.height);
         _render_backend->render(*_user_interface);
         glfwSwapBuffers(_glfw_window.get());
