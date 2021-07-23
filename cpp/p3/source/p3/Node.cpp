@@ -157,6 +157,9 @@ namespace p3
         if (_style)
             combined.merge(*_style);
         _style_computation.color = cascade(*this, combined.color, &StyleComputation::color, context.theme().text_color());
+        static Length const bw = 1 | px;
+        _style_computation.border_width = cascade(*this, combined.border_width, &StyleComputation::border_width, bw);
+        _style_computation.border_radius = cascade(*this, combined.border_radius, &StyleComputation::border_radius, bw);
         _style_computation.padding = cascade(*this, combined.padding, &StyleComputation::padding, context.theme().frame_padding());
         _style_computation.spacing = cascade(*this, combined.spacing, &StyleComputation::spacing, context.theme().item_spacing());
         //

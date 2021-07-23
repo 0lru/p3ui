@@ -35,6 +35,8 @@ namespace p3::python
         py::class_<StyleBlock, std::shared_ptr<StyleBlock>> style(module, "Style");
         style.def(py::init<>([](
             std::optional<Color> color,
+            std::optional<Length> border_width,
+            std::optional<Length> border_radius,
             std::optional<Length2> spacing,
             std::optional<Length2> padding,
             std::optional<LengthPercentage> x,
@@ -50,6 +52,9 @@ namespace p3::python
             style->set_color(std::move(color));
             style->set_spacing(std::move(spacing));
             style->set_padding(std::move(padding));
+            style->set_border_width(std::move(border_width));
+            style->set_border_radius(std::move(border_radius));
+            style->set_spacing(std::move(spacing));
             style->set_x(std::move(x));
             style->set_y(std::move(y));
             style->set_width(std::move(width));
@@ -60,6 +65,8 @@ namespace p3::python
             style->set_justify_content(std::move(justify_content));
             return style;
         }), py::arg("color") = std::nullopt,
+            py::arg("border_width") = std::nullopt,
+            py::arg("border_radius") = std::nullopt,
             py::arg("spacing") = std::nullopt,
             py::arg("padding") = std::nullopt,
             py::arg("x") = std::nullopt,
