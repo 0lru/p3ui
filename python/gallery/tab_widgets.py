@@ -73,7 +73,6 @@ class TabWidgets(ScrollArea):
                             on_mouse_enter=lambda e: print('mouse entered image'),
                             on_mouse_move=lambda e: print(f'{e.source} {e.x} {e.y}'),
                             on_mouse_leave=lambda e: print('mouse left image'),
-                            mouse_tracking_enabled=True
                         )
                     ),
                     SliderU8(

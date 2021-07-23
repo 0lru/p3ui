@@ -105,9 +105,8 @@ namespace p3
         auto const status_flag = window->DC.LastItemStatusFlags;
         if (status_flag == _status_flag)
         {
-            if (_mouse.hovered && _mouse.tracking_enabled && Context::current().mouse_move())
-                if (_mouse.move)
-                    _mouse.move(MouseEvent(this));
+            if (_mouse.hovered && _mouse.move && Context::current().mouse_move())
+                _mouse.move(MouseEvent(this));
             return;
         }
         if (status_flag & ImGuiItemStatusFlags_HoveredRect)
@@ -150,7 +149,7 @@ namespace p3
         }
     }
 
-    void Node::_perform_style_cascade(Context& context)
+    void Node::_cascade_styles_from_parent(Context& context)
     {
         StyleDerivation combined;
         StyleBlock style;
@@ -182,6 +181,8 @@ namespace p3
     void Node::_compile_style_computation(Context& context)
     {
         _style_compiled.clear();
+        //
+        // check if computed color changes the render state
         ImVec4 color;
         assign(color, _style_computation.color);
         if (color != GImGui->Style.Colors[ImGuiCol_Text])
@@ -191,10 +192,14 @@ namespace p3
                 std::swap(color, GImGui->Style.Colors[ImGuiCol_Text]);
             });
         }
+        //
+        // check if spacing 
         ImVec2 spacing(
             context.to_actual(_style_computation.spacing[0]),
             context.to_actual(_style_computation.spacing[1])
         );
+        //
+        // spacing.. between buttons (inside a flex etc.)
         if (spacing != GImGui->Style.ItemSpacing)
         {
             log_verbose("-style- <{}>\"{}\" changes spacing to ({}, {})", _element_name, label() ? label().value() : "", spacing.x, spacing.y);
@@ -202,6 +207,9 @@ namespace p3
                 std::swap(spacing, GImGui->Style.ItemSpacing);
             });
         }
+        //
+        // padding (between border and content). note that
+        // this doesn't work for "Windows"
         ImVec2 padding(
             context.to_actual(_style_computation.padding[0]),
             context.to_actual(_style_computation.padding[1])
@@ -227,13 +235,14 @@ namespace p3
         _needs_restyle = _needs_restyle || force;
         _needs_update = _needs_update || force;
         
+        //
+        // no change in this subtree, abort
         if (!_needs_update)
-        {
             return;
-        }
-        else if (_needs_restyle)
+        
+        if (_needs_restyle)
         {
-            _perform_style_cascade(context);
+            _cascade_styles_from_parent(context);
             //
             // at this point the anchestor-style is still applied
             _compile_style_computation(context);
@@ -370,16 +379,6 @@ namespace p3
     bool Node::disabled() const
     {
         return _disabled;
-    }
-
-    void Node::set_mouse_tracking_enabled(bool mouse_tracking_enabled)
-    {
-        _mouse.tracking_enabled = mouse_tracking_enabled;
-    }
-
-    bool Node::mouse_tracking_enabled() const
-    {
-        return _mouse.tracking_enabled;
     }
 
     void Node::set_on_mouse_enter(MouseEventHandler handler)

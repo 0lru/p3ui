@@ -108,8 +108,6 @@ namespace p3
         
         class MouseEvent;
         using MouseEventHandler = std::function<void(MouseEvent)>;
-        void set_mouse_tracking_enabled(bool);
-        bool mouse_tracking_enabled() const;
 
         void set_on_mouse_enter(MouseEventHandler handler);
         MouseEventHandler on_mouse_enter() const;
@@ -176,8 +174,12 @@ namespace p3
             MouseEventHandler move;
         } _mouse;
 
+        //
+        // Note: alignment is optimizable.
+        // this requires some work. at the moment it's 
+        // "recompute everything on every single frame"..
         // 
-        // styling... no KISS :-/
+        // bool _needs_realign = true;
         bool _needs_update = true;
         bool _needs_restyle = true;
         void on_style_changed();
@@ -186,7 +188,7 @@ namespace p3
         StyleComputation _style_computation;
         std::vector<std::function<void()>> _style_compiled;
         
-        void _perform_style_cascade(Context&);
+        void _cascade_styles_from_parent(Context&);
         void _compile_style_computation(Context&);
     };
 
