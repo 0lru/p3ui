@@ -28,6 +28,7 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <cstdint>
 
 namespace p3
 {
@@ -37,8 +38,18 @@ namespace p3
     class Texture
     {
     public:
+        class Observer
+        {
+        public:
+            virtual ~Observer() = default;
+            virtual void on_texture_resized() = 0;
+        };
+
         Texture(std::size_t width, std::size_t height);
         ~Texture();
+
+        void add_observer(Observer&);
+        void remove_observer(Observer&);
 
         void resize(std::size_t width, std::size_t height);
 
@@ -49,16 +60,17 @@ namespace p3
 
         bool empty() const;
 
-        bool dirty() const;
-        void set_dirty();
+        // request update of the hardware memory
+        void update();
 
         TextureId use(Context&);
 
     private:
+        std::vector<Observer *> _observer;
         std::size_t _width;
         std::size_t _height;
         std::unique_ptr<std::uint8_t[]> _data;
-        bool _dirty = true;
+        bool _updated = true;
         std::optional<TextureId> _texture_id = std::nullopt;
         std::optional<OnScopeExit> _on_exit = std::nullopt;
     };

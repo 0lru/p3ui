@@ -42,14 +42,19 @@ namespace p3
         return _width * _height == 0;
     }
 
-    bool Texture::dirty() const
+    void Texture::update()
     {
-        return _dirty;
+        _updated = true;
     }
 
-    void Texture::set_dirty()
+    void Texture::add_observer(Observer& observer)
     {
-        _dirty = true;
+        _observer.push_back(&observer);
+    }
+
+    void Texture::remove_observer(Observer& observer)
+    {
+        std::erase(_observer, &observer);
     }
 
     TextureId Texture::use(Context& context)
@@ -62,16 +67,18 @@ namespace p3
                 backend->delete_texture(texture_id);
             });
         }
-        if (_dirty)
+        if (_updated)
         {
             context.render_backend().update_texture(_texture_id.value(), _width, _height, _data.get());
-            _dirty = false;
+            _updated = false;
         }
         return _texture_id.value();
     }
 
     void Texture::resize(std::size_t width, std::size_t height)
     {
+        if (_width == width && _height == height)
+            return;
         _width = width;
         _height = height;
         auto pixels = _width * _height;
@@ -79,6 +86,8 @@ namespace p3
             _data = std::make_unique<std::uint8_t[]>(pixels * 4);
         else
             _data.reset();
+        for (auto observer : _observer)
+            observer->on_texture_resized();
     }
 
     std::size_t Texture::width() const

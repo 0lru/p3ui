@@ -31,12 +31,15 @@
 namespace p3
 {
 
-    class Image : public Node
+    class Image 
+        : public Node
+        , public Texture::Observer
     {
     public:
         using Callback = std::function<void()>;
 
         Image();
+        ~Image();
 
         StyleStrategy& style_strategy() const override;
         void render_impl(Context&, float width, float height) override;
@@ -48,8 +51,10 @@ namespace p3
         void set_scale(double);
         double scale() const;
 
+        void on_texture_resized() override;
+
     private:
-        std::shared_ptr<Texture> _texture;
+        std::shared_ptr<Texture> _texture = nullptr;
         double _scale = 1.;
     };
 

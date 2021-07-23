@@ -32,6 +32,8 @@ namespace p3
 
     namespace
     {
+        //
+        // an image does not grow/shrink per default
         class LocalStyleStrategy : public StyleStrategy
         {
         public:
@@ -59,6 +61,12 @@ namespace p3
     {
     }
 
+    Image::~Image()
+    {
+        if (_texture)
+            _texture->remove_observer(*this);
+    }
+
     void Image::render_impl(Context& context, float width, float height)
     {
         if (!_texture)
@@ -71,13 +79,18 @@ namespace p3
 
     void Image::update_content()
     {
-        _automatic_height = _texture ? _texture->height() * float(_scale) : 0.f;
-        _automatic_width = _texture ? _texture->width() * float(_scale) : 0.f;
+        _automatic_height = _texture ? float(_texture->height() * _scale) : 0.f;
+        _automatic_width = _texture ? float(_texture->width() * _scale) : 0.f;
     }
 
     void Image::set_texture(std::shared_ptr<Texture> texture)
     {
+        if (_texture)
+            _texture->remove_observer(*this);
         _texture = std::move(texture);
+        if (_texture)
+            _texture->add_observer(*this);
+        set_needs_update();
     }
 
     std::shared_ptr<Texture> Image::texture() const
@@ -94,6 +107,11 @@ namespace p3
     double Image::scale() const
     {
         return _scale;
+    }
+
+    void Image::on_texture_resized()
+    {
+        Node::set_needs_update();
     }
 
 }
