@@ -112,7 +112,7 @@ namespace p3::python
             return e.source()->shared_from_this();
         })
             .def_property_readonly("x", &Node::MouseEvent::x)
-            .def_property_readonly("y", &Node::MouseEvent::x)
+            .def_property_readonly("y", &Node::MouseEvent::y)
             .def_property_readonly("global_x", &Node::MouseEvent::global_x)
             .def_property_readonly("global_y", &Node::MouseEvent::global_y);
 
