@@ -57,8 +57,6 @@ namespace p3::python
             node.style()->set_justify_content(kwargs["justify_content"].cast<Justification>());
         if (kwargs.contains("visible"))
             node.set_visible(kwargs["visible"].cast<bool>());
-        if (kwargs.contains("mouse_tracking_enabled"))
-            node.set_mouse_tracking_enabled(kwargs["mouse_tracking_enabled"].cast<bool>());
         if (kwargs.contains("on_mouse_enter"))
             node.set_on_mouse_enter([f{ kwargs["on_mouse_enter"].cast<py::function>() }](Node::MouseEvent e) {
             py::gil_scoped_acquire acquire;
