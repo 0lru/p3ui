@@ -20,6 +20,7 @@ namespace p3
         , _im_plot_context(ImPlot::CreateContext(), &ImPlot::DestroyContext)
     {
         set_theme(Theme::make_default());
+        _im_gui_context->IO.IniFilename = nullptr;
     }
 
     UserInterface::~UserInterface()
