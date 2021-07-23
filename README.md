@@ -1,6 +1,6 @@
 # C++, Python User Interface Library
 
-This project aims at fast prototyping and data visualization for applications written in C++ as well as in Python.
+This project aims at fast prototyping and development of performant applications in C++ or Python.
 
 #  Example
 
