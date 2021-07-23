@@ -45,8 +45,12 @@ namespace p3
         void set_texture(std::shared_ptr<Texture>);
         std::shared_ptr<Texture> texture() const;
 
+        void set_scale(double);
+        double scale() const;
+
     private:
         std::shared_ptr<Texture> _texture;
+        double _scale = 1.;
     };
 
 }

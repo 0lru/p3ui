@@ -37,12 +37,12 @@ namespace p3
         public:
             FlexibleLength const& initial_width() override
             {
-                static auto initial = FlexibleLength{std::nullopt, 0.f, 0.f};
+                static auto initial = FlexibleLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
             FlexibleLength const& initial_height() override
             {
-                static auto initial = FlexibleLength{std::nullopt, 0.f, 0.f};
+                static auto initial = FlexibleLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
         };
@@ -71,8 +71,8 @@ namespace p3
 
     void Image::update_content()
     {
-        _automatic_height = _texture ? _texture->height() : 0.f;
-        _automatic_width = _texture ? _texture->width() : 0.f;
+        _automatic_height = _texture ? _texture->height() * float(_scale) : 0.f;
+        _automatic_width = _texture ? _texture->width() * float(_scale) : 0.f;
     }
 
     void Image::set_texture(std::shared_ptr<Texture> texture)
@@ -83,6 +83,17 @@ namespace p3
     std::shared_ptr<Texture> Image::texture() const
     {
         return _texture;
+    }
+
+    void Image::set_scale(double scale)
+    {
+        _scale = scale;
+        set_needs_update();
+    }
+
+    double Image::scale() const
+    {
+        return _scale;
     }
 
 }

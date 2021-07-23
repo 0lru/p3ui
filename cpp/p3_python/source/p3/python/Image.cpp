@@ -45,6 +45,8 @@ namespace p3::python
         }));
 
         image.def_property("texture", &Image::texture, &Image::set_texture);
+        image.def("set_dirty", &Image::set_needs_update);
+        image.def_property("scale", &Image::scale, &Image::set_scale);
     }
 
 }
