@@ -20,6 +20,7 @@
   SOFTWARE.
 /******************************************************************************/
 
+#include "constant.h"
 #include "ChildWindow.h"
 
 #include <imgui.h>
@@ -30,9 +31,8 @@
 namespace p3
 {
 
-    ChildWindow::ChildWindow(std::string title)
+    ChildWindow::ChildWindow()
         : Node("ChildWindow")
-        , _title(std::move(title))
     {
     }
 
@@ -41,16 +41,15 @@ namespace p3
         ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
         bool open;
-        if (!_movable)
+        if (!_moveable)
             flags |= ImGuiWindowFlags_NoMove;
         if (!_resizeable)
-        {
             flags |= ImGuiWindowFlags_NoResize;
+        else
             conditions |= ImGuiCond_Appearing;
-        }        
         ImVec2 size(width, height);
-        ImGui::SetNextWindowSize(size, 0);
-        ImGui::Begin(_title.c_str(), &open, flags);
+        ImGui::SetNextWindowSize(size, conditions);
+        ImGui::Begin(imgui_label().c_str(), &open, flags);
         auto const& style = ImGui::GetStyle();
         auto avail = ImGui::GetContentRegionAvail();
         if (_content)
@@ -73,27 +72,43 @@ namespace p3
         return _content;
     }
 
-    void ChildWindow::set_title(std::string title)
-    {
-        _title = std::move(title);
-    }
-
-    std::string const& ChildWindow::title() const
-    {
-        return _title;
-    }
-
     void ChildWindow::update_content()
     {
-        _automatic_width = 1.f;
-        _automatic_height = 1.f;
+        auto const context_ptr = ImGui::GetCurrentContext();
+        auto const font_size = context_ptr->FontSize;
+        auto const frame_padding = context_ptr->Style.FramePadding;
+        _automatic_height = _automatic_height = DefaultItemWidthEm * font_size;
         if (_content)
         {
-            _content->update_content();
-            // TODO: add title height, spacing
-            _automatic_height = _content->automatic_height();
-            _automatic_width = _content->automatic_width();
+            _automatic_height =
+                _content->automatic_height()
+                + font_size
+                + 2 * frame_padding.y
+                + GImGui->Style.ItemInnerSpacing.y
+                + GImGui->Style.WindowPadding.y * 2;
+            _automatic_width = _content->automatic_width()
+                + GImGui->Style.WindowPadding.x * 2;
         }
+    }
+
+    void ChildWindow::set_moveable(bool moveable)
+    {
+        _moveable = moveable;
+    }
+
+    bool ChildWindow::moveable() const
+    {
+        return _moveable;
+    }
+
+    void ChildWindow::set_resizeable(bool resizeable)
+    {
+        _resizeable = resizeable;
+    }
+
+    bool ChildWindow::resizeable() const
+    {
+        return _resizeable;
     }
 
 }

@@ -33,12 +33,9 @@ namespace p3
     class ChildWindow : public Node
     {
     public:
-        ChildWindow(std::string title);
+        ChildWindow();
 
         void render_impl(Context&, float width, float height) override;
-
-        void set_title(std::string);
-        std::string const& title() const;
 
         void set_content(std::shared_ptr<Node>);
         std::shared_ptr<Node> content() const;
@@ -52,10 +49,9 @@ namespace p3
         bool resizeable() const;
 
     private:
-        std::string _title;
         std::shared_ptr<Node> _content;
         bool _collapsed;
-        bool _movable=true;
+        bool _moveable=true;
         bool _resizeable=false;
     };
 
