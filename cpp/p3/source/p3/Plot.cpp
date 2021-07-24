@@ -21,6 +21,7 @@
 /******************************************************************************/
 
 #include "Plot.h"
+#include "convert.h"
 
 #include <iostream>
 
@@ -126,8 +127,11 @@ namespace p3
             y_flags))
         {
             for (auto& item : _items)
+            {
                 item->render();
-
+                //for (auto& annotation : item->annotations())
+                //    annotation->render_item_annotation();
+            }
             ImPlot::EndPlot();
         }
     }
@@ -222,6 +226,89 @@ namespace p3
     std::optional<Plot::TickLabels> const& Plot::Axis::tick_labels() const
     {
         return _tick_labels;
+    }
+
+    void Plot::Annotation::render()
+    {
+        if (clamped)
+            if (_fill_color == IMPLOT_AUTO_COL)
+                ImPlot::AnnotateClamped(x, y, offset, text.c_str());
+            else
+                ImPlot::AnnotateClamped(x, y, offset, _fill_color, text.c_str());
+        else
+            if (_fill_color == IMPLOT_AUTO_COL)
+                ImPlot::Annotate(x, y, offset, text.c_str());
+            else
+                ImPlot::Annotate(x, y, offset, _fill_color, text.c_str());
+    }
+
+    void Plot::Annotation::render_item_annotation()
+    {
+        if (clamped)
+        {
+            if(_fill_color == IMPLOT_AUTO_COL)
+            {
+                ImVec4 c = ImPlot::GetLastItemColor();
+                ImPlot::AnnotateClamped(x, y, offset, c, text.c_str());
+            }
+            else
+            {
+                ImPlot::AnnotateClamped(x, y, offset, _fill_color, text.c_str());
+            }
+        }
+        else
+        {
+            if(_fill_color == IMPLOT_AUTO_COL)
+            {
+                ImVec4 c = ImPlot::GetLastItemColor();
+                ImPlot::Annotate(x, y, offset, c, text.c_str());
+            }
+            else
+            {
+                ImPlot::Annotate(x, y, offset, _fill_color, text.c_str());
+            }
+        }
+    }
+
+    std::optional<Color> Plot::Item::line_color() const
+    {
+        return convert(_line_color);
+    }
+
+    void Plot::Item::set_line_color(std::optional<Color> line_color)
+    {
+        _line_color = convert(line_color);
+    }
+
+    std::optional<Color> Plot::Item::fill_color() const
+    {
+        return convert(_fill_color);
+    }
+
+    void Plot::Item::set_fill_color(std::optional<Color> fill_color)
+    {
+        _fill_color = convert(fill_color);
+    }
+
+    void Plot::AnnotatedItem::add(std::shared_ptr<Annotation> annotation)
+    {
+        if(annotation)
+            _annotations.push_back(std::move(annotation));
+    }
+
+    void Plot::AnnotatedItem::remove(std::shared_ptr<Annotation> annotation)
+    {
+        std::erase(_annotations, annotation);
+    }
+
+    std::vector<std::shared_ptr<Plot::Annotation>> const& Plot::AnnotatedItem::annotations() const
+    {
+        return _annotations;
+    }
+
+    void Plot::AnnotatedItem::set_annotations(std::vector<std::shared_ptr<Annotation>> annotations)
+    {
+        _annotations = std::move(annotations);
     }
 
 }

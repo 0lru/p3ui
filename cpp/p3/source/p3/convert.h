@@ -65,6 +65,18 @@ namespace p3
         );
     }
 
+    inline void assign(ImVec4& v, std::optional<Color> const& color)
+    {
+        v = color
+            ? ImVec4(
+                color.value().red() / 255.f,
+                color.value().green() / 255.f,
+                color.value().blue() / 255.f,
+                color.value().alpha() / 255.f
+            )
+            : IMPLOT_AUTO_COL;
+    }
+
     inline void assign(std::optional<Color>& color, ImVec4 const& src)
     {
         if (src == IMPLOT_AUTO_COL)
@@ -78,16 +90,26 @@ namespace p3
             );
     }
 
-    inline void assign(ImVec4& v, std::optional<Color> const& color)
+    inline std::optional<Color> convert(ImVec4 const& v)
     {
-        v = color
-            ? ImVec4(
-                color.value().red() / 255.f,
-                color.value().green() / 255.f,
-                color.value().blue() / 255.f,
-                color.value().alpha() / 255.f
-            )
-            : IMPLOT_AUTO_COL;
+        if (v == IMPLOT_AUTO_COL)
+            return std::nullopt;
+        Color color;
+        assign(color, v);
+        return color;
     }
+
+    inline ImVec4 convert(Color const& color)
+    {
+        ImVec4 v;
+        assign(v, color);
+        return v;
+    }
+
+    inline ImVec4 convert(std::optional<Color> const& color)
+    {
+        return color ? convert(color.value()) : IMPLOT_AUTO_COL;
+    }
+
 
 }

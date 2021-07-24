@@ -22,14 +22,17 @@
 
 #pragma once
 
+#include "Node.h"
+#include "Color.h"
+
+#include <implot.h>
+
 #include <string>
 #include <functional>
 #include <optional>
 #include <variant>
 
-#include "Node.h"
 
-#include <implot.h>
 
 namespace p3
 {
@@ -53,6 +56,7 @@ namespace p3
     {
     public:
         class Axis;
+        class Annotation;
 
         using Ticks = std::vector<double>;
         using TickLabels = std::vector<std::string>;
@@ -62,10 +66,45 @@ namespace p3
         public:
             virtual ~Item() = default;
             virtual void render() = 0;
+
+            std::optional<Color> line_color() const;
+            void set_line_color(std::optional<Color>);
+
+            std::optional<Color> fill_color() const;
+            void set_fill_color(std::optional<Color>);
+
+        protected:
+            ImVec4 _line_color;
+            ImVec4 _fill_color;
+        };
+
+        class AnnotatedItem : public Item
+        {
+        public:
+            void add(std::shared_ptr<Annotation>);
+            void remove(std::shared_ptr<Annotation>);
+
+            std::vector<std::shared_ptr<Annotation>> const& annotations() const;
+            void set_annotations(std::vector<std::shared_ptr<Annotation>>);
+
+        private:
+            std::vector<std::shared_ptr<Annotation>> _annotations;
+        };
+
+        class Annotation : public Item
+        {
+        public:
+            std::string text;
+            double x;
+            double y;
+            ImVec2 offset{ 0.f, 0.f };
+            bool clamped = false;
+            void render() override;
+            void render_item_annotation();
         };
 
         template<typename T>
-        class BarSeries : public Item
+        class BarSeries : public AnnotatedItem
         {
         public:
             std::string name;
@@ -76,7 +115,7 @@ namespace p3
         };
 
         template<typename T>
-        class LineSeries : public Item
+        class LineSeries : public AnnotatedItem
         {
         public:
             std::string name;
@@ -87,7 +126,7 @@ namespace p3
         };
 
         template<typename T>
-        class StemSeries : public Item
+        class StemSeries : public AnnotatedItem
         {
         public:
             std::string name;
@@ -98,7 +137,7 @@ namespace p3
         };
 
         template<typename T>
-        class ScatterSeries : public Item
+        class ScatterSeries : public AnnotatedItem
         {
         public:
             std::string name;
@@ -109,22 +148,20 @@ namespace p3
         };
 
         template<typename T>
-        class HorizontalLines : public Item
+        class HorizontalLines : public AnnotatedItem
         {
         public:
             std::string name;
             std::vector<T> data;
-            // TODO: std::optional<Color> color;
             void render() override;
         };
 
         template<typename T>
-        class VerticalLines : public Item
+        class VerticalLines : public AnnotatedItem
         {
         public:
             std::string name;
             std::vector<T> data;
-            // TODO: std::optional<Color> color;
             void render() override;
         };
 
@@ -192,6 +229,8 @@ namespace p3
     {
         auto sample_count = values.size();
         ImPlot::PlotBars(name.c_str(), values.data(), int(values.size()), width, shift);
+        for (auto& annotation : annotations())
+            annotation->render_item_annotation();
     }
 
     template<typename T>
@@ -199,6 +238,8 @@ namespace p3
     {
         auto sample_count = std::min(x.size(), y.size());
         ImPlot::PlotLine(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
+        for (auto& annotation : annotations())
+            annotation->render_item_annotation();
     }
 
     template<typename T>
@@ -207,6 +248,8 @@ namespace p3
         auto count = int(std::min(x.size(), y.size()));
         ImPlot::SetNextMarkerStyle(static_cast<ImPlotMarker>(marker_style));
         ImPlot::PlotScatter(name.c_str(), x.data(), y.data(), count);
+        for (auto& annotation : annotations())
+            annotation->render_item_annotation();
     }
 
     template<typename T>
@@ -214,6 +257,8 @@ namespace p3
     {
         auto sample_count = std::min(x.size(), y.size());
         ImPlot::PlotStems(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
+        for (auto& annotation : annotations())
+            annotation->render_item_annotation();
     }
 
     template<typename T>

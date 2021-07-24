@@ -24,6 +24,7 @@
 #include <p3/Plot.h>
 #include <p3/DataSuffix.h>
 
+PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<p3::Plot::Annotation>>);
 
 namespace p3::python
 {
@@ -112,7 +113,7 @@ namespace p3::python
         {
             auto class_name = "BarSeries" + DataSuffix<T>;
             py::class_<Plot::BarSeries<T>, 
-                Plot::Item, 
+                Plot::AnnotatedItem, 
                 std::shared_ptr<Plot::BarSeries<T>>>(class_, class_name.c_str())
                 .def(py::init<>([](std::string name, py::kwargs kwargs) {
                     auto series = std::make_shared<Plot::BarSeries<T>>();
@@ -145,7 +146,7 @@ namespace p3::python
             auto class_name = "LineSeries" + DataSuffix<T>;
             py::class_<
                 Plot::LineSeries<T>, 
-                Plot::Item, 
+                Plot::AnnotatedItem, 
                 std::shared_ptr<Plot::LineSeries<T>>>(class_, class_name.c_str())
                 .def(py::init<>([](std::string name, py::kwargs kwargs) {
                     auto series = std::make_shared<Plot::LineSeries<T>>();
@@ -178,7 +179,7 @@ namespace p3::python
         {
             auto class_name = "ScatterSeries" + DataSuffix<T>;
         py::class_<Plot::ScatterSeries<T>, 
-            Plot::Item,
+            Plot::AnnotatedItem,
             std::shared_ptr<Plot::ScatterSeries<T>>>(class_, class_name.c_str())
             .def(py::init<>([](std::string name, py::kwargs kwargs) {
                 auto series = std::make_shared<Plot::ScatterSeries<T>>();
@@ -212,7 +213,7 @@ namespace p3::python
         {
             auto class_name = "StemSeries" + DataSuffix<T>;
             py::class_<Plot::StemSeries<T>, 
-                Plot::Item, 
+                Plot::AnnotatedItem, 
                 std::shared_ptr<Plot::StemSeries<T>>>(class_, class_name.c_str())
                 .def(py::init<>([](std::string name, py::kwargs kwargs) {
                     auto series = std::make_shared<Plot::StemSeries<T>>();
@@ -348,7 +349,14 @@ namespace p3::python
             .value("UniversalTime", Plot::Axis::Type::UniversalTime)
             .export_values();
 
-        auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item");
+        auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item")
+            .def_property("line_color", &Plot::Item::line_color, &Plot::Item::set_line_color)
+            .def_property("fill_color", &Plot::Item::fill_color, &Plot::Item::set_fill_color);
+
+        py::class_<Plot::AnnotatedItem, Plot::Item, std::shared_ptr<Plot::AnnotatedItem>> annotated_item(plot, "AnnotatedItem");
+            annotated_item.def("add", &Plot::AnnotatedItem::add);
+            annotated_item.def("remove", &Plot::AnnotatedItem::remove);
+            annotated_item.def_property("annotations", &Plot::AnnotatedItem::annotations, &Plot::AnnotatedItem::set_annotations);
 
         p3::invoke_for_all_data_types<define_bar_series>(plot);
         p3::invoke_for_all_data_types<define_line_series>(plot);
@@ -357,6 +365,50 @@ namespace p3::python
 
         p3::invoke_for_all_data_types<define_horizontal_lines>(plot);
         p3::invoke_for_all_data_types<define_vertical_lines>(plot);
+        py::class_<Plot::Annotation, Plot::Item, std::shared_ptr<Plot::Annotation>>(plot, "Annotation")
+            .def(py::init<>([](
+                std::string text, 
+                double x, 
+                double y, 
+                float offset_x,
+                float offset_y,
+                bool clamped,
+                std::optional<Color> line_color,
+                std::optional<Color> fill_color
+                ) {
+                auto annotation = std::make_shared<Plot::Annotation>();
+                annotation->text = std::move(text);
+                annotation->x = x;
+                annotation->y = y;
+                annotation->offset.x = offset_x;
+                annotation->offset.y = offset_y;
+                annotation->clamped = clamped;
+                annotation->set_line_color(std::move(line_color));
+                annotation->set_fill_color(std::move(fill_color));
+                return annotation;
+            }), 
+                py::arg("text")=std::string(), 
+                py::kw_only(), 
+                py::arg("x")=0., py::arg("y")=0.,
+                py::arg("offset_x")=0.f, py::arg("offset_y")=0.f,
+                py::arg("clamped")=false,
+                py::arg("line_color")=py::none(), py::arg("fill_color")=py::none())
+            .def_readwrite("text", &Plot::Annotation::text)
+            .def_readwrite("x", &Plot::Annotation::x)
+            .def_readwrite("y", &Plot::Annotation::y)
+            .def_property("offset_x", [](Plot::Annotation const& annotation) 
+            {
+                return annotation.offset.x;
+            }, [](Plot::Annotation& annotation, float offset_x) {
+                annotation.offset.x = offset_x;
+            })
+            .def_property("offset_y", [](Plot::Annotation const& annotation) 
+            {
+                return annotation.offset.y;
+            }, [](Plot::Annotation& annotation, float offset_y) {
+                annotation.offset.y = offset_y;
+            });
+            py::bind_vector<std::vector<std::shared_ptr<Plot::Annotation>>>(plot, "AnnotationList");
     }
 
 }

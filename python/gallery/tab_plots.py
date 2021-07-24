@@ -30,6 +30,7 @@ class TabPlots(ScrollArea):
         self.line_series = Plot.LineSeriesDouble("sin")
         plot.add(self.line_series)
         plot.add(Plot.HorizontalLinesFloat("lines", data=[0.5]))
+        self.line_series.add(Plot.Annotation('hline', y=0.5, clamped=True))
         self.content.add(plot)
 
         #
@@ -43,8 +44,16 @@ class TabPlots(ScrollArea):
             x_tick_labels=['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'],
             x_limits=(-1, 8),
             y_limits=(0, 35))
-        plot.add(Plot.BarSeriesFloat("s1", width=0.2, shift=-0.1, values=[1, 5, 3, 5, 30, 5, 2, 1]))
-        plot.add(Plot.BarSeriesFloat("s2", width=0.2, shift=0.1, values=[2, 4, 8, 3, 15, 13, 11, 4]))
+        bar_series1 = Plot.BarSeriesFloat("s1", width=0.2, shift=-0.1, values=[1, 5, 3, 5, 30, 5, 2, 1])
+        bar_series2 = Plot.BarSeriesFloat("s2", width=0.2, shift=0.1, values=[2, 4, 8, 3, 15, 13, 11, 4])
+        plot.add(bar_series1)
+        plot.add(bar_series2)
+        plot.add(Plot.Annotation('plot-annotation', x=0, y=10))
+        test = Plot.Annotation('plot-annotation, colored', x=0, y=15, fill_color='red')
+        plot.add(test)
+        plot.remove(test)
+        bar_series1.add(Plot.Annotation('series-annotation', x=2, y=12, clamped=True))
+        bar_series2.add(Plot.Annotation('series-annotation', x=2, y=16))
         self.content.add(plot)
 
         #
