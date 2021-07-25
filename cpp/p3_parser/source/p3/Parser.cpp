@@ -8,79 +8,95 @@
 #include <unordered_map>
 #include <functional>
 
-namespace p3::tokenizer
-{
-
-    pos name(pos input)
-    {
-        const char* ptr = input;
-        while (std::isalpha(static_cast<unsigned char>(*ptr)))
-            ++ptr;
-        if (ptr == input)
-            return input;
-        while (*ptr == '_' || std::isalpha(static_cast<unsigned char>(*ptr)))
-            ++ptr;
-        return ptr;
-    }
-
-    namespace expression
-    {
-        std::regex floating_point(R"(^[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?)");
-    }
-    pos floating_point(pos input)
-    {
-        std::cmatch match;
-        if (std::regex_search(input, match, expression::floating_point))
-            return match[0].second;
-        return input;
-    }
-
-    namespace expression
-    {
-        std::regex comment(R"(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)");
-    }
-    pos comment(pos input)
-    {
-        std::cmatch match;
-        if (std::regex_match(input, match, expression::comment))
-            return &input[match[0].length()];
-        return input;
-    }
-
-    pos hex_color(pos pos)
-    {
-        if (*pos != '#')
-            return pos;
-        auto it = pos + 1;
-        if (!std::isxdigit(*it))
-            return pos;
-        ++it;
-        if (!std::isxdigit(*it))
-            return pos;
-        ++it;
-        if (!std::isxdigit(*it))
-            return pos;
-        ++it;
-        if (!std::isxdigit(*it))
-            return it;
-        ++it;
-        if (!std::isxdigit(*it))
-            return pos;
-        ++it;
-        if (!std::isxdigit(*it))
-            return pos;
-        ++it;
-        if (!std::isxdigit(*it))
-            return it;
-        ++it;
-        if (!std::isxdigit(*it))
-            return pos;
-        return ++it;
-    }
-}
-
 namespace p3::parser
 {
+
+    namespace tokenizer
+    {
+
+        pos name(pos input)
+        {
+            const char* ptr = input;
+            while (std::isalpha(static_cast<unsigned char>(*ptr)))
+                ++ptr;
+            if (ptr == input)
+                return input;
+            while (*ptr == '_' || std::isalpha(static_cast<unsigned char>(*ptr)))
+                ++ptr;
+            return ptr;
+        }
+
+        namespace expression
+        {
+            std::regex floating_point(R"(^[-+]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][-+]?[0-9]+)?)");
+        }
+        pos floating_point(pos input)
+        {
+            std::cmatch match;
+            if (std::regex_search(input, match, expression::floating_point))
+                return match[0].second;
+            return input;
+        }
+
+        namespace expression
+        {
+            std::regex comment(R"(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)");
+        }
+        pos comment(pos input)
+        {
+            std::cmatch match;
+            if (std::regex_search(input, match, expression::comment))
+                return match[0].second;
+            return input;
+        }
+
+        pos hex_color(pos pos)
+        {
+            if (*pos != '#')
+                return pos;
+            auto it = pos + 1;
+            if (!std::isxdigit(*it))
+                return pos;
+            ++it;
+            if (!std::isxdigit(*it))
+                return pos;
+            ++it;
+            if (!std::isxdigit(*it))
+                return pos;
+            ++it;
+            if (!std::isxdigit(*it))
+                return it;
+            ++it;
+            if (!std::isxdigit(*it))
+                return pos;
+            ++it;
+            if (!std::isxdigit(*it))
+                return pos;
+            ++it;
+            if (!std::isxdigit(*it))
+                return it;
+            ++it;
+            if (!std::isxdigit(*it))
+                return pos;
+            return ++it;
+        }
+
+        pos px(pos begin)
+        {
+            return std::strncmp(begin, "px", 2) == 0 ? &begin[2] : begin;
+        }
+
+        pos em(pos begin)
+        {
+            return std::strncmp(begin, "em", 2) == 0 ? &begin[2] : begin;
+        }
+
+        pos rem(pos begin)
+        {
+            return std::strncmp(begin, "rem", 3) == 0 ? &begin[2] : begin;
+        }
+
+    } // tokenizer
 
     pos skip_whitespace(pos it)
     {
@@ -123,20 +139,20 @@ namespace p3::parser
         }
         else
             return begin;
-        if (std::strncmp(it, "px", 2) == 0)
+        if (auto temp = tokenizer::px(it); it != temp)
         {
             length = Px{ value };
-            return it + 2;
+            return temp;
         }
-        if (std::strncmp(it, "em", 2) == 0)
+        if (auto temp = tokenizer::em(it); it != temp)
         {
             length = Em{ value };
-            return it + 2;
+            return temp;
         }
-        if (std::strncmp(it, "rem", 3) == 0)
+        if (auto temp = tokenizer::rem(it); it != temp)
         {
             length = Rem{ value };
-            return it + 3;
+            return temp;
         }
         return begin;
     }

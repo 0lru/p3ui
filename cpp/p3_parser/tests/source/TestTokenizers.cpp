@@ -2,7 +2,7 @@
 
 #include <p3/Parser.h>
 
-namespace p3::tests
+namespace p3::parser::tests
 {
 
     TEST(TestTokenizers, name_must_not_start_with_underscore)
