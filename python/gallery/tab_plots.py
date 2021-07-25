@@ -1,18 +1,13 @@
-from p3ui import Flexible, ScrollArea, Plot, Style, auto, px, \
-    percent, Direction, Alignment, Justification, MarkerStyle
+from p3ui import *
 import numpy as np
 
+from shared import VerticalScrollArea
 
-class TabPlots(ScrollArea):
+
+class TabPlots(VerticalScrollArea):
 
     def __init__(self):
-        super().__init__(
-            content=Flexible(
-                width=(100 | percent, 0, 0),
-                height=(auto, 0, 0),
-                direction=Direction.Vertical,
-                align_items=Alignment.Stretch,
-                justify_content=Justification.Center))
+        super().__init__()
 
         #
         # sinus generator
@@ -23,10 +18,9 @@ class TabPlots(ScrollArea):
         plot = Plot(
             label='Sinus',
             y_limits=(-1.1, 1.1),
-            style=Style(
-                width=(250 | px, 1, 1),
-                height=(300 | px, 1, 0)
-            ))
+            width=(250 | px, 1, 1),
+            height=(300 | px, 1, 0)
+            )
         self.line_series = Plot.LineSeriesDouble("sin")
         plot.add(self.line_series)
         plot.add(Plot.HorizontalLinesFloat("lines", data=[0.5]))
@@ -54,6 +48,7 @@ class TabPlots(ScrollArea):
         plot.remove(test)
         bar_series1.add(Plot.Annotation('series-annotation', x=2, y=12, clamped=True))
         bar_series2.add(Plot.Annotation('series-annotation', x=2, y=16))
+        bar_series2.errors = np.random.standard_normal(8)
         self.content.add(plot)
 
         #
