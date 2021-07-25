@@ -10,6 +10,7 @@ target_link_libraries(p3
     glfw 
     rang
     pugixml
+    p3_parser
     ${OPENGL_LIBRARIES})
 
 add_subdirectory(tests)
