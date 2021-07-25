@@ -88,7 +88,7 @@ namespace p3::parser
 
         pos rem(pos begin)
         {
-            return std::strncmp(begin, "rem", 3) == 0 ? &begin[2] : begin;
+            return std::strncmp(begin, "rem", 3) == 0 ? &begin[3] : begin;
         }
 
     } // tokenizer

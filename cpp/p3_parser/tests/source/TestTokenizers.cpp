@@ -19,6 +19,27 @@ namespace p3::parser::tests
         ASSERT_EQ(std::string(input, tokenizer::name(input)), data);
     }
 
+    TEST(TestTokenizers, em_can_parse)
+    {
+        std::string data(R"(em)");
+        auto input = data.c_str();
+        ASSERT_EQ(std::string(input, tokenizer::em(input)), data);
+    }
+
+    TEST(TestTokenizers, rem_can_parse)
+    {
+        std::string data(R"(rem)");
+        auto input = data.c_str();
+        ASSERT_EQ(std::string(input, tokenizer::rem(input)), data);
+    }
+
+    TEST(TestTokenizers, px_can_parse)
+    {
+        std::string data(R"(px)");
+        auto input = data.c_str();
+        ASSERT_EQ(std::string(input, tokenizer::px(input)), data);
+    }
+
     TEST(TestTokenizers, name_can_contain_underscore)
     {
         std::string data(R"(a_bc)");
