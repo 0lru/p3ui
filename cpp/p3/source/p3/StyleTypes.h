@@ -23,6 +23,8 @@
 
 #include "string_utils.h"
 
+#include <p3/Parser.h>
+
 #include <array>
 #include <optional>
 #include <variant>
@@ -30,43 +32,26 @@
 namespace p3
 {
 
-    struct Pixels
-    {
-        float value;
-    };
+    using Px = p3::parser::Px;
+    using Percentage = p3::parser::Percentage;
+    using Em = p3::parser::Em;
+    using Rem = p3::parser::Rem;
+    using Length = p3::parser::Length;
 
-    struct Percentage
-    {
-        float value;
-    };
-
-    // font height
-    struct Em
-    {
-        float value;
-    };
-
-    // root font height
-    struct Rem
-    {
-        float value;
-    };
-
-    using Length = std::variant<Pixels, Em, Rem>;
     using Length2 = std::array<Length, 2>;
-    using LengthPercentage = std::variant<Length, Percentage>;
+    using LengthPercentage = p3::parser::LengthPercentage;
 
     template<typename T> struct UnitType {};
-    inline static UnitType<Pixels> const px;
+    inline static UnitType<Px> const px;
     inline static UnitType<Em> const em;
     inline static UnitType<Rem> const rem;
     inline static UnitType<Percentage> const percent;
     inline static UnitType<std::nullopt_t> const auto_;
 
     template<typename T>
-    Length operator |(T value, UnitType<Pixels> const&)
+    Length operator |(T value, UnitType<Px> const&)
     {
-        return Pixels{ static_cast<float>(value) };
+        return Px{ static_cast<float>(value) };
     }
 
     template<typename T>

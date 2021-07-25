@@ -1,9 +1,16 @@
 #include <array>
 #include <string>
 #include <variant>
+#include <stdexcept>
 
 namespace p3::parser
 {
+
+    class ParseError : std::runtime_error
+    {
+    public:
+        ParseError(std::string const& what) : std::runtime_error(what) {}
+    };
 
     using pos = char const*;
 
@@ -42,6 +49,16 @@ namespace p3::parser
     pos parse(pos begin, T& t)
     {
         return Rule<T>::parse(begin, t);
+    }
+
+    template<typename T>
+    T parse(pos begin)
+    {
+        T value;
+        auto it = parse(begin, value);
+        if (it == begin)
+            throw ParseError("failed to parse");
+        return value;
     }
 
     template<typename T>

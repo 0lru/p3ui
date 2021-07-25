@@ -23,6 +23,8 @@
 #include "Context.h"
 #include "UserInterface.h"
 
+#include <imgui.h>
+
 namespace p3
 {
 
@@ -69,10 +71,10 @@ namespace p3
 
     float Context::to_actual(Length const& length) const
     {
-        if (std::holds_alternative<Pixels>(length))
-            return std::get<Pixels>(length).value;
+        if (std::holds_alternative<Px>(length))
+            return std::get<Px>(length).value;
         if (std::holds_alternative<Em>(length))
-            return rem() * std::get<Em>(length).value;
+            return ImGui::GetFontSize() * std::get<Em>(length).value;
         return rem() * std::get<Rem>(length).value;
     }
 

@@ -166,15 +166,15 @@ namespace p3::python
 
         //
         // px
-        py::class_<Pixels>(module, "Pixels")
-            .def(py::init<>([](double value) { return Pixels{ static_cast<float>(value) }; }))
-            .def("__float__", [](Pixels const& self) { return self.value; })
-            .def_readwrite("value", &Pixels::value);
+        py::class_<Px>(module, "Px")
+            .def(py::init<>([](double value) { return Px{ static_cast<float>(value) }; }))
+            .def("__float__", [](Px const& self) { return self.value; })
+            .def_readwrite("value", &Px::value);
 
-        py::class_<UnitType<Pixels>>(module, "PixelsUnit")
-            .def("__ror__", [](UnitType<Pixels> const&, double value) {return Pixels{ static_cast<float>(value) }; });
+        py::class_<UnitType<Px>>(module, "PxUnit")
+            .def("__ror__", [](UnitType<Px> const&, double value) {return Px{ static_cast<float>(value) }; });
 
-        module.attr("px") = UnitType<Pixels>();
+        module.attr("px") = UnitType<Px>();
 
         //
         // percent
