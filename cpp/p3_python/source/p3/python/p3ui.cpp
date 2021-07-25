@@ -56,6 +56,7 @@ PYBIND11_MODULE(p3ui, module)
     python::Definition<InputScalar<std::uint64_t>>::apply(module);
     python::Definition<InputScalar<float>>::apply(module);
     python::Definition<InputScalar<double>>::apply(module);
+    python::Definition<Loader>::apply(module);
     python::Definition<Menu>::apply(module);
     python::Definition<MenuItem>::apply(module);
     python::Definition<MenuBar>::apply(module);

@@ -19,59 +19,29 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 /******************************************************************************/
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-#include <pybind11/complex.h>
-#include <pybind11/functional.h>
 
-namespace py = pybind11;
+#include "p3ui.h"
 
-//
-// NOTE: use fwd header?
-namespace p3
-{
-    class Button;
-    class CheckBox;
-    class ChildWindow;
-    class Collapsible;
-    class Color;
-    class ColorEdit;
-    class ComboBox;
-    class Flexible;
-    class Image;
-    template<typename T> class InputScalar;
-    class InputText;
-    class Loader;
-    class Menu;
-    class MenuItem;
-    class MenuBar;
-    class Node;
-    class Plot;
-    class Popup;
-    class ProgressBar;
-    class ScrollArea;
-    template<typename T> class Slider;
-    class StyleBlock;
-    class Tab;
-    class Table;
-    class Text;
-    class Texture;
-    class UserInterface;
-    struct Theme;
-    class Window;
-}
+#include <p3/Node.h>
+#include <p3/Loader.h>
 
 namespace p3::python
 {
 
-    template<typename T>
-    class Definition
+    void Definition<Loader>::parse(py::kwargs const& kwargs, Loader&)
     {
-    public:
-        static void parse(py::kwargs const&, T&);
-        static void apply(py::module&);
-    };
+    }
+
+    void Definition<Loader>::apply(py::module& module)
+    {
+        py::class_<Loader, std::shared_ptr<Loader>> loader(module, "Loader");
+        loader.def(py::init<>([](py::kwargs kwargs) {
+            return std::make_shared<Loader>();
+        }));
+        loader.def_static("parse", [](std::string xml_text) {
+            py::gil_scoped_release release;
+            return Loader::load(xml_text);
+        });
+    }
 
 }
