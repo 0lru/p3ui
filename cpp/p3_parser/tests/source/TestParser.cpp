@@ -125,4 +125,19 @@ namespace p3::parser::tests
         ASSERT_FLOAT_EQ(value[1], 3.4e5f);
     }
 
+    TEST(TestParser, can_parse_optional_length_percentage)
+    {
+        {
+            std::string data("auto");
+            auto input = data.c_str();
+            OptionalLengthPercentage olp;
+            ASSERT_NE(parse(input, olp), input);
+        }
+        {
+            std::string data("100%");
+            auto input = data.c_str();
+            OptionalLengthPercentage olp;
+            ASSERT_NE(parse(input, olp), input);
+        }
+    }
 }

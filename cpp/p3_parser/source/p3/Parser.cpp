@@ -209,4 +209,21 @@ namespace p3::parser
         return begin;
     }
 
+    pos Rule<OptionalLengthPercentage>::parse(pos begin, OptionalLengthPercentage& olp)
+    {
+        auto it = skip_whitespace(begin);
+        if (auto temp = tokenizer::auto_(it); it != temp)
+        {
+            olp.reset();
+            return temp;
+        }
+        LengthPercentage length_percentage;
+        if (auto temp = parser::parse<LengthPercentage>(begin, length_percentage); temp != it)
+        {
+            olp = std::move(length_percentage);
+            return temp;
+        }
+        return begin;
+    }
+
 }
