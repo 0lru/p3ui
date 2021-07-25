@@ -1,6 +1,6 @@
 from p3ui import Flexible, Direction, Alignment, Justification, \
     px, em, rem, InputFloat, ComboBox, ScrollArea, ColorEdit, Text, \
-    Pixels, Em, Color, Style, Button
+    Px, Em, Color, Style, Button
 
 
 class StyleInput(Flexible):
@@ -47,13 +47,13 @@ class Length1(StyleInput):
         self.__combo = ComboBox(
             on_change=self.on_change,
             width=(4 | em, 0, 0),
-            selected_index=0 if isinstance(self.value, Pixels) else 1 if isinstance(self.value, Em) else 2,
+            selected_index=0 if isinstance(self.value, Px) else 1 if isinstance(self.value, Em) else 2,
             options=['px', 'em', 'rem'])
         self.add(self.__input)
         self.add(self.__combo)
 
     def initialize_value(self):
-        self.__combo.selected_index = 0 if isinstance(self.value, Pixels) else 1 if isinstance(self.value, Em) else 2
+        self.__combo.selected_index = 0 if isinstance(self.value, Px) else 1 if isinstance(self.value, Em) else 2
 
     def on_change(self, _):
         self.value = self.__input.value | [px, em, rem][self.__combo.selected_index]
@@ -91,7 +91,7 @@ class Length2(Flexible):
     def initialize_value(self):
         initial = getattr(self.__target, self.__attribute)
         self.__input1.value = initial[0].value
-        if isinstance(initial[0], Pixels):
+        if isinstance(initial[0], Px):
             self.__combo1.selected_index = 0
         elif isinstance(initial[0], Em):
             self.__combo1.selected_index = 1
@@ -99,7 +99,7 @@ class Length2(Flexible):
             self.__combo1.selected_index = 2
 
         self.__input2.value = initial[1].value
-        if isinstance(initial[1], Pixels):
+        if isinstance(initial[1], Px):
             self.__combo2.selected_index = 0
         elif isinstance(initial[1], Em):
             self.__combo2.selected_index = 1
