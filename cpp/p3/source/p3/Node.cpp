@@ -89,6 +89,17 @@ namespace p3
         });
     }
 
+    void Node::set_attribute(std::string const& name, std::string const& value)
+    {
+        static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{
+            { "label", [](Node& node, std::string const& value) { node.set_label(value); }}
+        };
+        auto it = setter.find(name);
+        if (it == setter.end())
+            throw std::invalid_argument(std::format("attribute {} not found", name));
+        it->second(*this, value);
+    }
+
     void Node::on_style_changed()
     {
         set_needs_restyle();

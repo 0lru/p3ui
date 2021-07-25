@@ -57,6 +57,9 @@ namespace p3
     public:
         virtual ~Node();
 
+        // this is used by the loader to apply xml attributes
+        virtual void set_attribute(std::string const&, std::string const&);
+
         // ###### composition ##################################################
         
         using Children = std::vector<std::shared_ptr<Node>>;
