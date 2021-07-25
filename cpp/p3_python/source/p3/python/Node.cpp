@@ -147,10 +147,10 @@ namespace p3::python
             .def("__float__", [](Em const& self) { return self.value; })
             .def_readwrite("value", &Em::value);
 
-        py::class_<Em::Suffix>(module, "EmUnit")
-            .def("__ror__", [](Em::Suffix const&, double value) {return Em{ static_cast<float>(value) }; });
+        py::class_<UnitType<Em>>(module, "EmUnit")
+            .def("__ror__", [](UnitType<Em> const&, double value) {return Em{ static_cast<float>(value) }; });
 
-        module.attr("em") = Em::Suffix();
+        module.attr("em") = UnitType<Em>();
 
         //
         // em
@@ -159,10 +159,10 @@ namespace p3::python
             .def("__float__", [](Rem const& self) { return self.value; })
             .def_readwrite("value", &Rem::value);
 
-        py::class_<Rem::Suffix>(module, "REmUnit")
-            .def("__ror__", [](Rem::Suffix const&, double value) {return Rem{ static_cast<float>(value) }; });
+        py::class_<UnitType<Rem>>(module, "REmUnit")
+            .def("__ror__", [](UnitType<Rem> const&, double value) {return Rem{ static_cast<float>(value) }; });
 
-        module.attr("rem") = Rem::Suffix();
+        module.attr("rem") = UnitType<Rem>();
 
         //
         // px
@@ -171,10 +171,10 @@ namespace p3::python
             .def("__float__", [](Pixels const& self) { return self.value; })
             .def_readwrite("value", &Pixels::value);
 
-        py::class_<Pixels::Suffix>(module, "PixelsUnit")
-            .def("__ror__", [](Pixels::Suffix const&, double value) {return Pixels{ static_cast<float>(value) }; });
+        py::class_<UnitType<Pixels>>(module, "PixelsUnit")
+            .def("__ror__", [](UnitType<Pixels> const&, double value) {return Pixels{ static_cast<float>(value) }; });
 
-        module.attr("px") = Pixels::Suffix();
+        module.attr("px") = UnitType<Pixels>();
 
         //
         // percent
@@ -183,10 +183,10 @@ namespace p3::python
             .def("__float__", [](Percentage const& self) { return self.value; })
             .def_readwrite("value", &Percentage::value);
 
-        py::class_<Percentage::Suffix>(module, "PercentageUnit")
-            .def("__ror__", [](Percentage::Suffix const&, double value) {return Percentage{ static_cast<float>(value) }; });
+        py::class_<UnitType<Percentage>>(module, "PercentageUnit")
+            .def("__ror__", [](UnitType<Percentage> const&, double value) {return Percentage{ static_cast<float>(value) }; });
 
-        module.attr("percent") = Percentage::Suffix();
+        module.attr("percent") = UnitType<Percentage>();
 
         //
         // auto

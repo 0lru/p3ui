@@ -32,27 +32,23 @@ namespace p3
 
     struct Pixels
     {
-        struct Suffix {};
         float value;
     };
 
     struct Percentage
     {
-        struct Suffix {};
         float value;
     };
 
     // font height
     struct Em
     {
-        struct Suffix {};
         float value;
     };
 
     // root font height
     struct Rem
     {
-        struct Suffix {};
         float value;
     };
 
@@ -60,32 +56,33 @@ namespace p3
     using Length2 = std::array<Length, 2>;
     using LengthPercentage = std::variant<Length, Percentage>;
 
-    inline constexpr std::nullopt_t auto_{std::nullopt_t::_Tag{}};
-    inline static Pixels::Suffix const px = Pixels::Suffix{};
-    inline static Em::Suffix const em = Em::Suffix{};
-    inline static Rem::Suffix const rem = Rem::Suffix{};
-    inline static Percentage::Suffix const percent = Percentage::Suffix{};
+    template<typename T> struct UnitType {};
+    inline static UnitType<Pixels> const px;
+    inline static UnitType<Em> const em;
+    inline static UnitType<Rem> const rem;
+    inline static UnitType<Percentage> const percent;
+    inline static UnitType<std::nullopt_t> const auto_;
 
     template<typename T>
-    Length operator |(T value, Pixels::Suffix const&)
+    Length operator |(T value, UnitType<Pixels> const&)
     {
         return Pixels{ static_cast<float>(value) };
     }
 
     template<typename T>
-    LengthPercentage operator |(T value, Percentage::Suffix const&)
+    LengthPercentage operator |(T value, UnitType<Percentage> const&)
     {
         return Percentage{ static_cast<float>(value) };
     }
 
     template<typename T>
-    Length operator |(T value, Em::Suffix const&)
+    Length operator |(T value, UnitType<Em> const&)
     {
         return Em{ static_cast<float>(value) };
     }
 
     template<typename T>
-    Length operator |(T value, Rem::Suffix const&)
+    Length operator |(T value, UnitType<Rem> const&)
     {
         return Rem{ static_cast<float>(value) };
     }
