@@ -91,6 +91,11 @@ namespace p3::parser
             return std::strncmp(begin, "rem", 3) == 0 ? &begin[3] : begin;
         }
 
+        pos auto_(pos begin)
+        {
+            return std::strncmp(begin, "auto", 4) == 0 ? &begin[4] : begin;
+        }
+
     } // tokenizer
 
     pos skip_whitespace(pos it)

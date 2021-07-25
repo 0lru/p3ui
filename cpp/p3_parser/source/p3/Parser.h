@@ -1,6 +1,7 @@
 #include <array>
 #include <string>
 #include <variant>
+#include <optional>
 #include <stdexcept>
 
 namespace p3::parser
@@ -25,6 +26,7 @@ namespace p3::parser
         pos px(pos);
         pos percent(pos);
         pos comment(pos);
+        pos auto_(pos);
 
     }
 
@@ -35,6 +37,9 @@ namespace p3::parser
     struct Percentage { float value; };
     using Length = std::variant<Px, Em, Rem>;
     using LengthPercentage = std::variant<Length, Percentage>;
+    using OptionalLengthPercentage = std::optional<LengthPercentage>;
+    using FlexibleLengthPercentage = std::tuple<OptionalLengthPercentage, float, float>;
+
     enum class Cascade { inherit, initial };
 
     template<typename T>
