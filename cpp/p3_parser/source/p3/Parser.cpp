@@ -3,9 +3,7 @@
 #include <cctype>
 #include <regex>
 
-#include <iostream>
 #include <string>
-#include <unordered_map>
 #include <functional>
 
 namespace p3::parser
@@ -181,18 +179,18 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<LengthPercentage>::parse(pos begin, LengthPercentage& lpct)
+    pos Rule<LengthPercentage>::parse(pos begin, LengthPercentage& length_percentrage)
     {
         Length length;
         if (auto it = parser::parse(begin, length); it != begin)
         {
-            lpct = length;
+            length_percentrage = length;
             return it;
         }
         Percentage percentage;
         if (auto it = parser::parse(begin, percentage); it != begin)
         {
-            lpct = percentage;
+            length_percentrage = percentage;
             return it;
         }
         return begin;
