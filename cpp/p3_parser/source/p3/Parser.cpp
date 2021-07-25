@@ -226,4 +226,21 @@ namespace p3::parser
         return begin;
     }
 
+    pos Rule<FlexibleLength>::parse(pos begin, FlexibleLength& fd)
+    {
+        auto it = begin;
+        if (auto temp = parser::parse<OptionalLengthPercentage>(it, std::get<0>(fd)); it == temp)
+            return begin;
+        else
+            it = temp;
+        if (auto temp = parser::parse<float>(it, std::get<1>(fd)); it == temp)
+            return begin;
+        else
+            it = temp;
+        if (auto temp = parser::parse<float>(it, std::get<2>(fd)); it == temp)
+            return begin;
+        else
+            return it;
+    }
+
 }

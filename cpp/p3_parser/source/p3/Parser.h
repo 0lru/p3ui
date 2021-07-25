@@ -38,7 +38,7 @@ namespace p3::parser
     using Length = std::variant<Px, Em, Rem>;
     using LengthPercentage = std::variant<Length, Percentage>;
     using OptionalLengthPercentage = std::optional<LengthPercentage>;
-    using FlexibleDefinition = std::tuple<OptionalLengthPercentage, float, float>;
+    using FlexibleLength = std::tuple<OptionalLengthPercentage, float, float>;
 
     enum class Cascade { inherit, initial };
 

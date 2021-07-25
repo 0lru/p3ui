@@ -29,8 +29,8 @@
 namespace p3
 {
 
-    using Sizing = std::optional<LengthPercentage>;
-    using FlexibleLength = std::tuple<Sizing, float, float>;
+    using OptionalLengthPercentage = p3::parser::OptionalLengthPercentage;
+    using FlexibleLength = p3::parser::FlexibleLength;
 
     enum class Direction
     {

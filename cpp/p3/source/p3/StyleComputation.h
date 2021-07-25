@@ -48,10 +48,10 @@ namespace p3
         Justification justify_content;
         Alignment align_items;
 
-        Sizing const& width_basis() const;
+        OptionalLengthPercentage const& width_basis() const;
         float width_grow() const;
         float width_shrink() const;
-        Sizing const& height_basis() const;
+        OptionalLengthPercentage const& height_basis() const;
         float height_grow() const;
         float height_shrink() const;
     };
