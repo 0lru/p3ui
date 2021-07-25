@@ -1,6 +1,6 @@
-#include <variant>
-#include <string>
 #include <array>
+#include <string>
+#include <variant>
 
 namespace p3::parser
 {

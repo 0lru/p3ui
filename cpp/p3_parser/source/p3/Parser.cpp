@@ -3,9 +3,6 @@
 #include <cctype>
 #include <regex>
 
-#include <string>
-#include <functional>
-
 namespace p3::parser
 {
 
