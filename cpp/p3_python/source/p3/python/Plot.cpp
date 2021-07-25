@@ -133,6 +133,14 @@ namespace p3::python
                     return make_guarded_array_overlay(series, series->values);
                 }, [](Plot::BarSeries<T>& series, py::array_t<T> array) {
                     copy(array, series.values);
+                })
+                .def_property("errors", [](std::shared_ptr<Plot::BarSeries<T>> series) {
+                    if (series->errors)
+                        return std::optional<py::array_t<T>>(make_guarded_array_overlay(series, series->errors.value()));
+                    else
+                        return std::optional<py::array_t<T>>();
+                }, [](Plot::BarSeries<T>& series, std::optional<py::array_t<T>> array) {
+                    copy(array, series.errors);
                 });
         }
     };

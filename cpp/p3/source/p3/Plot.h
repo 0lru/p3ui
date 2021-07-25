@@ -19,7 +19,6 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 /******************************************************************************/
-
 #pragma once
 
 #include "Node.h"
@@ -31,7 +30,6 @@
 #include <functional>
 #include <optional>
 #include <variant>
-
 
 
 namespace p3
@@ -109,6 +107,7 @@ namespace p3
         public:
             std::string name;
             std::vector<T> values;
+            std::optional<std::vector<T>> errors;
             double shift = 0.;
             double width = 1.;
             void render() override;
