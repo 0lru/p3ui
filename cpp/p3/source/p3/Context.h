@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "LengthPercentageTypes.h"
+#include "StyleTypes.h"
 
 #include <memory>
 #include <array>

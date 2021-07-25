@@ -21,7 +21,7 @@
 /******************************************************************************/
 #pragma once
 
-#include "LengthPercentageTypes.h"
+#include "StyleTypes.h"
 #include "Color.h"
 #include "OnScopeExit.h"
 

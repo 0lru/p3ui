@@ -22,7 +22,7 @@
 #pragma once
 
 #include "Color.h"
-#include "LengthPercentageTypes.h"
+#include "StyleTypes.h"
 #include "FlexibleTypes.h"
 
 #include <variant>
