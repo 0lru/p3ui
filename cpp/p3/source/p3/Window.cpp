@@ -23,7 +23,7 @@
 #include "Window.h"
 #include "UserInterface.h"
 #include "log.h"
-#include "backend/OpenGL2RenderBackend.h"
+#include "backend/OpenGL3RenderBackend.h"
 
 #define GLFW_INCLUDE_NONE
 #include <glad/gl.h>
@@ -103,7 +103,7 @@ namespace p3
     }
 
     Window::Window(std::string title, std::size_t width, std::size_t height)
-        : _render_backend(std::make_shared<OpenGL2RenderBackend>())
+        : _render_backend(std::make_shared<OpenGL3RenderBackend>())
     {
         if (!glfwInit())
             throw std::runtime_error("could not init glfw");
