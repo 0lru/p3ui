@@ -92,11 +92,13 @@ namespace p3
     void Node::set_attribute(std::string const& name, std::string const& value)
     {
         static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{
-            { "label", [](Node& node, std::string const& value) { node.set_label(value); }}
+            { "label", [](Node& node, std::string const& value) { node.set_label(value); }},
+            { "width", [](Node& node, std::string const& value) { node.style()->set_width(parser::parse<FlexibleLength>(value.c_str())); }},
+            { "height", [](Node& node, std::string const& value) { node.style()->set_height(parser::parse<FlexibleLength>(value.c_str())); }}
         };
         auto it = setter.find(name);
         if (it == setter.end())
-            throw std::invalid_argument(std::format("attribute {} not found", name));
+            throw parser::ParseError(std::format("attribute {} not found", name));
         it->second(*this, value);
     }
 
