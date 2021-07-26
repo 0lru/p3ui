@@ -36,7 +36,7 @@ namespace p3
     public:
         using Callback = std::function<void()>;
 
-        Text(std::string text, std::optional<std::string> label=std::optional<std::string>());
+        Text(std::string text="", std::optional<std::string> label=std::optional<std::string>());
 
         StyleStrategy& style_strategy() const override;        
         void render_impl(Context&, float width, float height) override;

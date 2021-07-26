@@ -30,6 +30,8 @@ namespace p3::parser
 
     }
 
+    //
+    // "ast"
     struct Color { std::uint32_t value; };
     struct Px { float value; };
     struct Em { float value; };
@@ -45,6 +47,8 @@ namespace p3::parser
     template<typename T>
     using Cascaded = std::variant<Cascade, T>;
 
+    //
+    // parser
     pos skip_whitespace(pos);
 
     template<typename T>

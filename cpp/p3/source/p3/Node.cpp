@@ -162,6 +162,11 @@ namespace p3
         }
     }
 
+    std::string const& Node::element_name() const
+    {
+        return _element_name;
+    }
+
     void Node::_cascade_styles_from_parent(Context& context)
     {
         StyleDerivation combined;

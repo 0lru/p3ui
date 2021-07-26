@@ -20,31 +20,28 @@
   SOFTWARE.
 /******************************************************************************/
 
-#pragma once
+#include "p3ui.h"
 
-#include <istream>
-#include <memory>
-#include <unordered_map>
+#include <p3/Node.h>
+#include <p3/Factory.h>
 
-namespace p3
+namespace p3::python
 {
 
-    class Node;
-
-    class Loader
+    void Definition<Factory>::parse(py::kwargs const& kwargs, Factory&)
     {
-    public:
-        typedef std::shared_ptr<Node>(*NodeConstructor)();
-        using NodeConstructorMap = std::unordered_map<std::string, NodeConstructor>;
+    }
 
-        static void add_node_constructor(std::string type, NodeConstructor);
-        static NodeConstructorMap const& node_constructor_map();
-        
-        static std::shared_ptr<Node> load(std::istream&);
-        static std::shared_ptr<Node> load(std::string const&);
-
-    private:
-        static NodeConstructorMap _node_constructors;
-    };
+    void Definition<Factory>::apply(py::module& module)
+    {
+        py::class_<Factory, std::shared_ptr<Factory>> factory(module, "Factory");
+        factory.def(py::init<>([]() {
+            return std::make_shared<Factory>();
+        }));
+        factory.def_static("parse", [](std::string xml_text) {
+            py::gil_scoped_release release;
+            return Factory::parse(xml_text);
+        });
+    }
 
 }

@@ -43,7 +43,7 @@ namespace p3
     class Image;
     template<typename T> class InputScalar;
     class InputText;
-    class Loader;
+    class Factory;
     class Menu;
     class MenuItem;
     class MenuBar;

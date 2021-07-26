@@ -36,7 +36,7 @@ namespace p3
         using OnClick = std::function<void()>;
         using OnChange = std::function<void(bool)>;
 
-        MenuItem(std::string label);
+        MenuItem(std::string label="");
         void update_content() override;
         void render_impl(Context&, float width, float height) override;
 

@@ -44,7 +44,7 @@ namespace p3
     class Tab::Item : public Node
     {
     public:
-        Item(std::string name, std::shared_ptr<Node> = nullptr);
+        Item(std::string name="", std::shared_ptr<Node> = nullptr);
 
         std::shared_ptr<Node> content() const;
         void set_content(std::shared_ptr<Node>);

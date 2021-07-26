@@ -57,6 +57,7 @@ namespace p3
     public:
         virtual ~Node();
 
+        std::string const& element_name() const;
         // this is used by the loader to apply xml attributes
         virtual void set_attribute(std::string const&, std::string const&);
 

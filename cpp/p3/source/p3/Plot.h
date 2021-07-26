@@ -20,6 +20,7 @@
   SOFTWARE.
 /******************************************************************************/
 #pragma once
+#define NOMINMAX
 
 #include "Node.h"
 #include "Color.h"

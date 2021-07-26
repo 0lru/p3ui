@@ -20,28 +20,37 @@
   SOFTWARE.
 /******************************************************************************/
 
-#include "p3ui.h"
+#pragma once
 
-#include <p3/Node.h>
-#include <p3/Loader.h>
+#include <istream>
+#include <memory>
+#include <unordered_map>
+#include <functional>
 
-namespace p3::python
+namespace pugi { class xml_node; }
+
+namespace p3
 {
 
-    void Definition<Loader>::parse(py::kwargs const& kwargs, Loader&)
-    {
-    }
+    class Node;
 
-    void Definition<Loader>::apply(py::module& module)
+    class Factory
     {
-        py::class_<Loader, std::shared_ptr<Loader>> loader(module, "Loader");
-        loader.def(py::init<>([](py::kwargs kwargs) {
-            return std::make_shared<Loader>();
-        }));
-        loader.def_static("parse", [](std::string xml_text) {
-            py::gil_scoped_release release;
-            return Loader::load(xml_text);
-        });
-    }
+    public:
+        using Bind = std::function<void(Node&, std::string& name, std::string& value)>;
+
+        typedef std::shared_ptr<Node>(*NodeConstructor)();
+        using NodeConstructorMap = std::unordered_map<std::string, NodeConstructor>;
+
+        static void add_node_constructor(std::string type, NodeConstructor);
+        static NodeConstructorMap const& node_constructor_map();
+        
+        static std::shared_ptr<Node> load(std::istream&, Bind=nullptr);
+        static std::shared_ptr<Node> parse(std::string const&, Bind=nullptr);
+
+    private:
+        static std::shared_ptr<Node> parse_node(pugi::xml_node const&, Bind=nullptr);
+        static NodeConstructorMap _node_constructors;
+    };
 
 }

@@ -1,7 +1,7 @@
 add_executable(p3_tests 
 
     source/main.cpp
-    source/TestLoader.cpp
+    source/TestFactory.cpp
 
 )
 

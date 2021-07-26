@@ -33,7 +33,7 @@ namespace p3
     class Collapsible : public Node
     {
     public:
-        Collapsible(std::string title);
+        Collapsible(std::string title="");
 
         void render_impl(Context&, float width, float height) override;
 

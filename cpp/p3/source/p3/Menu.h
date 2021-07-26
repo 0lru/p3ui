@@ -33,7 +33,7 @@ namespace p3
     class Menu : public Node
     {
     public:
-        Menu(std::string label);
+        Menu(std::string label="");
 
         using OnOpen = std::function<void()>;
         using OnClose = std::function<void()>;
