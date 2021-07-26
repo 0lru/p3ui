@@ -29,20 +29,20 @@ namespace p3::python
 
     void Definition<Image>::parse(py::kwargs const& kwargs, Image& image)
     {
-        Definition<Node>::parse(kwargs, image);
-        if (kwargs.contains("texture"))
-            image.set_texture(kwargs["texture"].cast<std::shared_ptr<Texture>>());
     }
 
     void Definition<Image>::apply(py::module& module)
     {
         py::class_<Image, Node, std::shared_ptr<Image>> image(module, "Image");
 
-        image.def(py::init<>([](py::kwargs kwargs) {
+        image.def(py::init<>([](std::shared_ptr<Texture> texture, float scale, py::kwargs kwargs) {
             auto image = std::make_shared<Image>();
-            parse(kwargs, *image);
+            if(texture)
+                image->set_texture(std::move(texture));
+            image->set_scale(scale);
+            Definition<Node>::parse(kwargs, *image);
             return image;
-        }));
+        }), py::arg("texture")=py::none(), py::arg("scale")=1.0);
 
         image.def_property("texture", &Image::texture, &Image::set_texture);
         image.def("set_dirty", &Image::set_needs_update);

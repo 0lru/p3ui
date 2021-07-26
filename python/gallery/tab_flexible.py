@@ -5,11 +5,9 @@ class TabFlexible(Flexible):
 
     def __init__(self):
         super().__init__(
-            style=Style(
-                direction=Direction.Vertical,
-                justify_content=Justification.Center,
-                align_items=Alignment.Stretch
-            ))
+            direction=Direction.Vertical,
+            justify_content=Justification.Center,
+            align_items=Alignment.Stretch)
 
         justifications = [key for key, value in Justification.__members__.items()]
 

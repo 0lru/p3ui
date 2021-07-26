@@ -45,7 +45,11 @@ namespace p3
 
         void update_content() override;
 
+        // this is used by the loader to apply xml attributes
+        virtual void set_attribute(std::string const&, std::string const&) override;
+
     private:
+
         OnClick _on_click;
     };
 

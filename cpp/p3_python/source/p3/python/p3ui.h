@@ -43,7 +43,6 @@ namespace p3
     class Image;
     template<typename T> class InputScalar;
     class InputText;
-    class Factory;
     class Menu;
     class MenuItem;
     class MenuBar;
@@ -65,6 +64,7 @@ namespace p3
 
 namespace p3::python
 {
+    class Builder;
 
     template<typename T>
     class Definition

@@ -32,28 +32,8 @@ namespace p3
     using OptionalLengthPercentage = p3::parser::OptionalLengthPercentage;
     using FlexibleLength = p3::parser::FlexibleLength;
 
-    enum class Direction
-    {
-        Horizontal=0,
-        Vertical=1
-    };
-
-    enum class Alignment
-    {
-        Start=0,
-        Center=1,
-        End=2,
-        Stretch=3,
-        Baseline=4
-    };
-
-    enum class Justification
-    {
-        SpaceBetween = 0,
-        SpaceAround = 1,
-        Start = 2,
-        Center = 3,
-        End = 4
-    };
+    using Direction = p3::parser::Direction;
+    using Alignment = p3::parser::Alignment;
+    using Justification = p3::parser::Justification;
 
 }

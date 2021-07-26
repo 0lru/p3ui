@@ -20,7 +20,7 @@ class TabPlots(VerticalScrollArea):
             y_limits=(-1.1, 1.1),
             width=(250 | px, 1, 1),
             height=(300 | px, 1, 0)
-            )
+        )
         self.line_series = Plot.LineSeriesDouble("sin")
         plot.add(self.line_series)
         plot.add(Plot.HorizontalLinesFloat("lines", data=[0.5]))
@@ -53,29 +53,18 @@ class TabPlots(VerticalScrollArea):
 
         #
         # scatter plot
-        plot = Plot(
-            label='Scatter',
-            y_limits=(0, 1.1),
-            style=Style(
-                width=(250 | px, 1, 1),
-                height=(300 | px, 1, 0)))
+        plot = Plot(label='Scatter', y_limits=(0, 1.1), width=(250 | px, 1, 1), height=(300 | px, 1, 0))
         x_scatter = np.arange(0, 10, 0.1)
         y_scatter = np.random.rand(x_scatter.shape[0])
-        self.scatter_series = Plot.ScatterSeriesFloat(
-            "scatter",
-            x=x_scatter, y=y_scatter,
-            marker_style=MarkerStyle.Circle)
+        self.scatter_series = Plot.ScatterSeriesFloat("scatter", x=x_scatter, y=y_scatter,
+                                                      marker_style=MarkerStyle.Circle)
         plot.add(self.scatter_series)
         self.content.add(plot)
 
         #
         # stems
         #
-        plot = Plot(
-            label='Stems',
-            y_limits=(-0.1, 1.1),
-            stlye=Style(
-                width=(250 | px, 1, 1), height=(300 | px, 1, 0)))
+        plot = Plot(label='Stems', y_limits=(-0.1, 1.1), width=(250 | px, 1, 1), height=(300 | px, 1, 0))
         self.stem_series = Plot.StemSeriesFloat("sin")
         x = np.arange(0, 100)
         plot.add(Plot.StemSeriesFloat("stems", x=x, y=np.random.rand(x.shape[0])))

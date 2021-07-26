@@ -1,26 +1,26 @@
 #include <gtest/gtest.h>
 
-#include <p3/Factory.h>
+#include <p3/Builder.h>
 #include <p3/Node.h>
 
 namespace p3::tests
 {
 
-    TEST(TestFactory, can_create_button)
+    TEST(TestBuilder, can_create_button)
     {
-        ASSERT_TRUE(Factory::parse("<Button/>") != nullptr);
+        ASSERT_TRUE(Builder().build("<Button/>") != nullptr);
     }
 
-    TEST(TestFactory, can_set_node_label_attribute)
+    TEST(TestBuilder, can_set_node_label_attribute)
     {
-        auto node = Factory::parse(R"(<Button label="abc"/>)");
+        auto node = Builder().build(R"(<Button label="abc"/>)");
         ASSERT_TRUE(node != nullptr);
         ASSERT_EQ(node->label(), "abc");
     }
 
-    TEST(TestFactory, can_set_width_attribute_of_node_style)
+    TEST(TestBuilder, can_set_width_attribute_of_node_style)
     {
-        auto node = Factory::parse(R"(<Button width="1px 2 3"/>)");
+        auto node = Builder().build(R"(<Button width="1px 2 3"/>)");
         ASSERT_TRUE(node != nullptr);
         ASSERT_TRUE(node->style()->width());
         ASSERT_TRUE(std::holds_alternative<FlexibleLength>(node->style()->width().value()));
@@ -31,9 +31,9 @@ namespace p3::tests
         ASSERT_EQ(std::get<2>(length), 3);
     }
 
-    TEST(TestFactory, can_add_button_to_flexible)
+    TEST(TestBuilder, can_add_button_to_flexible)
     {
-        auto node = Factory::parse(R"(<Flexible><Button width="1px 2 3"/></Flexible>)");
+        auto node = Builder().build(R"(<Flexible><Button width="1px 2 3"/></Flexible>)");
         ASSERT_EQ(node->element_name(), "Flexible");
         ASSERT_EQ(node->children().size(), 1);
         ASSERT_EQ(node->children()[0]->element_name(), "Button");

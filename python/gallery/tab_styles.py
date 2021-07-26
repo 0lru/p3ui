@@ -62,6 +62,18 @@ class Length1(StyleInput):
 class Length2(Flexible):
 
     def __init__(self, label, target, attribute):
+
+        d = {}
+
+        def shit():
+            pass
+
+        def bind(what):
+            d['x'] = what
+
+#        binding = Binding()
+#        self.template(f'<button value="" on_click="{binding(self.shit)}">', binding)
+
         super().__init__(
             width=(100 | em, 1, 0),
             height=(None, 0, 0),

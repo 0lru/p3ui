@@ -24,6 +24,7 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <format>
 
 namespace p3
 {
@@ -52,6 +53,17 @@ namespace p3
     {
         set_label(std::move(label));
     }
+
+    void Button::set_attribute(std::string const& name, std::string const& value)
+    {
+        static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{
+        };
+        auto it = setter.find(name);
+        if (it != setter.end())
+            it->second(*this, value);
+        Node::set_attribute(name, value);
+    }
+
 
     void Button::render_impl(Context&, float width, float height)
     {

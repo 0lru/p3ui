@@ -23,7 +23,6 @@ namespace p3
         , public Theme::Observer
     {
     public:
-
         UserInterface(std::size_t width=1024, std::size_t height=768);
         ~UserInterface();
 

@@ -1,5 +1,15 @@
 import asyncio
-from p3ui import UserInterface, Window, Tab, TabItem, Style, em, ChildWindow, Button
+import traceback
+from p3ui import UserInterface, Window, Tab, TabItem, Style, em, ChildWindow, Button, Builder
+
+
+def make_template(builder):
+    template = """
+    <Flexible width="2em" justify-content="{get}" >
+      <Button width="5em"/>
+    </Flexible>
+    """
+
 
 import pathlib
 from menu_bar import MenuBar
@@ -46,5 +56,40 @@ async def main():
 
 
 asyncio.run(main())
+exit(0)
+
+
 # sync would be:
 # window.loop(on_frame=lambda _: plots.update())
+
+
+def test():
+    print('clicked')
+
+
+builder = Builder()
+
+node = builder.build(f"""
+<Flexible 
+    justify-content="space-around" 
+    align-items="start">
+    <Button 
+        label="NoName" 
+        on_click="{builder.bind(test)}" 
+        width="100px 2 3"/>
+</Flexible>
+""")
+
+ui = UserInterface(content=node)
+window = Window(user_interface=ui)
+
+
+async def main():
+    while not window.closed:
+        window.frame()
+        await asyncio.sleep(0)
+
+
+asyncio.run(main())
+
+exit(0)

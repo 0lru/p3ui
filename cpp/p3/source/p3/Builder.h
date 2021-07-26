@@ -27,30 +27,41 @@
 #include <unordered_map>
 #include <functional>
 
-namespace pugi { class xml_node; }
+namespace pugi
+{
+    class xml_node;
+    class xml_document;
+    class xml_text;
+    class xml_attribute;
+}
 
 namespace p3
 {
-
     class Node;
 
-    class Factory
+    class Builder
     {
     public:
-        using Bind = std::function<void(Node&, std::string& name, std::string& value)>;
+        Builder();
 
         typedef std::shared_ptr<Node>(*NodeConstructor)();
-        using NodeConstructorMap = std::unordered_map<std::string, NodeConstructor>;
+        using Definitions = std::unordered_map<std::string, NodeConstructor>;
 
-        static void add_node_constructor(std::string type, NodeConstructor);
-        static NodeConstructorMap const& node_constructor_map();
-        
-        static std::shared_ptr<Node> load(std::istream&, Bind=nullptr);
-        static std::shared_ptr<Node> parse(std::string const&, Bind=nullptr);
+        void define(std::string type, NodeConstructor);
+        Definitions const& definitions();
+
+        std::shared_ptr<Node> build(std::istream&);
+        std::shared_ptr<Node> build(std::string const&);
+
+        std::shared_ptr<Node> build(pugi::xml_document const&);
+        std::shared_ptr<Node> build(pugi::xml_node const&);
+        void build(Node& node, pugi::xml_node const& pugi_node);
+
+    protected:
+        virtual void assign_text(Node&, std::string);
+        virtual void assign_attribute(Node&, std::string const& name, std::string const& value);
 
     private:
-        static std::shared_ptr<Node> parse_node(pugi::xml_node const&, Bind=nullptr);
-        static NodeConstructorMap _node_constructors;
+        Definitions _definitions;
     };
-
 }

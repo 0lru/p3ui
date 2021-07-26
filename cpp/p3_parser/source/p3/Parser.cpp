@@ -110,25 +110,7 @@ namespace p3::parser
         return it;
     }
 
-    pos Rule<Cascade>::parse(pos begin, Cascade& cascade)
-    {
-        static auto const inherit = std::string("inherit");
-        static auto const initial = std::string("initial");
-        auto it = skip_whitespace(begin);
-        if (std::strncmp(it, inherit.c_str(), inherit.size()) == 0)
-        {
-            cascade = Cascade::inherit;
-            return &it[inherit.size()];
-        }
-        if (std::strncmp(it, initial.c_str(), initial.size()) == 0)
-        {
-            cascade = Cascade::initial;
-            return &it[initial.size()];
-        }
-        return begin;
-    }
-
-    pos Rule<Length>::parse(pos begin, Length& length)
+    pos Rule<Length, void>::parse(pos begin, Length& length)
     {
         auto it = skip_whitespace(begin);
         float value;
@@ -157,7 +139,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<Percentage>::parse(pos begin, Percentage& percentage)
+    pos Rule<Percentage, void>::parse(pos begin, Percentage& percentage)
     {
         auto it = skip_whitespace(begin);
         if (auto temp = tokenizer::floating_point(it); it != temp)
@@ -170,7 +152,7 @@ namespace p3::parser
         return *it == '%' ? it + 1 : begin;
     }
 
-    pos Rule<float>::parse(pos begin, float& value)
+    pos Rule<float, void>::parse(pos begin, float& value)
     {
         auto it = skip_whitespace(begin);
         if (auto temp = tokenizer::floating_point(it); temp != it)
@@ -181,7 +163,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<LengthPercentage>::parse(pos begin, LengthPercentage& length_percentrage)
+    pos Rule<LengthPercentage, void>::parse(pos begin, LengthPercentage& length_percentrage)
     {
         Length length;
         if (auto it = parser::parse(begin, length); it != begin)
@@ -198,7 +180,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<Color>::parse(pos begin, Color& color)
+    pos Rule<Color, void>::parse(pos begin, Color& color)
     {
         auto it = skip_whitespace(begin);
         if (auto temp = tokenizer::hex_color(it); it != temp)
@@ -209,7 +191,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<OptionalLengthPercentage>::parse(pos begin, OptionalLengthPercentage& olp)
+    pos Rule<OptionalLengthPercentage, void>::parse(pos begin, OptionalLengthPercentage& olp)
     {
         auto it = skip_whitespace(begin);
         if (auto temp = tokenizer::auto_(it); it != temp)
@@ -226,7 +208,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<FlexibleLength>::parse(pos begin, FlexibleLength& fd)
+    pos Rule<FlexibleLength, void>::parse(pos begin, FlexibleLength& fd)
     {
         auto it = begin;
         if (auto temp = parser::parse<OptionalLengthPercentage>(it, std::get<0>(fd)); it == temp)
