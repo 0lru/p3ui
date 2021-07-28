@@ -4,6 +4,47 @@ import numpy as np
 from shared import VerticalScrollArea
 
 
+class ColoredPlot(Plot):
+
+    def __init__(self, label, **kwargs):
+        super().__init__(
+            label='Sinus',
+            y_limits=(-0.1, 1.1),
+            width=(250 | px, 1, 1),
+            height=(300 | px, 1, 0),
+            **kwargs
+        )
+        self.add(Plot.LineSeriesDouble(
+            "red with yellow marker",
+            x=np.arange(0., 20., 1.),
+            y=np.random.random(20),
+            line_color='red',
+            marker_style=MarkerStyle.Circle,
+            marker_line_color='black',
+            marker_fill_color='yellow'
+        ))
+        self.add(Plot.LineSeriesDouble(
+            "blue with yellow marker",
+            x=np.arange(0., 20., 1.),
+            y=np.random.random(20),
+            line_color='blue',
+            marker_style=MarkerStyle.Circle,
+            marker_line_color='black',
+            marker_fill_color='yellow'
+        ))
+        self.add(Plot.LineSeriesDouble(
+            "white with big white marker",
+            x=np.arange(0., 20., 1.),
+            y=np.random.random(20),
+            opacity=0.5,
+            line_color='white',
+            marker_style=MarkerStyle.Circle,
+            marker_line_color='black',
+            marker_fill_color='white',
+            marker_size=4 | px
+        ))
+
+
 class TabPlots(VerticalScrollArea):
 
     def __init__(self):
@@ -69,6 +110,8 @@ class TabPlots(VerticalScrollArea):
         x = np.arange(0, 100)
         plot.add(Plot.StemSeriesFloat("stems", x=x, y=np.random.rand(x.shape[0])))
         self.content.add(plot)
+
+        self.content.add(ColoredPlot(label='Colored Plot'))
 
     def update(self):
         self.line_series.x, self.line_series.y = next(self.sin_signal)
