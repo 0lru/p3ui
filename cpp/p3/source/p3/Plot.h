@@ -36,7 +36,7 @@
 namespace p3
 {
 
-    enum class MarkerStyle : std::int32_t
+    enum class MarkerStyle : ImPlotMarker
     {
         None = ImPlotMarker_None,
         Circle = ImPlotMarker_Circle,
@@ -65,16 +65,23 @@ namespace p3
         public:
             virtual ~Item() = default;
             virtual void render() = 0;
+            virtual void apply_style();
 
             std::optional<Color> line_color() const;
+            ImVec4& native_line_color() { return _line_color; }
             void set_line_color(std::optional<Color>);
 
             std::optional<Color> fill_color() const;
             void set_fill_color(std::optional<Color>);
+            ImVec4& native_fill_color() { return _fill_color; }
+
+            std::optional<float> const& opacity() const;
+            void set_opacity(std::optional<float>);
 
         protected:
-            ImVec4 _line_color;
-            ImVec4 _fill_color;
+            std::optional<float> _opacity = std::nullopt;
+            ImVec4 _line_color = IMPLOT_AUTO_COL;
+            ImVec4 _fill_color = IMPLOT_AUTO_COL;
         };
 
         class AnnotatedItem : public Item
@@ -86,8 +93,33 @@ namespace p3
             std::vector<std::shared_ptr<Annotation>> const& annotations() const;
             void set_annotations(std::vector<std::shared_ptr<Annotation>>);
 
+            std::optional<Color> marker_line_color() const;
+            ImVec4& native_marker_line_color() { return _marker_line_color; }
+            void set_marker_line_color(std::optional<Color>);
+
+            std::optional<Color> marker_fill_color() const;
+            void set_marker_fill_color(std::optional<Color>);
+            ImVec4& native_marker_fill_color() { return _marker_fill_color; }
+
+            std::optional<Length> const& marker_size() const;
+            void set_marker_size(std::optional<Length>);
+
+            std::optional<Length> const& marker_weight() const;
+            void set_marker_weight(std::optional<Length>);
+
+            std::optional<MarkerStyle> const& marker_style() const;
+            void set_marker_style(std::optional<MarkerStyle>);
+
+        protected:
+            void apply_style() override;
+
         private:
             std::vector<std::shared_ptr<Annotation>> _annotations;
+            ImVec4 _marker_line_color = IMPLOT_AUTO_COL;
+            ImVec4 _marker_fill_color = IMPLOT_AUTO_COL;
+            std::optional<Length> _marker_size = std::nullopt;
+            std::optional<Length> _marker_weight = std::nullopt;
+            std::optional<MarkerStyle> _marker_style = std::nullopt;
         };
 
         class Annotation : public Item
@@ -121,7 +153,6 @@ namespace p3
             std::string name;
             std::vector<T> x;
             std::vector<T> y;
-            MarkerStyle marker_Style = MarkerStyle::None;
             void render() override;
         };
 
@@ -132,7 +163,6 @@ namespace p3
             std::string name;
             std::vector<T> x;
             std::vector<T> y;
-            MarkerStyle marker_Style = MarkerStyle::None;
             void render() override;
         };
 
@@ -143,7 +173,6 @@ namespace p3
             std::string name;
             std::vector<T> x;
             std::vector<T> y;
-            MarkerStyle marker_style = MarkerStyle::None;
             void render() override;
         };
 
@@ -246,7 +275,6 @@ namespace p3
     void Plot::ScatterSeries<T>::render()
     {
         auto count = int(std::min(x.size(), y.size()));
-        ImPlot::SetNextMarkerStyle(static_cast<ImPlotMarker>(marker_style));
         ImPlot::PlotScatter(name.c_str(), x.data(), y.data(), count);
         for (auto& annotation : annotations())
             annotation->render_item_annotation();

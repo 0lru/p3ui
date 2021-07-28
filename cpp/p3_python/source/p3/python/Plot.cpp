@@ -105,6 +105,30 @@ namespace p3::python
         }
     }
 
+    auto parse_plot_item_kwargs = [](Plot::Item& item, py::kwargs& kwargs)
+    {
+        if(kwargs.contains("opacity"))
+            item.set_opacity(kwargs["opacity"].cast<std::optional<float>>());
+        if(kwargs.contains("line_color"))
+            item.set_line_color(kwargs["line_color"].cast<std::optional<Color>>());
+        if(kwargs.contains("fill_color"))
+            item.set_fill_color(kwargs["fill_color"].cast<std::optional<Color>>());
+    };
+
+    auto parse_annotated_plot_item_kwargs = [](Plot::AnnotatedItem& item, py::kwargs& kwargs)
+    {
+        if(kwargs.contains("marker_line_color"))
+            item.set_marker_line_color(kwargs["marker_line_color"].cast<std::optional<Color>>());
+        if(kwargs.contains("marker_fill_color"))
+            item.set_marker_fill_color(kwargs["marker_fill_color"].cast<std::optional<Color>>());
+        if(kwargs.contains("marker_weight"))
+            item.set_marker_weight(kwargs["marker_weight"].cast<std::optional<Length>>());
+        if(kwargs.contains("marker_size"))
+            item.set_marker_size(kwargs["marker_size"].cast<std::optional<Length>>());
+        if(kwargs.contains("marker_style"))
+            item.set_marker_style(kwargs["marker_style"].cast<std::optional<MarkerStyle>>());
+    };
+
     template<typename T>
     struct define_bar_series
     {
@@ -124,6 +148,8 @@ namespace p3::python
                         series->shift = kwargs["shift"].cast<double>();
                     if (kwargs.contains("width"))
                         series->width = kwargs["width"].cast<double>();
+                    parse_plot_item_kwargs(*series, kwargs);
+                    parse_annotated_plot_item_kwargs(*series, kwargs);
                     return series;
                 }))
                 .def_readwrite("name", &Plot::BarSeries<T>::name)
@@ -163,6 +189,8 @@ namespace p3::python
                         copy(kwargs["x"].cast<py::array_t<T>>(), series->x);
                     if(kwargs.contains("y"))
                         copy(kwargs["y"].cast<py::array_t<T>>(), series->y);
+                    parse_plot_item_kwargs(*series, kwargs);
+                    parse_annotated_plot_item_kwargs(*series, kwargs);
                     return series;
                 }))
                 .def_readwrite("name", &Plot::LineSeries<T>::name)
@@ -196,10 +224,11 @@ namespace p3::python
                     copy(kwargs["x"].cast<py::array_t<T>>(), series->x);
                 if(kwargs.contains("y"))
                     copy(kwargs["y"].cast<py::array_t<T>>(), series->y);
+                parse_plot_item_kwargs(*series, kwargs);
+                parse_annotated_plot_item_kwargs(*series, kwargs);
                 return series;
             }))
             .def_readwrite("name", &Plot::ScatterSeries<T>::name)
-            .def_readwrite("marker_style", &Plot::ScatterSeries<T>::marker_style)
             .def_property("x", [](std::shared_ptr<Plot::ScatterSeries<T>> series) {
                 return make_guarded_array_overlay(series, series->x);
             }, [](Plot::ScatterSeries<T>& series, py::array_t<T> array) {
@@ -230,6 +259,8 @@ namespace p3::python
                         copy(kwargs["x"].cast<py::array_t<T>>(), series->x);
                     if(kwargs.contains("y"))
                         copy(kwargs["y"].cast<py::array_t<T>>(), series->y);
+                    parse_plot_item_kwargs(*series, kwargs);
+                    parse_annotated_plot_item_kwargs(*series, kwargs);
                     return series;
                 }))
                 .def_readwrite("name", &Plot::StemSeries<T>::name)
@@ -261,6 +292,8 @@ namespace p3::python
                     series->name = std::move(name);
                     if(kwargs.contains("data"))
                         copy(kwargs["data"].cast<py::array_t<T>>(), series->data);
+                    parse_plot_item_kwargs(*series, kwargs);
+                    parse_annotated_plot_item_kwargs(*series, kwargs);
                     return series;
                 }))
                 .def_property("name", [](Plot::HorizontalLines<T>& lines) {
@@ -291,6 +324,8 @@ namespace p3::python
                     series->name = std::move(name);
                     if(kwargs.contains("data"))
                         copy(kwargs["data"].cast<py::array_t<T>>(), series->data);
+                    parse_plot_item_kwargs(*series, kwargs);
+                    parse_annotated_plot_item_kwargs(*series, kwargs);
                     return series;
                 }))
                 .def_property("name", [](Plot::VerticalLines<T>& lines) {
@@ -358,10 +393,16 @@ namespace p3::python
             .export_values();
 
         auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item")
+            .def_property("opacity", &Plot::Item::opacity, &Plot::Item::set_opacity)
             .def_property("line_color", &Plot::Item::line_color, &Plot::Item::set_line_color)
             .def_property("fill_color", &Plot::Item::fill_color, &Plot::Item::set_fill_color);
 
         py::class_<Plot::AnnotatedItem, Plot::Item, std::shared_ptr<Plot::AnnotatedItem>> annotated_item(plot, "AnnotatedItem");
+            annotated_item.def_property("marker_style", &Plot::AnnotatedItem::marker_style, &Plot::AnnotatedItem::set_marker_style);
+            annotated_item.def_property("marker_line_color", &Plot::AnnotatedItem::marker_line_color, &Plot::AnnotatedItem::set_marker_line_color);
+            annotated_item.def_property("marker_fill_color", &Plot::AnnotatedItem::marker_fill_color, &Plot::AnnotatedItem::set_marker_line_color);
+            annotated_item.def_property("marker_size", &Plot::AnnotatedItem::marker_size, &Plot::AnnotatedItem::set_marker_size);
+            annotated_item.def_property("marker_weight", &Plot::AnnotatedItem::marker_weight, &Plot::AnnotatedItem::set_marker_weight);
             annotated_item.def("add", &Plot::AnnotatedItem::add);
             annotated_item.def("remove", &Plot::AnnotatedItem::remove);
             annotated_item.def_property("annotations", &Plot::AnnotatedItem::annotations, &Plot::AnnotatedItem::set_annotations);

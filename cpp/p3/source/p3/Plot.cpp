@@ -22,6 +22,7 @@
 
 #include "Plot.h"
 #include "convert.h"
+#include "Context.h"
 
 #include <iostream>
 
@@ -128,12 +129,39 @@ namespace p3
         {
             for (auto& item : _items)
             {
+                if (item->line_color())
+                    ImPlot::SetNextLineStyle(item->native_line_color());
+                if (item->fill_color())
+                    ImPlot::SetNextFillStyle(item->native_fill_color());
+                item->apply_style();
                 item->render();
                 //for (auto& annotation : item->annotations())
                 //    annotation->render_item_annotation();
             }
             ImPlot::EndPlot();
         }
+    }
+
+    void Plot::Item::apply_style()
+    {
+        if(opacity())
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity().value());
+    }
+
+    void Plot::AnnotatedItem::apply_style()
+    {
+        Item::apply_style();
+        auto& context = Context::current();
+        ImPlotMarker style = marker_style()
+            ? static_cast<ImPlotMarker>(marker_style().value())
+            : ImPlotMarker_None;
+        float size = marker_size()
+            ? context.to_actual(marker_size().value())
+            : -1.f;
+        float weight = marker_weight()
+            ? context.to_actual(marker_weight().value())
+            : -1.f;
+        ImPlot::SetNextMarkerStyle(style, size, native_marker_fill_color(), weight, native_marker_line_color());
     }
 
     void Plot::add(std::shared_ptr<Item> item)
@@ -288,6 +316,66 @@ namespace p3
     void Plot::Item::set_fill_color(std::optional<Color> fill_color)
     {
         _fill_color = convert(fill_color);
+    }
+
+    std::optional<float> const& Plot::Item::opacity() const
+    {
+        return _opacity;
+    }
+
+    void Plot::Item::set_opacity(std::optional<float> opacity)
+    {
+        _opacity = std::move(opacity);
+    }
+
+    std::optional<Color> Plot::AnnotatedItem::marker_line_color() const
+    {
+        return convert(_marker_line_color);
+    }
+
+    void Plot::AnnotatedItem::set_marker_line_color(std::optional<Color> marker_line_color)
+    {
+        _marker_line_color = convert(marker_line_color);
+    }
+
+    std::optional<Color> Plot::AnnotatedItem::marker_fill_color() const
+    {
+        return convert(_marker_fill_color);
+    }
+
+    void Plot::AnnotatedItem::set_marker_fill_color(std::optional<Color> marker_fill_color)
+    {
+        _marker_fill_color = convert(marker_fill_color);
+    }
+
+    std::optional<Length> const& Plot::AnnotatedItem::marker_size() const
+    {
+        return _marker_size;
+    }
+
+    void Plot::AnnotatedItem::set_marker_size(std::optional<Length> marker_size)
+    {
+        _marker_size = std::move(marker_size);
+    }
+
+    std::optional<Length> const& Plot::AnnotatedItem::marker_weight() const
+    {
+        return _marker_weight;
+    }
+
+    void Plot::AnnotatedItem::set_marker_weight(std::optional<Length> marker_weight)
+    {
+        _marker_weight = std::move(marker_weight);
+    }
+
+    std::optional<MarkerStyle> const& Plot::AnnotatedItem::marker_style() const
+    {
+        return _marker_style;
+    }
+
+    void Plot::AnnotatedItem::set_marker_style(std::optional<MarkerStyle> marker_style)
+    {
+        _marker_style = std::move(marker_style);
     }
 
     void Plot::AnnotatedItem::add(std::shared_ptr<Annotation> annotation)
