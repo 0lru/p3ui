@@ -2,7 +2,7 @@ from p3ui import *
 from material_icons import MaterialIcons
 
 
-class TabIcons(ScrollArea):
+class TabIcons(Flexible):
 
     def __init__(self):
         super().__init__(
@@ -11,14 +11,28 @@ class TabIcons(ScrollArea):
                 direction=Direction.Vertical,
                 align_items=Alignment.Start,
                 justify_content=Justification.Start))
-        self.search = InputText(width=(20 | em, 0, 0), label=f'{MaterialIcons.Search}', on_change=self.filter)
-        self.content.add(self.search)
+
+        self.search = InputText(
+            label=f'{MaterialIcons.Search}',
+            width=(20 | em, 0, 0),
+            height=(None, 0, 0),
+            on_change=self.filter)
+        self.add(self.search)
+
+        self.icons_list = [
+            Text(f'{getattr(MaterialIcons, icon_name)} {icon_name}')
+            for icon_name in TabIcons.icon_names()
+        ]
+        self.add(ScrollArea(content=Flexible(children=self.icons_list)))
+
+    @staticmethod
+    def icon_names():
         for icon_name in [i for i in MaterialIcons.__dict__.keys() if i[:1] != '_']:
-            self.content.add(Text(f'{getattr(MaterialIcons, icon_name)} {icon_name}'))
+            yield icon_name
 
     def filter(self):
-        for child in self.content.children:
-            if child is self.search:
+        for icon_text in self.icons_list:
+            if icon_text is self.search:
                 continue
-            lbl = child.text.split(' ')[1]
-            child.visible = self.search.value.lower() in lbl.lower()
+            lbl = icon_text.text.split(' ')[1]
+            icon_text.visible = self.search.value.lower() in lbl.lower()
