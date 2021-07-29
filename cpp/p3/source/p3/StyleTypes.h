@@ -21,13 +21,7 @@
 /******************************************************************************/
 #pragma once
 
-#include "string_utils.h"
-
-#include <p3/Parser.h>
-
-#include <array>
-#include <optional>
-#include <variant>
+#include <p3/Types.h>
 
 namespace p3
 {

@@ -21,11 +21,13 @@
 /******************************************************************************/
 
 #include "Node.h"
+#include "convert.h"
 #include "Context.h"
 #include "Theme.h"
 #include "log.h"
-#include "convert.h"
 #include "StyleDerivation.h"
+
+#include <p3/Parser.h>
 
 #include <mutex>
 #include <unordered_map>
@@ -101,7 +103,7 @@ namespace p3
         };
         auto it = setter.find(name);
         if (it == setter.end())
-            throw parser::ParseError(std::format("attribute {} not found", name));
+            throw parser::ParserError(std::format("attribute {} not found", name));
         it->second(*this, value);
     }
 

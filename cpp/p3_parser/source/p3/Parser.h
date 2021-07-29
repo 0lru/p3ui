@@ -1,19 +1,17 @@
 #pragma once
 
-#include <array>
-#include <string>
-#include <variant>
-#include <optional>
+#include "Types.h"
+
 #include <stdexcept>
 #include <unordered_map>
 
 namespace p3::parser
 {
 
-    class ParseError : std::runtime_error
+    class ParserError : std::runtime_error
     {
     public:
-        ParseError(std::string const& what) : std::runtime_error(what) {}
+        ParserError(std::string const& what) : std::runtime_error(what) {}
     };
 
     using pos = char const*;
@@ -33,48 +31,22 @@ namespace p3::parser
 
     }
 
-    //
-    // "ast"
-    struct Color { std::uint32_t value; };
-    struct Px { float value; };
-    struct Em { float value; };
-    struct Rem { float value; };
-    struct Percentage { float value; };
-    using Length = std::variant<Px, Em, Rem>;
-    using LengthPercentage = std::variant<Length, Percentage>;
-    using OptionalLengthPercentage = std::optional<LengthPercentage>;
-    using FlexibleLength = std::tuple<OptionalLengthPercentage, float, float>;
-
     template<typename E>
     std::unordered_map<std::string, E> enum_table;
 
-    enum class Cascade { inherit, initial };
+    template<typename T, typename = void >
+    struct Rule { static pos parse(pos, T&); };
+
     template<> inline static auto enum_table<Cascade> = std::unordered_map<std::string, Cascade>{
         {"inherit", Cascade::inherit},
         {"initial", Cascade::initial}
     };
 
-    template<typename T>
-    using Cascaded = std::variant<Cascade, T>;
-
-    enum class Direction
-    {
-        Horizontal=0,
-        Vertical=1
-    };
     template<> inline static auto enum_table<Direction> = std::unordered_map<std::string, Direction>{
         {"horizontal", Direction::Horizontal},
         {"vertical", Direction::Vertical}
     };
 
-    enum class Alignment
-    {
-        Start=0,
-        Center=1,
-        End=2,
-        Stretch=3,
-        Baseline=4
-    };
     template<> inline static auto enum_table<Alignment> = std::unordered_map<std::string, Alignment>{
         {"start", Alignment::Start},
         {"center", Alignment::Center},
@@ -83,14 +55,6 @@ namespace p3::parser
         {"baseline", Alignment::Baseline}
     };
 
-    enum class Justification
-    {
-        SpaceBetween = 0,
-        SpaceAround = 1,
-        Start = 2,
-        Center = 3,
-        End = 4
-    };
     template<> inline static auto enum_table<Justification> = std::unordered_map<std::string, Justification>{
         {"space_between", Justification::SpaceBetween},
         {"space_around", Justification::SpaceAround},
@@ -99,12 +63,7 @@ namespace p3::parser
         {"end", Justification::End}
     };
 
-    //
-    // parser
     pos skip_whitespace(pos);
-
-    template<typename T, typename = void >
-    struct Rule { static pos parse(pos, T&); };
 
     template<typename T>
     pos parse(pos begin, T& t)
@@ -118,12 +77,9 @@ namespace p3::parser
         T value;
         auto it = parse(begin, value);
         if (it == begin)
-            throw ParseError("todo: include line/char info");
+            throw ParserError("todo: include line/char info");
         return value;
     }
-
-    //
-    // spec.
 
     template<typename T>
     struct Rule<T, typename std::enable_if< std::is_enum<T>::value >::type>

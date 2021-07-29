@@ -25,6 +25,7 @@
 #include "Context.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include <imgui.h>
 #include <implot.h>
