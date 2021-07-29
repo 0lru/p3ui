@@ -79,7 +79,6 @@ namespace p3
         virtual StyleStrategy& style_strategy() const;
 
         std::shared_ptr<StyleBlock> const& style() const;
-        void set_style(std::shared_ptr<StyleBlock>);
 
         /// inform that this node needs to update it's actual values
         void set_needs_update();

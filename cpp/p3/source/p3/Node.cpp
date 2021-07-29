@@ -502,21 +502,6 @@ namespace p3
         return _style;
     }
 
-    void Node::set_style(std::shared_ptr<StyleBlock> style)
-    {
-        if (_style)
-            _style_guard.reset();
-        _style = std::move(style);
-        if (_style)
-        {
-            _style->add_observer(this);
-            _style_guard = OnScopeExit([this, style = _style]() {
-                style->remove_observer(this);
-            });
-        }
-        set_needs_restyle();
-    }
-
     float Node::MouseEvent::global_x() const
     {
         return _global_x;

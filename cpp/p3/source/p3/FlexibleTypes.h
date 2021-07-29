@@ -29,11 +29,5 @@
 namespace p3
 {
 
-    using OptionalLengthPercentage = p3::parser::OptionalLengthPercentage;
-    using FlexibleLength = p3::parser::FlexibleLength;
-
-    using Direction = p3::parser::Direction;
-    using Alignment = p3::parser::Alignment;
-    using Justification = p3::parser::Justification;
 
 }

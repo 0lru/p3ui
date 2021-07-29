@@ -31,8 +31,6 @@ namespace p3::python
     {
         if (kwargs.contains("label"))
             node.set_label(kwargs["label"].cast<std::optional<std::string>>());
-        if (kwargs.contains("style"))
-            node.set_style(kwargs["style"].cast<std::shared_ptr<StyleBlock>>());
         if (kwargs.contains("color"))
             node.style()->set_color(kwargs["color"].cast<Color>());
         if (kwargs.contains("spacing"))
@@ -119,7 +117,7 @@ namespace p3::python
         node.def_property_readonly("children", &Node::children);
         node.def_property("disabled", &Node::disabled, &Node::set_disabled);
         node.def_property("label", &Node::label, &Node::set_label);
-        node.def_property("style", &Node::style, &Node::set_style);
+        node.def_property_readonly("style", &Node::style);
         node.def_property("on_mouse_enter", &Node::on_mouse_enter, [](Node& node, py::function f) {
             node.set_on_mouse_enter([f{ std::move(f) }](Node::MouseEvent e) {
                 py::gil_scoped_acquire acquire;
