@@ -50,7 +50,7 @@ namespace p3::python
             auto input = std::make_shared<InputText>(size);
             parse(kwargs, *input);
             return input;
-        }), py::arg("size")=1024);
+        }), py::arg("size")=16);
 
         input.def(py::init<>([](py::kwargs kwargs) {
             auto input = std::make_shared<InputText>();
@@ -59,7 +59,7 @@ namespace p3::python
         }));
 
         input.def_property("on_change", &InputText::on_change, &InputText::set_on_change);
-        input.def_property("text", &InputText::text, &InputText::set_text);
+        input.def_property("value", &InputText::value, &InputText::set_value);
     }
 
 }
