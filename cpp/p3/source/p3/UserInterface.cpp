@@ -197,47 +197,44 @@ namespace p3
 
     void UserInterface::update_restyle(Context& context, bool force_restyle)
     {
-        if (needs_update() && (needs_restyle()))
+        if (needs_restyle())
         {
             log_debug("restyling window");
-            if (_theme)
-                _theme_apply_function = _theme->compile(context);
-            else
-                _theme_apply_function = nullptr;
+            _theme_apply_function = _theme
+                ? _theme->compile(context)
+                : nullptr;
         }
-        std::optional<OnScopeExit> theme_guard;
-        if (_theme_apply_function)
-            theme_guard = _theme_apply_function();
-        Node::update_restyle(context, force_restyle);
+        if (needs_update())
+        {
+            if (_theme_apply_function)
+            {
+                auto guard_theme_application = _theme_apply_function();
+                Node::update_restyle(context, force_restyle);
+            }
+            else
+            {
+                Node::update_restyle(context, force_restyle);
+            }
+        }
     }
 
     void UserInterface::render(
-        Context& context, 
-        float width, 
+        Context& context,
+        float width,
         float height)
     {
         ImGui::NewFrame();
-
-        // TODO: remove this
-        auto& style = ImPlot::GetStyle();
-        ImVec4* colors = style.Colors;
-        colors[ImPlotCol_PlotBg] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.LineWeight = 3.0f;
-
-        //
-        // apply theme
-        std::optional<OnScopeExit> theme_guard;
-        if (_theme_apply_function)
-            theme_guard = _theme_apply_function();
 
         //
         // make context
         ImGui::SetCurrentContext(_im_gui_context.get());
         ImPlot::SetCurrentContext(_im_plot_context.get());
-        //
-        // it is important that the destr. is executed after tree
-        // traversal
+        
         update_restyle(context);
+
+        std::optional<OnScopeExit> theme_guard;
+        if (_theme_apply_function)
+            theme_guard = _theme_apply_function();
 
         //
         // begin window
