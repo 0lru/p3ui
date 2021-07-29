@@ -1,7 +1,7 @@
 from p3ui import *
 import numpy as np
 from matplotlib.image import imread
-
+from material_icons import MaterialIcons
 icon_char = b'\xee\x8b\x88'.decode('utf-8')
 
 

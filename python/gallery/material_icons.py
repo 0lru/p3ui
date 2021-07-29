@@ -1,5 +1,5 @@
 class MaterialIcons:
-    
+
     Rotation3d = b'\xee\xa1\x8d'.decode('utf-8')
     AcUnit = b'\xee\xac\xbb'.decode('utf-8')
     AccessAlarm = b'\xee\x86\x90'.decode('utf-8')

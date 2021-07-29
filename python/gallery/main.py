@@ -18,13 +18,14 @@ from tab_widgets import TabWidgets
 from tab_flexible import TabFlexible
 from tab_styles import TabStyles
 from tab_system import TabSystem
+from tab_icons import TabIcons
 
 assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
 
 def set_default_font(ui):
-    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
-    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
+    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 16)
+    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 16)
 
 
 ui = UserInterface(menu_bar=MenuBar())
@@ -35,8 +36,9 @@ tab_plots = TabPlots()
 tab_system = TabSystem(window)
 
 ui.content = Tab(
-    style=Style(padding=(1.5 | em, 0.5 | em)),
+    padding=(1.5 | em, 0.5 | em),
     children=[
+        TabItem("Icons", content=TabIcons()),
         TabItem("Flexible", content=TabFlexible()),
         TabItem("Widgets", content=TabWidgets(ui, assets)),
         TabItem("Plots", content=tab_plots),

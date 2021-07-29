@@ -89,6 +89,9 @@ class TabPlots(VerticalScrollArea):
         plot.remove(test)
         bar_series1.add(Plot.Annotation('series-annotation', x=2, y=12, clamped=True))
         bar_series2.add(Plot.Annotation('series-annotation', x=2, y=16))
+        bar_series1.add(Plot.Annotation('series-annotation', x=3, y=15,
+                                        line_color='red',
+                                        fill_color='#00000000'))
         bar_series2.errors = np.random.standard_normal(8)
         self.content.add(plot)
 
