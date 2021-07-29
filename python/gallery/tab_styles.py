@@ -187,10 +187,8 @@ class TabStyles(ScrollArea):
             justify_content=Justification.Start))
         self.ui = ui
         self.content.add(Flexible(
-            style=Style(
-                direction=Direction.Horizontal,
-                padding=(0 | px, 0.5 | em)
-            ),
+            direction=Direction.Horizontal,
+            padding=(0 | px, 0.5 | em),
             children=[
                 Button(
                     label='make light',

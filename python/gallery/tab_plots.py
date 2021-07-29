@@ -72,9 +72,8 @@ class TabPlots(VerticalScrollArea):
         # bar plot
         plot = Plot(
             label='Bars',
-            style=Style(
-                width=(250 | px, 1, 1),
-                height=(300 | px, 1, 0)),
+            width=(250 | px, 1, 1),
+            height=(300 | px, 1, 0),
             x_ticks=[0, 1, 2, 3, 4, 5, 6, 7],
             x_tick_labels=['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'],
             x_limits=(-1, 8),

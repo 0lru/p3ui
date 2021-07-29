@@ -18,20 +18,18 @@ class TabWidgets(ScrollArea):
     def __init__(self, user_interface, assets):
         super().__init__(
             content=Flexible(
-                style=Style(
-                    width=(100 | percent, 0, 0),
-                    direction=Direction.Vertical,
-                    align_items=Alignment.Stretch,
-                    justify_content=Justification.Start
-                ),
+                width=(100 | percent, 0, 0),
+                direction=Direction.Vertical,
+                align_items=Alignment.Stretch,
+                justify_content=Justification.Start,
                 children=[
                     Button(
                         label='Button',
                         on_click=lambda: user_interface.add(Popup(content=Text('button clicked!')))
                     ),
                     Text(f'Text'),
-                    Text(f'Green Text', style=Style(color='green')),
-                    Text(f'Red Text', style=Style(color='#ff0000')),
+                    Text(f'Green Text', color='green'),
+                    Text(f'Red Text', color='#ff0000'),
                     Button(
                         label=f"{icon_char} Icon Button",
                         on_click=lambda: print('icon button clicked')
