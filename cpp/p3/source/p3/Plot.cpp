@@ -272,6 +272,9 @@ namespace p3
 
     void Plot::Annotation::render_item_annotation()
     {
+        bool has_line_color = line_color() && fill_color() && fill_color().value().alpha() == 0.f;
+        if (has_line_color)
+            std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
         if (clamped)
         {
             if(_fill_color == IMPLOT_AUTO_COL)
@@ -296,6 +299,8 @@ namespace p3
                 ImPlot::Annotate(x, y, offset, _fill_color, text.c_str());
             }
         }
+        if (has_line_color)
+            std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
     }
 
     std::optional<Color> Plot::Item::line_color() const
