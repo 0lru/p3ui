@@ -27,13 +27,15 @@
 
 #include "Node.h"
 
+struct ImGuiInputTextCallbackData;
+
 namespace p3
 {
 
     class InputText : public Node
     {
     public:
-        using Callback = std::function<void()>;
+        using OnChange = std::function<void()>;
 
         InputText(std::size_t size=1024, std::optional<std::string> label=std::optional<std::string>());
 
@@ -43,16 +45,20 @@ namespace p3
         void set_hint(std::optional<std::string>);
         std::optional<std::string> const& hint(std::string) const;
 
-        void set_callback(Callback);
-        Callback callback() const;
+        void set_on_change(OnChange);
+        OnChange on_change() const;
 
         void update_content() override;
 
+        void set_value(std::string);
+        std::string const& value() const;
+
     private:
-        std::string _text;
+        std::string _value;
         std::size_t _size;
         std::optional<std::string> _hint;
-        Callback _callback;
+        OnChange _on_change;
+        static int Callback(ImGuiInputTextCallbackData* data);
     };
 
 }

@@ -32,12 +32,13 @@ namespace p3
 
     namespace
     {
+
         class LocalStyleStrategy : public StyleStrategy
         {
         public:
             FlexibleLength const& initial_height() override
             {
-                static auto initial = FlexibleLength{std::nullopt, 0.f, 1.f};
+                static auto initial = FlexibleLength{ std::nullopt, 0.f, 1.f };
                 return initial;
             }
         };
@@ -51,20 +52,29 @@ namespace p3
 
     InputText::InputText(std::size_t size, std::optional<std::string> label)
         : Node("InputText")
-        , _text()
-        , _size(size)
+        , _value()
+        , _size(4)
     {
-        _text.reserve(size);
+        _value.reserve(4);
         set_label(std::move(label));
     }
 
     void InputText::render_impl(Context&, float width, float height)
     {
-        ImGui::SetNextItemWidth(label() ? width* GoldenRatio : width);
-        if(_hint)
-            ImGui::InputTextWithHint(imgui_label().c_str(), _hint.value().c_str(), _text.data(), _size);
+        ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
+        if (_hint)
+        {
+            if (ImGui::InputTextWithHint(imgui_label().c_str(), _hint.value().c_str(), _value.data(), _size))
+                if (_on_change)
+                    postpone(_on_change);
+        }
         else
-            ImGui::InputText(imgui_label().c_str(), _text.data(), _size);
+        {
+            if (ImGui::InputText( imgui_label().c_str(), _value.data(), _value.capacity(),
+                ImGuiInputTextFlags_CallbackResize, InputText::Callback, this))
+                if (_on_change)
+                    postpone(_on_change);
+        }
         update_status();
     }
 
@@ -78,14 +88,14 @@ namespace p3
         return _hint;
     }
 
-    void InputText::set_callback(Callback callback)
+    void InputText::set_on_change(OnChange on_change)
     {
-        _callback = callback;
+        _on_change = on_change;
     }
 
-    InputText::Callback InputText::callback() const
+    InputText::OnChange InputText::on_change() const
     {
-        return _callback;
+        return _on_change;
     }
 
     void InputText::update_content()
@@ -100,6 +110,27 @@ namespace p3
             const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);
             _automatic_width += label_size.x + context_ptr->Style.ItemInnerSpacing.x;
         }
+    }
+
+    void InputText::set_value(std::string value)
+    {
+        _value = std::move(value);
+    }
+
+    std::string const& InputText::value() const
+    {
+        return _value;
+    }
+
+    int InputText::Callback(ImGuiInputTextCallbackData* data)
+    {
+        auto self = static_cast<InputText *>(data->UserData);
+        if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+        {
+            self->_value.resize(data->BufTextLen);
+            data->Buf = self->_value.data();
+        }
+        return 0;
     }
 
 }

@@ -32,9 +32,13 @@ namespace p3::python
         Definition<Node>::parse(kwargs, input);
         if (kwargs.contains("hint"))
             input.set_hint(kwargs["hint"].cast<std::optional<std::string>>());
-        if (kwargs.contains("clicked"))
+        if (kwargs.contains("on_change"))
         {
-            auto f = kwargs["clicked"].cast<py::function>();
+            input.set_on_change([f{kwargs["on_change"].cast<py::function>()}]()
+            {
+                py::gil_scoped_acquire acquire;
+                f();
+            });
         }
     }
 
@@ -46,7 +50,7 @@ namespace p3::python
             auto input = std::make_shared<InputText>(size);
             parse(kwargs, *input);
             return input;
-        }));
+        }), py::arg("size")=1024);
 
         input.def(py::init<>([](py::kwargs kwargs) {
             auto input = std::make_shared<InputText>();
@@ -54,7 +58,8 @@ namespace p3::python
             return input;
         }));
 
-        input.def_property("clicked", &InputText::callback, &InputText::set_callback);
+        input.def_property("on_change", &InputText::on_change, &InputText::set_on_change);
+        input.def_property("text", &InputText::text, &InputText::set_text);
     }
 
 }
