@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "FlexibleTypes.h"
+#include "StyleTypes.h"
 #include "StyleBlock.h"
 #include "StyleStrategy.h"
 #include "StyleComputation.h"
