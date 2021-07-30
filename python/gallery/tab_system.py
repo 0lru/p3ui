@@ -41,7 +41,7 @@ class ProcessInfo(p3.Layout):
         self._process = psutil.Process()
 
         self.__frames_per_second = p3.Text('-', label='Frames Per Second')
-        self.__seconds_till_idle = p3.Text('-', label='Seconds Till Idle')
+        self.__seconds_till_idle = p3.Text('-', label='Idle Timer')
         self.add(self.__frames_per_second)
         self.add(self.__seconds_till_idle)
 
