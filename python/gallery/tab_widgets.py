@@ -17,7 +17,7 @@ class TabWidgets(ScrollArea):
 
     def __init__(self, user_interface, assets):
         super().__init__(
-            content=Flexible(
+            content=Layout(
                 width=(100 | percent, 0, 0),
                 direction=Direction.Vertical,
                 align_items=Alignment.Stretch,

@@ -5,9 +5,9 @@ from p3ui import UserInterface, Window, Tab, TabItem, Style, em, ChildWindow, Bu
 
 def make_template(builder):
     template = """
-    <Flexible width="2em" justify-content="{get}" >
+    <Layout width="2em" justify-content="{get}" >
       <Button width="5em"/>
-    </Flexible>
+    </Layout>
     """
 
 
@@ -15,7 +15,7 @@ import pathlib
 from menu_bar import MenuBar
 from tab_plots import TabPlots
 from tab_widgets import TabWidgets
-from tab_flexible import TabFlexible
+from tab_layout import TabLayout
 from tab_styles import TabStyles
 from tab_system import TabSystem
 from tab_icons import TabIcons
@@ -39,7 +39,7 @@ ui.content = Tab(
     padding=(1.5 | em, 0.5 | em),
     children=[
         TabItem("Icons", content=TabIcons()),
-        TabItem("Flexible", content=TabFlexible()),
+        TabItem("Layout", content=TabLayout()),
         TabItem("Widgets", content=TabWidgets(ui, assets)),
         TabItem("Plots", content=tab_plots),
         TabItem("Styles", content=TabStyles(ui)),
@@ -72,14 +72,14 @@ def test():
 builder = Builder()
 
 node = builder.build(f"""
-<Flexible 
+<Layout 
     justify-content="space-around" 
     align-items="start">
     <Button 
         label="NoName" 
         on_click="{builder.bind(test)}" 
         width="100px 2 3"/>
-</Flexible>
+</Layout>
 """)
 
 ui = UserInterface(content=node)

@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 
-class ProcessInfo(p3.Flexible):
+class ProcessInfo(p3.Layout):
 
     @staticmethod
     def utc_seconds(dt):
@@ -50,10 +50,8 @@ class ProcessInfo(p3.Flexible):
             x_label='Time (UTC)',
             y_label='GB',
             x_type=p3.Plot.Axis.UniversalTime,
-            style=p3.Style(
-                width=(250 | p3.px, 1, 1),
-                height=(18 | p3.em, 1, 0)
-            ))
+            width=(250 | p3.px, 1, 1),
+            height=(18 | p3.em, 1, 0))
         plot.x_axis.type = p3.Plot.Axis.UniversalTime
         self._memory_series = p3.Plot.LineSeriesDouble(self._process.name())
         self._memory_series.x = np.arange(-100.0, .0, 1.0) + time.time()
@@ -67,10 +65,8 @@ class ProcessInfo(p3.Flexible):
             y_label='%',
             y_limits=(-0.1, 100.1),
             x_type=p3.Plot.Axis.UniversalTime,
-            style=p3.Style(
-                width=(250 | p3.px, 1, 1),
-                height=(18 | p3.em, 1, 0)
-            ))
+            width=(250 | p3.px, 1, 1),
+            height=(18 | p3.em, 1, 0))
         self._cpu_series = p3.Plot.LineSeriesDouble(self._process.name())
         self._cpu_series.x = np.arange(-100.0, .0, 1.0) + time.time()
         self._cpu_series.y = np.zeros(100)
@@ -119,49 +115,37 @@ class TabSystem(p3.ScrollArea):
 
         self.__process_info = ProcessInfo(window)
 
-        self.content = p3.Flexible(
-            style=p3.Style(
-                width=(100 | p3.percent, 1, 1),
-                height=(None, 0, 0),
-                direction=p3.Direction.Vertical,
-                align_items=p3.Alignment.Stretch,
-                justify_content=p3.Justification.Start
-            ),
+        self.content = p3.Layout(
+            width=(100 | p3.percent, 1, 1),
+            height=(None, 0, 0),
+            direction=p3.Direction.Vertical,
+            align_items=p3.Alignment.Stretch,
+            justify_content=p3.Justification.Start,
             children=[
                 p3.Collapsible(
                     label='Video Mode',
                     collapsed=False,
-                    style=p3.Style(
-                    ),
-                    content=p3.Flexible(
-                        style=p3.Style(
-                            direction=p3.Direction.Vertical,
-                            justify_content=p3.Justification.Start,
-                            align_items=p3.Alignment.Stretch,
-                            padding=(1 | p3.em, 0 | p3.em),
-                        ),
+                    content=p3.Layout(
+                        direction=p3.Direction.Vertical,
+                        justify_content=p3.Justification.Start,
+                        align_items=p3.Alignment.Stretch,
+                        padding=(1 | p3.em, 0 | p3.em),
                         children=[
                             self.monitor_combo_box,
                             self.mode_combo_box,
-                            p3.Flexible(
-                                style=p3.Style(
-                                    direction=p3.Direction.Horizontal,
-                                    padding=(0 | p3.em, 0 | p3.em),
-                                    align_items=p3.Alignment.End
-                                ),
+                            p3.Layout(
+                                direction=p3.Direction.Horizontal,
+                                padding=(0 | p3.em, 0 | p3.em),
+                                align_items=p3.Alignment.End,
                                 children=[
                                     p3.Button(
                                         label='apply',
-                                        style=p3.Style(
-                                            width=(100 | p3.px, 0, 0),
-                                        ),
+                                        width=(100 | p3.px, 0, 0),
                                         on_click=self.set_video_mode
                                     ),
                                     p3.Button(
                                         label='reset',
-                                        style=p3.Style(
-                                            width=(100 | p3.px, 0, 0),
-                                        ),
+                                        width=(100 | p3.px, 0, 0),
                                         on_click=self.reset_video_mode
                                     )
                                 ]
@@ -172,12 +156,10 @@ class TabSystem(p3.ScrollArea):
                 p3.Collapsible(
                     label='Settings',
                     collapsed=False,
-                    content=p3.Flexible(
-                        style=p3.Style(
-                            justify_content=p3.Justification.Start,
-                            align_items=p3.Alignment.Stretch,
-                            padding=(1 | p3.em, 0 | p3.em)
-                        ),
+                    content=p3.Layout(
+                        justify_content=p3.Justification.Start,
+                        align_items=p3.Alignment.Stretch,
+                        padding=(1 | p3.em, 0 | p3.em),
                         children=[
                             p3.InputDouble(
                                 label='Idle Timeout (seconds)',

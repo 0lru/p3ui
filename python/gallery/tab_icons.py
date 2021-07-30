@@ -2,11 +2,11 @@ from p3ui import *
 from material_icons import MaterialIcons
 
 
-class TabIcons(Flexible):
+class TabIcons(Layout):
 
     def __init__(self):
         super().__init__(
-            content=Flexible(
+            content=Layout(
                 width=(100 | percent, 0, 0),
                 direction=Direction.Vertical,
                 align_items=Alignment.Start,
@@ -23,7 +23,7 @@ class TabIcons(Flexible):
             Text(f'{getattr(MaterialIcons, icon_name)} {icon_name}')
             for icon_name in TabIcons.icon_names()
         ]
-        self.add(ScrollArea(content=Flexible(children=self.icons_list)))
+        self.add(ScrollArea(content=Layout(children=self.icons_list)))
 
     @staticmethod
     def icon_names():

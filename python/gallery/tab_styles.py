@@ -1,9 +1,9 @@
-from p3ui import Flexible, Direction, Alignment, Justification, \
+from p3ui import Layout, Direction, Alignment, Justification, \
     px, em, rem, InputFloat, ComboBox, ScrollArea, ColorEdit, Text, \
-    Px, Em, Color, Style, Button
+    Px, Em, Color, Button
 
 
-class StyleInput(Flexible):
+class StyleInput(Layout):
     def __init__(self, label, target, attribute):
         super().__init__(
             width=(100 | em, 1, 0),
@@ -59,7 +59,7 @@ class Length1(StyleInput):
         self.value = self.__input.value | [px, em, rem][self.__combo.selected_index]
 
 
-class Length2(Flexible):
+class Length2(Layout):
 
     def __init__(self, label, target, attribute):
 
@@ -126,7 +126,7 @@ class Length2(Flexible):
         setattr(self.__target, self.__attribute, l2)
 
 
-class Color4(Flexible):
+class Color4(Layout):
 
     def __init__(self, label, target, attribute):
         super().__init__(
@@ -180,13 +180,13 @@ class TabStyles(ScrollArea):
         self.initialize_values()
 
     def __init__(self, ui):
-        super().__init__(content=Flexible(
+        super().__init__(content=Layout(
             width=(45 | em, 0, 0),
             direction=Direction.Vertical,
             align_items=Alignment.Stretch,
             justify_content=Justification.Start))
         self.ui = ui
-        self.content.add(Flexible(
+        self.content.add(Layout(
             direction=Direction.Horizontal,
             padding=(0 | px, 0.5 | em),
             children=[

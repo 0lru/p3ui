@@ -1,7 +1,7 @@
-from p3ui import Flexible, ComboBox, Direction, Justification, Alignment, px, Button, Style, ScrollArea
+from p3ui import Layout, ComboBox, Direction, Justification, Alignment, px, Button, Style, ScrollArea
 
 
-class TabFlexible(Flexible):
+class TabLayout(Layout):
 
     def __init__(self):
         super().__init__(
@@ -35,7 +35,7 @@ class TabFlexible(Flexible):
             on_change=lambda index: set_alignment(Alignment.__members__[alignments[index]])
         ))
 
-        self.vertical = Flexible(
+        self.vertical = Layout(
             width=(1 | px, 1, 1),
             direction=Direction.Vertical,
             justify_content=Justification.Center,
@@ -65,7 +65,7 @@ class TabFlexible(Flexible):
             ]
         )
 
-        self.horizontal = Flexible(
+        self.horizontal = Layout(
             width=(1 | px, 1, 1),
             direction=Direction.Horizontal,
             justify_content=Justification.Center,
@@ -95,7 +95,7 @@ class TabFlexible(Flexible):
             ]
         )
 
-        self.add(Flexible(
+        self.add(Layout(
             direction=Direction.Horizontal,
             justify_content=Justification.Center,
             align_items=Alignment.Stretch,

@@ -5,7 +5,7 @@ class VerticalScrollArea(ScrollArea):
 
     def __init__(self, *args, **kwargs):
         super().__init__(
-            content=Flexible(
+            content=Layout(
                 width=(100 | percent, 0, 0),
                 height=(auto, 0, 0),
                 direction=Direction.Vertical,
