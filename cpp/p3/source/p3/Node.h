@@ -80,6 +80,9 @@ namespace p3
 
         std::shared_ptr<StyleBlock> const& style() const;
 
+        /// set redraw flag for this branch up to the root
+        void set_needs_redraw();
+
         /// inform that this node needs to update it's actual values
         void set_needs_update();
 
@@ -182,7 +185,7 @@ namespace p3
         // this requires some work. at the moment it's 
         // "recompute everything on every single frame"..
         // 
-        // bool _needs_realign = true;
+        bool _needs_redraw = true;
         bool _needs_update = true;
         bool _needs_restyle = true;
         void on_style_changed();

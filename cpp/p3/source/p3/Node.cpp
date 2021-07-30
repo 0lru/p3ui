@@ -282,8 +282,9 @@ namespace p3
             update_content();
         }
         //
-        // clear flags
+        // change state
         _needs_update = _needs_restyle = false;
+        _needs_redraw = true;
     }
 
     StyleComputation const& Node::style_computation() const
@@ -295,6 +296,19 @@ namespace p3
     {
         _needs_restyle = true;
         set_needs_update();
+    }
+
+    void Node::set_needs_redraw()
+    {
+        _needs_redraw = true;
+        auto it = _parent;
+        while (it)
+        {
+            if (it->_needs_redraw)
+                break;
+            it->_needs_redraw = true;
+            it = it->_parent;
+        }
     }
 
     void Node::set_needs_update()
