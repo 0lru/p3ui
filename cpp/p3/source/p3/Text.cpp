@@ -41,6 +41,11 @@ namespace p3
                 static auto initial = LayoutLength{std::nullopt, 0.f, 0.f};
                 return initial;
             }
+            LayoutLength const& initial_width() override
+            {
+                static auto initial = LayoutLength{std::nullopt, 0.f, 0.f};
+                return initial;
+            }
         };
         LocalStyleStrategy _style_strategy;
     }
