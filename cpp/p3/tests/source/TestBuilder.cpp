@@ -23,8 +23,8 @@ namespace p3::tests
         auto node = Builder().build(R"(<Button width="1px 2 3"/>)");
         ASSERT_TRUE(node != nullptr);
         ASSERT_TRUE(node->style()->width());
-        ASSERT_TRUE(std::holds_alternative<FlexibleLength>(node->style()->width().value()));
-        auto& length = std::get<FlexibleLength>(node->style()->width().value());
+        ASSERT_TRUE(std::holds_alternative<LayoutLength>(node->style()->width().value()));
+        auto& length = std::get<LayoutLength>(node->style()->width().value());
         ASSERT_TRUE(std::get<0>(length));
         ASSERT_TRUE(std::holds_alternative<Length>(std::get<0>(length).value()));
         ASSERT_EQ(std::get<1>(length), 2);
@@ -33,8 +33,8 @@ namespace p3::tests
 
     TEST(TestBuilder, can_add_button_to_flexible)
     {
-        auto node = Builder().build(R"(<Flexible><Button width="1px 2 3"/></Flexible>)");
-        ASSERT_EQ(node->element_name(), "Flexible");
+        auto node = Builder().build(R"(<Layout><Button width="1px 2 3"/></Layout>)");
+        ASSERT_EQ(node->element_name(), "Layout");
         ASSERT_EQ(node->children().size(), 1);
         ASSERT_EQ(node->children()[0]->element_name(), "Button");
     }

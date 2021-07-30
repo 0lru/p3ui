@@ -68,10 +68,10 @@ namespace p3
         void set_x(Item<LengthPercentage>);
         Item<LengthPercentage> const& y() const;
         void set_y(Item<LengthPercentage>);
-        Item<FlexibleLength> const& width() const;
-        void set_width(Item<FlexibleLength>);
-        Item<FlexibleLength> const& height() const;
-        void set_height(Item<FlexibleLength>);
+        Item<LayoutLength> const& width() const;
+        void set_width(Item<LayoutLength>);
+        Item<LayoutLength> const& height() const;
+        void set_height(Item<LayoutLength>);
 
         Item<bool> const& visible() const;
         void set_visible(Item<bool>);
@@ -95,8 +95,8 @@ namespace p3
         Item<Color> _background_color = std::nullopt;
         Item<LengthPercentage> _x = std::nullopt;
         Item<LengthPercentage> _y = std::nullopt;
-        Item<FlexibleLength> _width = std::nullopt;
-        Item<FlexibleLength> _height = std::nullopt;
+        Item<LayoutLength> _width = std::nullopt;
+        Item<LayoutLength> _height = std::nullopt;
 
         Item<bool> _visible = std::nullopt;
         Item<Direction> _direction = std::nullopt;

@@ -42,9 +42,9 @@ namespace p3::python
         if (kwargs.contains("y"))
             node.style()->set_y(kwargs["y"].cast<Length>());
         if (kwargs.contains("width"))
-            node.style()->set_width(kwargs["width"].cast<FlexibleLength>());
+            node.style()->set_width(kwargs["width"].cast<LayoutLength>());
         if (kwargs.contains("height"))
-            node.style()->set_height(kwargs["height"].cast<FlexibleLength>());
+            node.style()->set_height(kwargs["height"].cast<LayoutLength>());
         if (kwargs.contains("visible"))
             node.style()->set_visible(kwargs["visible"].cast<bool>());
         if (kwargs.contains("direction"))

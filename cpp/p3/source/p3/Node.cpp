@@ -95,8 +95,8 @@ namespace p3
     {
         static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{
             { "label", [](Node& node, std::string const& value) { node.set_label(value); }},
-            { "width", [](Node& node, std::string const& value) { node.style()->set_width(parser::parse<FlexibleLength>(value.c_str())); }},
-            { "height", [](Node& node, std::string const& value) { node.style()->set_height(parser::parse<FlexibleLength>(value.c_str())); }},
+            { "width", [](Node& node, std::string const& value) { node.style()->set_width(parser::parse<LayoutLength>(value.c_str())); }},
+            { "height", [](Node& node, std::string const& value) { node.style()->set_height(parser::parse<LayoutLength>(value.c_str())); }},
             { "direction", [](Node& node, std::string const& value) { node.style()->set_direction(parser::parse<Direction>(value.c_str())); }},
             { "align-items", [](Node& node, std::string const& value) { node.style()->set_align_items(parser::parse<Alignment>(value.c_str())); }},
             { "justify-content", [](Node& node, std::string const& value) { node.style()->set_justify_content(parser::parse<Justification>(value.c_str())); }},

@@ -35,7 +35,7 @@ PYBIND11_MODULE(p3ui, module)
     python::Definition<Node>::apply(module);
     python::Definition<Button>::apply(module);
     python::Definition<CheckBox>::apply(module);
-    python::Definition<Flexible>::apply(module);
+    python::Definition<Layout>::apply(module);
     python::Definition<Texture>::apply(module);
     python::Definition<Image>::apply(module);
     python::Definition<Color>::apply(module);

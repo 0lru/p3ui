@@ -34,7 +34,7 @@
 #include "Collapsible.h"
 #include "ColorEdit.h"
 #include "ComboBox.h"
-#include "Flexible.h"
+#include "Layout.h"
 #include "Image.h"
 #include "InputScalar.h"
 #include "InputText.h"
@@ -91,7 +91,7 @@ namespace p3
             map["Collapsible"] = []() -> std::shared_ptr<Node> { return std::make_shared<Collapsible>(); };
             map["ColorEdit"] = []() -> std::shared_ptr<Node> { return std::make_shared<ColorEdit>(); };
             map["ComboBox"] = []() -> std::shared_ptr<Node> { return std::make_shared<ComboBox>(); };
-            map["Flexible"] = []() -> std::shared_ptr<Node> { return std::make_shared<Flexible>(); };
+            map["Layout"] = []() -> std::shared_ptr<Node> { return std::make_shared<Layout>(); };
             map["Image"] = []() -> std::shared_ptr<Node> { return std::make_shared<Image>(); };
             p3::invoke_for_all_data_types<add_input>(map);
             map["InputText"] = []() -> std::shared_ptr<Node> { return std::make_shared<InputText>(); };

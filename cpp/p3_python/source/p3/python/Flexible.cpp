@@ -22,31 +22,31 @@
 
 #include "p3ui.h"
 
-#include <p3/Flexible.h>
+#include <p3/Layout.h>
 
 
 namespace p3::python
 {
 
-    void Definition<Flexible>::parse(py::kwargs const& kwargs, Flexible& flexible)
+    void Definition<Layout>::parse(py::kwargs const& kwargs, Layout& flexible)
     {
         Definition<Node>::parse(kwargs, flexible);
     }
 
-    void Definition<Flexible>::apply(py::module& module)
+    void Definition<Layout>::apply(py::module& module)
     {
-        py::class_<Flexible, Node, std::shared_ptr<Flexible>> flexible(module, "Flexible", R"doc(
-            :py:class:`Flexible` Partial Adaption of the CSS flexbox.
+        py::class_<Layout, Node, std::shared_ptr<Layout>> flexible(module, "Layout", R"doc(
+            :py:class:`Layout` Partial Adaption of the CSS flexbox.
         )doc");
 
         flexible.def(py::init<>([](py::kwargs kwargs) {
-            auto flexible = std::make_shared<Flexible>();
+            auto flexible = std::make_shared<Layout>();
             parse(kwargs, *flexible);
             return flexible;
         }));
-        flexible.def("add", &Flexible::add, R"doc(
+        flexible.def("add", &Layout::add, R"doc(
         )doc");
-        flexible.def("insert", &Flexible::insert);
+        flexible.def("insert", &Layout::insert);
     }
 
 }

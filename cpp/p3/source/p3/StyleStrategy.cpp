@@ -24,15 +24,15 @@
 namespace p3
 {
 
-    FlexibleLength const& StyleStrategy::initial_width()
+    LayoutLength const& StyleStrategy::initial_width()
     {
-        static auto initial = FlexibleLength{ std::nullopt, 1.f, 0.f };
+        static auto initial = LayoutLength{ std::nullopt, 1.f, 0.f };
         return initial;
     }
     
-    FlexibleLength const& StyleStrategy::initial_height()
+    LayoutLength const& StyleStrategy::initial_height()
     {
-        static auto initial = FlexibleLength{ std::nullopt, 1.f, 0.f };
+        static auto initial = LayoutLength{ std::nullopt, 1.f, 0.f };
         return initial;
     }
     

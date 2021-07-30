@@ -208,7 +208,7 @@ namespace p3::parser
         return begin;
     }
 
-    pos Rule<FlexibleLength, void>::parse(pos begin, FlexibleLength& fd)
+    pos Rule<LayoutLength, void>::parse(pos begin, LayoutLength& fd)
     {
         auto it = begin;
         if (auto temp = parser::parse<OptionalLengthPercentage>(it, std::get<0>(fd)); it == temp)

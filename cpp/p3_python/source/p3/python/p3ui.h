@@ -39,7 +39,7 @@ namespace p3
     class Color;
     class ColorEdit;
     class ComboBox;
-    class Flexible;
+    class Layout;
     class Image;
     template<typename T> class InputScalar;
     class InputText;

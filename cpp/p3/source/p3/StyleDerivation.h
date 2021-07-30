@@ -43,8 +43,8 @@ namespace p3
         Cascadable<bool> visible = Cascade::Initial;
         Cascadable<LengthPercentage> x = Cascade::Initial;
         Cascadable<LengthPercentage> y = Cascade::Initial;
-        Cascadable<FlexibleLength> width = Cascade::Initial;
-        Cascadable<FlexibleLength> height = Cascade::Initial;
+        Cascadable<LayoutLength> width = Cascade::Initial;
+        Cascadable<LayoutLength> height = Cascade::Initial;
 
         Cascadable<Direction> direction = Cascade::Initial;
         Cascadable<Justification> justify_content = Cascade::Initial;

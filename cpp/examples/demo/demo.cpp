@@ -23,7 +23,7 @@
 #include <p3/Context.h>
 #include <p3/Window.h>
 #include <p3/ChildWindow.h>
-#include <p3/Flexible.h>
+#include <p3/Layout.h>
 #include <p3/Button.h>
 #include <p3/Collapsible.h>
 #include <p3/ScrollArea.h>
@@ -36,7 +36,7 @@ std::shared_ptr<ChildWindow> make_collapsible()
     auto button2 = make<Button>("button2");
     auto button3 = make<Button>("button3");
 
-    auto layout = make<Flexible>();
+    auto layout = make<Layout>();
     layout->style()->set_align_items(Alignment::Stretch);
     layout->style()->set_justify_content(Justification::SpaceBetween);
     layout->add(button1);
@@ -58,7 +58,7 @@ std::shared_ptr<ChildWindow> make_widgets()
     auto scroll_area = make<ScrollArea>();
     window->set_content(scroll_area);
 
-    auto layout = make<Flexible>();
+    auto layout = make<Layout>();
     /*layout->set_align_items(Alignment::Stretch)
         .set_justify_content(Justification::Start)
         .set_width({ 100 | percent, 0.f, 0.f });

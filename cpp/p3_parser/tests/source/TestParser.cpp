@@ -146,19 +146,19 @@ namespace p3::parser::tests
         {
             std::string data("auto 1 1");
             auto input = data.c_str();
-            FlexibleLength flexible_length;
+            LayoutLength flexible_length;
             ASSERT_NE(parse(input, flexible_length), input);
         }
         {
             std::string data("33% 1 1");
             auto input = data.c_str();
-            FlexibleLength flexible_length;
+            LayoutLength flexible_length;
             ASSERT_NE(parse(input, flexible_length), input);
         }
         {
             std::string data("0.3px 1 1");
             auto input = data.c_str();
-            FlexibleLength flexible_length;
+            LayoutLength flexible_length;
             ASSERT_NE(parse(input, flexible_length), input);
         }
     }

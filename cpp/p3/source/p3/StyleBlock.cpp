@@ -65,10 +65,10 @@ namespace p3
     void StyleBlock::set_x(Item<LengthPercentage> x) { _x = std::move(x); _on_change(); };
     StyleBlock::Item<LengthPercentage> const& StyleBlock::y() const { return _y; };
     void StyleBlock::set_y(Item<LengthPercentage> y) { _y = std::move(y); _on_change(); };
-    StyleBlock::Item<FlexibleLength> const& StyleBlock::width() const { return _width; };
-    void StyleBlock::set_width(Item<FlexibleLength> width) { _width = std::move(width); _on_change(); };
-    StyleBlock::Item<FlexibleLength> const& StyleBlock::height() const { return _height; };
-    void StyleBlock::set_height(Item<FlexibleLength> height) { _height = std::move(height); _on_change(); };
+    StyleBlock::Item<LayoutLength> const& StyleBlock::width() const { return _width; };
+    void StyleBlock::set_width(Item<LayoutLength> width) { _width = std::move(width); _on_change(); };
+    StyleBlock::Item<LayoutLength> const& StyleBlock::height() const { return _height; };
+    void StyleBlock::set_height(Item<LayoutLength> height) { _height = std::move(height); _on_change(); };
 
     StyleBlock::Item<bool> const& StyleBlock::visible() const { return _visible; };
     void StyleBlock::set_visible(Item<bool> visible) { _visible = std::move(visible); _on_change(); };

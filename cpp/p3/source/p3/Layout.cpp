@@ -20,7 +20,7 @@
   SOFTWARE.
 /******************************************************************************/
 
-#include "Flexible.h"
+#include "Layout.h"
 
 #include <numeric>
 #include <optional>
@@ -35,12 +35,12 @@ namespace p3
 {
 
 
-    Flexible::Flexible()
-        : Node("Flexible")
+    Layout::Layout()
+        : Node("Layout")
     {
     }
 
-    void Flexible::update_content()
+    void Layout::update_content()
     {
         if (style_computation().direction == Direction::Vertical)
         {
@@ -102,7 +102,7 @@ namespace p3
         }
     }
 
-    void Flexible::render_impl(Context& context, float w, float h)
+    void Layout::render_impl(Context& context, float w, float h)
     {
         auto initial_cursor = ImGui::GetCursorPos();
         auto const& frame_padding = ImGui::GetStyle().FramePadding;

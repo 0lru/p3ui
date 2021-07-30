@@ -30,10 +30,10 @@
 namespace p3
 {
 
-    class Flexible : public Node
+    class Layout : public Node
     {
     public:
-        Flexible();
+        Layout();
 
         void update_content() override;
         void render_impl(Context&, float width, float height) override;

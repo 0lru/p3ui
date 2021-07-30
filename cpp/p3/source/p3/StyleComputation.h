@@ -41,8 +41,8 @@ namespace p3
         bool visible;
         LengthPercentage x;
         LengthPercentage y;
-        FlexibleLength width;
-        FlexibleLength height;
+        LayoutLength width;
+        LayoutLength height;
 
         Direction direction;
         Justification justify_content;

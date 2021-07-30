@@ -22,15 +22,15 @@
 
 #include <p3/Context.h>
 #include <p3/Window.h>
-#include <p3/Flexible.h>
+#include <p3/Layout.h>
 #include <p3/Button.h>
 
 using namespace p3;
 
 
-ref<Flexible> make_layout(Direction direction)
+ref<Layout> make_layout(Direction direction)
 {
-    auto layout = make<Flexible>();
+    auto layout = make<Layout>();
     layout->style()->set_direction(direction);
 /*    layout->set_align_items(Alignment::Stretch)
         .set_justify_content(Justification::Start)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 {
     auto context = make<Context>();
     auto window = make<Window>(context);
-    auto main_layout = make<Flexible>();
+    auto main_layout = make<Layout>();
     main_layout->style()->set_direction(Direction::Vertical);
     main_layout->style()->set_align_items(Alignment::Stretch);
     main_layout->add(make_layout(Direction::Vertical));

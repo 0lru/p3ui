@@ -37,14 +37,14 @@ namespace p3
         class LocalStyleStrategy : public StyleStrategy
         {
         public:
-            FlexibleLength const& initial_width() override
+            LayoutLength const& initial_width() override
             {
-                static auto initial = FlexibleLength{ std::nullopt, 0.f, 0.f };
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
-            FlexibleLength const& initial_height() override
+            LayoutLength const& initial_height() override
             {
-                static auto initial = FlexibleLength{ std::nullopt, 0.f, 0.f };
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
         };

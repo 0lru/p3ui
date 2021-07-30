@@ -30,8 +30,8 @@ namespace p3
     {
     public:
         virtual ~StyleStrategy() = default;
-        virtual FlexibleLength const& initial_width();
-        virtual FlexibleLength const& initial_height();
+        virtual LayoutLength const& initial_width();
+        virtual LayoutLength const& initial_height();
         virtual Color initial_background_color();
         virtual Color current_background_color();
     };
