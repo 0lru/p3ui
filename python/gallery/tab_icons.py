@@ -34,5 +34,5 @@ class TabIcons(Layout):
         for icon_text in self.icons_list:
             if icon_text is self.search:
                 continue
-            lbl = icon_text.text.split(' ')[1]
+            lbl = icon_text.value.split(' ')[1]
             icon_text.visible = self.search.value.lower() in lbl.lower()
