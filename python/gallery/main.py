@@ -1,15 +1,5 @@
 import asyncio
-import traceback
-from p3ui import UserInterface, Window, Tab, TabItem, Style, em, ChildWindow, Button, Builder
-
-
-def make_template(builder):
-    template = """
-    <Layout width="2em" justify-content="{get}" >
-      <Button width="5em"/>
-    </Layout>
-    """
-
+from p3ui import *
 
 import pathlib
 from menu_bar import MenuBar
@@ -20,12 +10,14 @@ from tab_styles import TabStyles
 from tab_system import TabSystem
 from tab_icons import TabIcons
 
+from material_icons import MaterialIcons
+
 assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
 
 def set_default_font(ui):
-    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 16)
-    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 16)
+    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 18)
+    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 18)
 
 
 ui = UserInterface(menu_bar=MenuBar())
@@ -35,17 +27,27 @@ window = Window(user_interface=ui)
 tab_plots = TabPlots()
 tab_system = TabSystem(window)
 
-ui.content = Tab(
-    padding=(1.5 | em, 0.5 | em),
+ui.content = Layout(
+    direction=Direction.Vertical,
     children=[
-        TabItem("Icons", content=TabIcons()),
-        TabItem("Layout", content=TabLayout()),
-        TabItem("Widgets", content=TabWidgets(ui, assets)),
-        TabItem("Plots", content=tab_plots),
-        TabItem("Styles", content=TabStyles(ui)),
-        TabItem("System", content=tab_system)
-    ]
-)
+        Tab(
+            padding=(1.5 | em, 0.5 | em),
+            children=[
+                TabItem("Icons", content=TabIcons()),
+                TabItem("Layout", content=TabLayout()),
+                TabItem("Widgets", content=TabWidgets(ui, assets)),
+                TabItem("Plots", content=tab_plots),
+                TabItem("Styles", content=TabStyles(ui)),
+                TabItem("System", content=tab_system)
+            ]),
+        Layout(
+            height=(None, 0, 0),
+            direction=Horizontal,
+            align_items=Alignment.Center,
+            justify_content=Justification.End,
+            children=[Text(f'{MaterialIcons.Timer}')]
+        )
+    ])
 
 
 async def main():
@@ -58,40 +60,4 @@ async def main():
 
 
 asyncio.run(main())
-exit(0)
-
-
-# sync would be:
-# window.loop(on_frame=lambda _: plots.update())
-
-
-def test():
-    print('clicked')
-
-
-builder = Builder()
-
-node = builder.build(f"""
-<Layout 
-    justify-content="space-around" 
-    align-items="start">
-    <Button 
-        label="NoName" 
-        on_click="{builder.bind(test)}" 
-        width="100px 2 3"/>
-</Layout>
-""")
-
-ui = UserInterface(content=node)
-window = Window(user_interface=ui)
-
-
-async def main():
-    while not window.closed:
-        window.frame()
-        await asyncio.sleep(0)
-
-
-asyncio.run(main())
-
 exit(0)
