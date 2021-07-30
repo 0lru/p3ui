@@ -18,8 +18,8 @@ class ProcessInfo(p3.Layout):
 
     async def update(self):
         while True:
-            self.__frames_per_second.text = f'{self.window.frames_per_second:.2f}'
-            self.__seconds_till_idle.text = f'{self.window.time_till_enter_idle_mode:.2f}'
+            self.__frames_per_second.value = f'{self.window.frames_per_second:.2f}'
+            self.__seconds_till_idle.value = f'{self.window.time_till_enter_idle_mode:.2f}'
             self._memory_series.x = np.roll(self._memory_series.x, -1)
             self._memory_series.y = np.roll(self._memory_series.y, -1)
             self._memory_series.x[-1] = time.time()
