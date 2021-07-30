@@ -41,7 +41,7 @@ namespace p3::python
             parse(kwargs, *node);
             return node;
         }));
-        text.def_property("text", &Text::text, &Text::set_text);
+        text.def_property("value", &Text::value, &Text::set_value);
     }
 
 }

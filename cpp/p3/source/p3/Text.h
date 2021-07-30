@@ -36,18 +36,18 @@ namespace p3
     public:
         using Callback = std::function<void()>;
 
-        Text(std::string text="", std::optional<std::string> label=std::optional<std::string>());
+        Text(std::string value="", std::optional<std::string> label=std::optional<std::string>());
 
         StyleStrategy& style_strategy() const override;        
         void render_impl(Context&, float width, float height) override;
 
-        void set_text(std::string);
-        std::string const& text() const;
+        void set_value(std::string);
+        std::string const& value() const;
 
         void update_content() override;
 
     private:
-        std::string _text;
+        std::string _value;
         Callback _callback;
     };
 

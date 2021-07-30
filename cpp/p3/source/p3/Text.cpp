@@ -50,9 +50,9 @@ namespace p3
         return _style_strategy;
     }
 
-    Text::Text(std::string text, std::optional<std::string> label)
+    Text::Text(std::string value, std::optional<std::string> label)
         : Node("Text")
-        , _text(std::move(text))
+        , _value(std::move(value))
     {
         set_label(std::move(label));
     }
@@ -63,28 +63,28 @@ namespace p3
         ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
         if (label())
         {
-            ImGui::LabelText(label().value().c_str(), _text.c_str());
+            ImGui::LabelText(label().value().c_str(), _value.c_str());
         }
         else
         {
-            // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
+            // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentConvalue()->Style.FramePadding.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
-            ImGui::Text(_text.c_str());
+            ImGui::Text(_value.c_str());
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
             // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
         }
     }
 
-    void Text::set_text(std::string text)
+    void Text::set_value(std::string value)
     {
-        _text = std::move(text);
+        _value = std::move(value);
         set_needs_update();
         std::optional<float> x;
     }
 
-    std::string const& Text::text() const
+    std::string const& Text::value() const
     {
-        return _text;
+        return _value;
     }
 
     void Text::update_content()
@@ -93,7 +93,7 @@ namespace p3
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;
         _automatic_height = font_size + 2.f * frame_padding.y;
-        const ImVec2 label_size = ImGui::CalcTextSize(_text.c_str(), NULL, true);
+        const ImVec2 label_size = ImGui::CalcTextSize(_value.c_str(), NULL, true);
         _automatic_width = label_size.x;
         if (label())
         {
