@@ -16,8 +16,8 @@ assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
 
 
 def set_default_font(ui):
-    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 18)
-    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 18)
+    ui.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
+    ui.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
 
 
 ui = UserInterface(menu_bar=MenuBar())
@@ -33,13 +33,12 @@ ui.content = Layout(
         Tab(
             padding=(1.5 | em, 0.5 | em),
             children=[
-                TabItem("Icons", content=TabIcons()),
-                TabItem("Layout", content=TabLayout()),
-                TabItem("Widgets", content=TabWidgets(ui, assets)),
-                TabItem("Plots", content=tab_plots),
-                TabItem("Styles", content=TabStyles(ui)),
-                TabItem("System", content=tab_system)
-            ]),
+                TabItem(f'{MaterialIcons.VerticalAlignCenter} Layout', content=TabLayout()),
+                TabItem(f'{MaterialIcons.Widgets} Widgets', content=TabWidgets(ui, assets)),
+                TabItem(f'{MaterialIcons.LightbulbOutline} Icons', content=TabIcons()),
+                TabItem(f'{MaterialIcons.MultilineChart} Plots', content=tab_plots),
+                TabItem(f'{MaterialIcons.BorderOuter} Styles', content=TabStyles(ui)),
+                TabItem(f'{MaterialIcons.Settings} System', content=tab_system)]),
         Layout(
             height=(None, 0, 0),
             direction=Horizontal,
