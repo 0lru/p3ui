@@ -82,6 +82,8 @@ namespace p3
 
         std::string name() const;
 
+        double dpi() const;
+
     private:
         GLFWmonitor* _handle = nullptr;
     };
@@ -112,6 +114,7 @@ namespace p3
         std::optional<VideoMode> video_mode() const;
         void set_video_mode(std::optional<VideoMode>);
 
+        Monitor monitor() const;
         static Monitor primary_monitor();
         static std::vector<Monitor> monitors();
 

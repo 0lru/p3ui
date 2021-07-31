@@ -56,6 +56,7 @@ namespace p3::python
             .def_property_readonly("name", &Monitor::name)
             .def_property_readonly("mode", &Monitor::mode)
             .def_property_readonly("modes", &Monitor::modes)
+            .def_property_readonly("dpi", &Monitor::dpi)
             .def("__eq__", [](Monitor& monitor, Monitor& other) {
             return monitor == other;
         });
@@ -88,45 +89,46 @@ namespace p3::python
             parse(kwargs, *window);
             return window;
         }),
-                py::kw_only(),
-            py::arg("title") = "p3",
-            py::arg("width") = 1024,
-            py::arg("height") = 768,
-            py::arg("vsync") = true,
-            py::arg("idle_timeout") = py::none(),
-            py::arg("idle_frame_time") = 1.0)
-            .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
-            .def_static("monitors", &Window::monitors)
-            .def_property("position", &Window::position, &Window::set_position)
-            .def_property("size", &Window::size, &Window::set_size)
-            .def_property("vsync", &Window::vsync, &Window::set_vsync)
-            .def_property("idle_timeout", [](Window& window) {
+        py::kw_only(),
+        py::arg("title") = "p3",
+        py::arg("width") = 1024,
+        py::arg("height") = 768,
+        py::arg("vsync") = true,
+        py::arg("idle_timeout") = py::none(),
+        py::arg("idle_frame_time") = 1.0)
+        .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
+        .def_static("monitors", &Window::monitors)
+        .def_property("position", &Window::position, &Window::set_position)
+        .def_property("size", &Window::size, &Window::set_size)
+        .def_property("vsync", &Window::vsync, &Window::set_vsync)
+        .def_property("idle_timeout", [](Window& window) {
             return window.idle_timeout() ? std::optional<double>(window.idle_timeout().value().count()) : std::optional<double>();
         }, [](Window& window, std::optional<double> idle_timeout) {
             window.set_idle_timeout(idle_timeout
                 ? std::optional<Window::Seconds>(idle_timeout.value())
                 : std::nullopt);
         })
-            .def_property("idle_frame_time", [](Window& window) {
-                return window.idle_frame_time().count();
-            }, [](Window& window, double idle_frame_time) {
-                window.set_idle_frame_time(Window::Seconds(idle_frame_time));
-            })
-            .def_property_readonly("time_till_enter_idle_mode", &Window::time_till_enter_idle_mode)
-            .def_property_readonly("frames_per_second", &Window::frames_per_second)
-            .def_static("primary_monitor", &Window::primary_monitor)
-            .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
-            .def("frame", &Window::frame)
-            .def_property_readonly("closed", &Window::closed)
-            .def("loop", [](Window& window, py::object f) {
-            Window::UpdateCallback on_frame;
-            if (!f.is(py::none()))
-                on_frame = [f{ f.cast<py::function>() }](auto window) {
-                py::gil_scoped_acquire acquire;
-                f(std::move(window));
-            };
-            py::gil_scoped_release release;
-            window.loop(on_frame);
+        .def_property("idle_frame_time", [](Window& window) {
+            return window.idle_frame_time().count();
+        }, [](Window& window, double idle_frame_time) {
+            window.set_idle_frame_time(Window::Seconds(idle_frame_time));
+        })
+        .def_property_readonly("time_till_enter_idle_mode", &Window::time_till_enter_idle_mode)
+        .def_property_readonly("frames_per_second", &Window::frames_per_second)
+        .def_property_readonly("monitor", &Window::monitor)
+        .def_static("primary_monitor", &Window::primary_monitor)
+        .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
+        .def("frame", &Window::frame)
+        .def_property_readonly("closed", &Window::closed)
+        .def("loop", [](Window& window, py::object f) {
+        Window::UpdateCallback on_frame;
+        if (!f.is(py::none()))
+            on_frame = [f{ f.cast<py::function>() }](auto window) {
+            py::gil_scoped_acquire acquire;
+            f(std::move(window));
+        };
+        py::gil_scoped_release release;
+        window.loop(on_frame);
         }, py::kw_only(), py::arg("on_frame") = py::none());
     }
 

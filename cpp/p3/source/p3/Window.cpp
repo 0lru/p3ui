@@ -377,4 +377,23 @@ namespace p3
         return _idle_frame_time;
     }
 
+    Monitor Window::monitor() const
+    {
+        auto handle = glfwGetWindowMonitor(_glfw_window.get());
+        if(handle == nullptr)
+            handle = glfwGetPrimaryMonitor();
+        return Monitor(handle);
+    }
+
+    double Monitor::dpi() const
+    {
+        int width, height;
+        const GLFWvidmode* mode = glfwGetVideoMode(_handle);
+        glfwGetMonitorPhysicalSize(_handle, &width, &height);
+        // 25,4 = one inch in [mm]
+        return width == 0 
+            ? 96.0
+            : mode->width / (width / 25.4);
+    }
+
 }
