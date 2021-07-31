@@ -103,6 +103,12 @@ namespace p3::python
             auto y_ticks = kwargs["y_ticks"].cast<std::optional<py::array_t<double>>>();
             copy(y_ticks, plot.y_axis()->ticks());
         }
+        if (kwargs.contains("legend_location"))
+            plot.legend()->set_location(kwargs["legend_location"].cast<Location>());
+        if (kwargs.contains("legend_direction"))
+            plot.legend()->style()->set_direction(kwargs["legend_direction"].cast<Direction>());
+        if (kwargs.contains("legend_visible"))
+            plot.legend()->set_visible(kwargs["legend_visible"].cast<bool>());
     }
 
     auto parse_plot_item_kwargs = [](Plot::Item& item, py::kwargs& kwargs)
@@ -343,6 +349,17 @@ namespace p3::python
 
     void Definition<Plot>::apply(py::module& module)
     {
+        py::enum_<Location>(module, "Location")
+            .value("North", Location::North)
+            .value("NorthEast", Location::NorthEast)
+            .value("East", Location::East)
+            .value("SouthEast", Location::SouthEast)
+            .value("South", Location::South)
+            .value("SouthWest", Location::SouthWest)
+            .value("West", Location::West)
+            .value("NorthWest", Location::NorthWest)
+            .export_values();
+
         py::enum_<MarkerStyle>(module, "MarkerStyle")
             .value("None", MarkerStyle::None)
             .value("Circle", MarkerStyle::Circle)
@@ -366,6 +383,7 @@ namespace p3::python
             }))
             .def_property_readonly("x_axis", &Plot::x_axis)
             .def_property_readonly("y_axis", &Plot::y_axis)
+            .def_property_readonly("legend", &Plot::legend)
             .def("add", &Plot::add)
             .def("remove", &Plot::remove)
             .def("clear", &Plot::clear);
@@ -391,6 +409,9 @@ namespace p3::python
             .value("LocalTime", Plot::Axis::Type::LocalTime)
             .value("UniversalTime", Plot::Axis::Type::UniversalTime)
             .export_values();
+
+       py::class_<Plot::Legend, Node, std::shared_ptr<Plot::Legend>>(plot, "Legend")
+           .def_property("location", &Plot::Legend::location, &Plot::Legend::set_location);
 
         auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item")
             .def_property("opacity", &Plot::Item::opacity, &Plot::Item::set_opacity)

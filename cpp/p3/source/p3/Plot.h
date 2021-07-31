@@ -36,6 +36,18 @@
 namespace p3
 {
 
+    enum class Location : ImPlotLocation
+    {
+        North = ImPlotLocation_North,
+        NorthEast = ImPlotLocation_NorthEast,
+        East = ImPlotLocation_East,
+        SouthEast = ImPlotLocation_SouthEast,
+        South = ImPlotLocation_South,
+        SouthWest = ImPlotLocation_SouthWest,
+        West = ImPlotLocation_West,
+        NorthWest = ImPlotLocation_NorthWest,
+    };
+
     enum class MarkerStyle : ImPlotMarker
     {
         None = ImPlotMarker_None,
@@ -55,6 +67,7 @@ namespace p3
     {
     public:
         class Axis;
+        class Legend;
         class Annotation;
 
         using Ticks = std::vector<double>;
@@ -201,6 +214,7 @@ namespace p3
 
         std::shared_ptr<Axis> const& x_axis() const;
         std::shared_ptr<Axis> const& y_axis() const;
+        std::shared_ptr<Legend> const& legend() const;
 
         void update_content() override;
         void render_impl(Context&, float width, float height) override;
@@ -213,7 +227,20 @@ namespace p3
         std::string _title;
         std::shared_ptr<Axis> _x_axis;
         std::shared_ptr<Axis> _y_axis;
+        std::shared_ptr<Legend> _legend;
         std::vector<std::shared_ptr<Item>> _items;
+    };
+
+    class Plot::Legend : public Node
+    {
+    public:
+        Legend();
+
+        void set_location(Location);
+        Location location() const;
+
+    private:
+        Location _location = Location::NorthWest;
     };
 
     class Plot::Axis : public Node

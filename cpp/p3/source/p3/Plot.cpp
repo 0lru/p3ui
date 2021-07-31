@@ -48,11 +48,13 @@ namespace p3
         : Node("Plot")
         , _x_axis(std::make_shared<Axis>())
         , _y_axis(std::make_shared<Axis>())
+        , _legend(std::make_shared<Legend>())
     {
         // 
         // for styling..
         Node::add(_x_axis);
         Node::add(_y_axis);
+        Node::add(_legend);
     }
 
     void Plot::render_impl(Context&, float width, float height)
@@ -124,10 +126,16 @@ namespace p3
             _x_axis->label() ? _x_axis->label().value().c_str() : 0,
             _y_axis->label() ? _y_axis->label().value().c_str() : 0,
             size,
-            0,
+            legend()->visible() ? 0 : ImPlotFlags_NoLegend,
             x_flags,
             y_flags))
         {
+        if(legend())
+            ImPlot::SetLegendLocation(
+                static_cast<ImPlotLocation>(legend()->location()),
+                legend()->style_computation().direction == Direction::Vertical 
+                    ? ImPlotOrientation_Vertical 
+                    : ImPlotOrientation_Horizontal, false);
             for (auto& item : _items)
             {
                 if (item->line_color())
@@ -145,7 +153,7 @@ namespace p3
 
     void Plot::Item::apply_style()
     {
-        if(opacity())
+        if (opacity())
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity().value());
     }
 
@@ -190,6 +198,11 @@ namespace p3
     std::shared_ptr<Plot::Axis> const& Plot::y_axis() const
     {
         return _y_axis;
+    }
+
+    std::shared_ptr<Plot::Legend> const& Plot::legend() const
+    {
+        return _legend;
     }
 
     void Plot::update_content()
@@ -278,7 +291,7 @@ namespace p3
             std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
         if (clamped)
         {
-            if(_fill_color == IMPLOT_AUTO_COL)
+            if (_fill_color == IMPLOT_AUTO_COL)
             {
                 ImVec4 c = ImPlot::GetLastItemColor();
                 ImPlot::AnnotateClamped(x, y, offset, c, text.c_str());
@@ -290,7 +303,7 @@ namespace p3
         }
         else
         {
-            if(_fill_color == IMPLOT_AUTO_COL)
+            if (_fill_color == IMPLOT_AUTO_COL)
             {
                 ImVec4 c = ImPlot::GetLastItemColor();
                 ImPlot::Annotate(x, y, offset, c, text.c_str());
@@ -386,7 +399,7 @@ namespace p3
 
     void Plot::AnnotatedItem::add(std::shared_ptr<Annotation> annotation)
     {
-        if(annotation)
+        if (annotation)
             _annotations.push_back(std::move(annotation));
     }
 
@@ -403,6 +416,21 @@ namespace p3
     void Plot::AnnotatedItem::set_annotations(std::vector<std::shared_ptr<Annotation>> annotations)
     {
         _annotations = std::move(annotations);
+    }
+
+    Plot::Legend::Legend()
+        : Node("Legend")
+    {
+    }
+
+    void Plot::Legend::set_location(Location location)
+    {
+        _location = location;
+    }
+
+    Location Plot::Legend::location() const
+    {
+        return _location;
     }
 
 }
