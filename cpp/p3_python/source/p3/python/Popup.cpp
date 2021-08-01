@@ -27,22 +27,16 @@
 namespace p3::python
 {
 
-    void Definition<Popup>::parse(py::kwargs const& kwargs, Popup& popup)
-    {
-        Definition<Node>::parse(kwargs, popup);
-        if (kwargs.contains("content"))
-            popup.set_content(kwargs["content"].cast<std::shared_ptr<Node>>());
-    }
-
     void Definition<Popup>::apply(py::module& module)
     {
         py::class_<Popup, Node, std::shared_ptr<Popup>> popup(module, "Popup");
         popup.def(py::init<>([](py::kwargs kwargs) {
             auto popup = std::make_shared<Popup>();
-            parse(kwargs, *popup);
+            ArgumentParser<Node>()(kwargs, *popup);
+            assign(kwargs, "content", *popup, &Popup::set_content);
             return popup;
         }));
-        popup.def_property("content", &Popup::content, &Popup::set_content);
+        def_property(popup, "content", &Popup::content, &Popup::set_content);
     }
 
 }

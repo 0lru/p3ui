@@ -191,15 +191,15 @@ class TabStyles(ScrollArea):
             padding=(0 | px, 0.5 | em),
             children=[
                 Button(
-                    label='make light',
+                    label='light',
                     on_click=self.make_light
                 ),
                 Button(
-                    label='make dark',
+                    label='dark',
                     on_click=self.make_dark
                 ),
                 Button(
-                    label='make classic',
+                    label='classic',
                     on_click=self.make_classic
                 )
             ]

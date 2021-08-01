@@ -24,6 +24,7 @@
 #include "StyleTypes.h"
 #include "Color.h"
 #include "OnScopeExit.h"
+#include "Synchronizable.h"
 
 #include <array>
 #include <optional>
@@ -41,8 +42,10 @@ namespace p3
     class Context;
     using Float2 = std::array<float, 2>;
 
-    struct Theme
+    class Theme : public Synchronizable
     {
+    public:
+
         class Observer
         {
         public:

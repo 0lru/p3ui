@@ -46,8 +46,8 @@ namespace p3
         void set_shortcut(std::optional<std::string>);
         std::optional<std::string> const& shortcut() const;
 
-        void set_checked(bool);
-        bool checked() const;
+        void set_value(bool);
+        bool value() const;
 
         void set_checkable(bool);
         bool checkable() const;
@@ -61,7 +61,7 @@ namespace p3
     private:
         bool _enabled = true;
         bool _checkable = false;
-        bool _checked = false;
+        bool _value = false;
         std::optional<std::string> _shortcut = std::string();
         OnClick _on_click;
         OnChange _on_change;

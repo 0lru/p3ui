@@ -27,19 +27,11 @@
 namespace p3::python
 {
 
-    void Definition<InputText>::parse(py::kwargs const& kwargs, InputText& input)
+    void ArgumentParser<InputText>::operator()(py::kwargs const& kwargs, InputText& input_text)
     {
-        Definition<Node>::parse(kwargs, input);
-        if (kwargs.contains("hint"))
-            input.set_hint(kwargs["hint"].cast<std::optional<std::string>>());
-        if (kwargs.contains("on_change"))
-        {
-            input.set_on_change([f{kwargs["on_change"].cast<py::function>()}]()
-            {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        }
+        ArgumentParser<Node>()(kwargs, input_text);
+        assign(kwargs, "hint", input_text, &InputText::set_hint);
+        assign(kwargs, "on_change", input_text, &InputText::set_on_change);
     }
 
     void Definition<InputText>::apply(py::module& module)
@@ -48,18 +40,12 @@ namespace p3::python
 
         input.def(py::init<>([](std::size_t size, py::kwargs kwargs) {
             auto input = std::make_shared<InputText>(size);
-            parse(kwargs, *input);
+            ArgumentParser<InputText>()(kwargs, *input);
             return input;
-        }), py::arg("size")=16);
+        }), py::kw_only(), py::arg("size")=16);
 
-        input.def(py::init<>([](py::kwargs kwargs) {
-            auto input = std::make_shared<InputText>();
-            parse(kwargs, *input);
-            return input;
-        }));
-
-        input.def_property("on_change", &InputText::on_change, &InputText::set_on_change);
-        input.def_property("value", &InputText::value, &InputText::set_value);
+        def_property(input, "on_change", &InputText::on_change, &InputText::set_on_change);
+        def_property(input, "value", &InputText::value, &InputText::set_value);
     }
 
 }

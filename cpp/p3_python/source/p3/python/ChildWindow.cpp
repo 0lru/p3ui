@@ -26,23 +26,20 @@
 namespace p3::python
 {
 
-    void Definition<ChildWindow>::parse(py::kwargs const& kwargs, ChildWindow& window)
-    {
-    }
-
     void Definition<ChildWindow>::apply(py::module& module)
     {
         py::class_<ChildWindow, Node, std::shared_ptr<ChildWindow>> window(module, "ChildWindow");
 
         window.def(py::init<>([](std::shared_ptr<Node> content, bool resizeable, bool moveable, py::kwargs kwargs) {
             auto window = std::make_shared<ChildWindow>();
-            Definition<Node>::parse(kwargs, *window);
+            ArgumentParser<Node>()(kwargs, *window);
             window->set_content(std::move(content));
+            window->set_resizeable(resizeable);
+            window->set_moveable(moveable);
             return window;
         }), py::kw_only(), py::arg("content")=py::none(), py::arg("resizeable")=true, py::arg("moveable")=true);
-
-        window.def_property("resizeable", &ChildWindow::resizeable, &ChildWindow::set_resizeable);
-        window.def_property("moveable", &ChildWindow::moveable, &ChildWindow::set_moveable);
+        def_property(window, "resizeable", &ChildWindow::resizeable, &ChildWindow::set_resizeable);
+        def_property(window, "moveable", &ChildWindow::moveable, &ChildWindow::set_moveable);
     }
 
 }

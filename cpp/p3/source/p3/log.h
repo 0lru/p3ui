@@ -22,7 +22,7 @@
 #pragma once
 
 // #define LOG_LEVEL 10
-
+#define NOMINMAX
 #include <source_location>
 #include <format>
 #include <cstdint>
@@ -43,13 +43,14 @@ namespace logger
         constexpr std::uint32_t info = 4;
         constexpr std::uint32_t debug = 5;
         constexpr std::uint32_t verbose = 6;
-#ifdef LOG_LEVEL
+        constexpr std::uint32_t current = 4;
+/*#ifdef LOG_LEVEL
         constexpr std::uint32_t current = LOG_LEVEL;
 #elif _DEBUG
-        constexpr std::uint32_t current = verbose;
+        constexpr std::uint32_t current = 6;
 #else
         constexpr std::uint32_t current = info;
-#endif
+#endif*/
     }
 
     /*

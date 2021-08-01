@@ -64,10 +64,6 @@ namespace p3::python
         std::vector<py::function> _callbacks;
     };
 
-    void Definition<Builder>::parse(py::kwargs const& kwargs, Builder&)
-    {
-    }
-
     void Definition<Builder>::apply(py::module& module)
     {
         py::class_<Builder, std::shared_ptr<Builder>> builder(module, "Builder");

@@ -26,6 +26,7 @@
 #include "Theme.h"
 #include "log.h"
 #include "StyleDerivation.h"
+#include "TaskQueue.h"
 
 #include <p3/Parser.h>
 
@@ -123,8 +124,9 @@ namespace p3
         auto const status_flag = window->DC.LastItemStatusFlags;
         if (status_flag == _status_flag)
         {
-            if (_mouse.hovered && _mouse.move && Context::current().mouse_move())
-                _mouse.move(MouseEvent(this));
+            if (_mouse.hovered && _mouse.move && Context::current().mouse_move()) postpone([f = _mouse.move, e = MouseEvent(this)]() {
+                f(std::move(e));
+            });
             return;
         }
         if (status_flag & ImGuiItemStatusFlags_HoveredRect)
@@ -132,8 +134,9 @@ namespace p3
             if (!(_status_flag & ImGuiItemStatusFlags_HoveredRect))
             {
                 _mouse.hovered = true;
-                if (_mouse.enter)
-                    _mouse.enter(MouseEvent(this));
+                if (_mouse.enter) postpone([f = _mouse.enter, e = MouseEvent(this)]() {
+                    f(std::move(e));
+                });
             }
         }
         else
@@ -141,8 +144,9 @@ namespace p3
             if (_status_flag & ImGuiItemStatusFlags_HoveredRect)
             {
                 _mouse.hovered = false;
-                if (_mouse.leave)
-                    _mouse.leave(MouseEvent(this));
+                if (_mouse.leave) postpone([f = _mouse.leave, e = MouseEvent(this)]() {
+                    f(std::move(e));
+                });
             }
         }
         _status_flag = status_flag;
@@ -150,7 +154,7 @@ namespace p3
 
     void Node::postpone(std::function<void()> f)
     {
-        Context::current().postpone(std::move(f));
+        Context::current().task_queue().run(std::move(f));
     }
 
     namespace
@@ -210,7 +214,7 @@ namespace p3
         assign(color, _style_computation.color);
         if (color != GImGui->Style.Colors[ImGuiCol_Text])
         {
-            log_verbose("-style- <{}>\"{}\" changes color to {}", _element_name, label() ? label().value() : "", to_string(_style_computation.color));
+            log_verbose("-style- <{}>\"{}\" changes color to {}", _element_name, _label ? _label.value() : "", to_string(_style_computation.color));
             _style_compiled.push_back([color{ std::move(color) }]() mutable {
                 std::swap(color, GImGui->Style.Colors[ImGuiCol_Text]);
             });
@@ -225,7 +229,7 @@ namespace p3
         // spacing.. between buttons (inside a flex etc.)
         if (spacing != GImGui->Style.ItemSpacing)
         {
-            log_verbose("-style- <{}>\"{}\" changes spacing to ({}, {})", _element_name, label() ? label().value() : "", spacing.x, spacing.y);
+            log_verbose("-style- <{}>\"{}\" changes spacing to ({}, {})", _element_name, _label ? _label.value() : "", spacing.x, spacing.y);
             _style_compiled.push_back([spacing{ std::move(spacing) }]() mutable {
                 std::swap(spacing, GImGui->Style.ItemSpacing);
             });
@@ -239,7 +243,7 @@ namespace p3
         );
         if (padding != GImGui->Style.FramePadding)
         {
-            log_verbose("-style- <{}>\"{}\" changes padding to ({}, {})", _element_name, label() ? label().value() : "", padding.x, padding.y);
+            log_verbose("-style- <{}>\"{}\" changes padding to ({}, {})", _element_name, _label ? _label.value() : "", padding.x, padding.y);
             _style_compiled.push_back([padding{ std::move(padding) }]() mutable {
                 std::swap(padding, GImGui->Style.FramePadding);
             });
@@ -257,12 +261,12 @@ namespace p3
         // set both to true if subtree is forced to restyle
         _needs_restyle = _needs_restyle || force;
         _needs_update = _needs_update || force;
-        
+
         //
         // no change in this subtree, abort
         if (!_needs_update)
             return;
-        
+
         if (_needs_restyle)
         {
             _cascade_styles_from_parent(context);
@@ -277,14 +281,13 @@ namespace p3
             auto compiled_guard = _apply_style_compiled();
             for (auto& child : _children)
                 if (child->visible())
-                    child->update_restyle(context, 
+                    child->update_restyle(context,
                         _needs_restyle /* force restyle of child if this was restyled*/);
             update_content();
         }
         //
         // change state
         _needs_update = _needs_restyle = false;
-        _needs_redraw = true;
     }
 
     StyleComputation const& Node::style_computation() const
@@ -298,17 +301,10 @@ namespace p3
         set_needs_update();
     }
 
-    void Node::set_needs_redraw()
+    void Node::redraw()
     {
-        _needs_redraw = true;
-        auto it = _parent;
-        while (it)
-        {
-            if (it->_needs_redraw)
-                break;
-            it->_needs_redraw = true;
-            it = it->_parent;
-        }
+        if (_parent)
+            _parent->redraw();
     }
 
     void Node::set_needs_update()
@@ -341,6 +337,9 @@ namespace p3
 
     void Node::add(std::shared_ptr<Node> node)
     {
+        node->synchronize_with(*this);
+        if (node->parent())
+            throw std::invalid_argument("node is already assigned");
         node->set_parent(this);
         _children.push_back(std::move(node));
         _children.back()->set_needs_restyle();
@@ -348,6 +347,9 @@ namespace p3
 
     void Node::insert(std::size_t index, std::shared_ptr<Node> node)
     {
+        if (node->parent())
+            throw std::invalid_argument("node is already assigned");
+        node->synchronize_with(*this);
         node->set_parent(this);
         auto it = _children.begin();
         std::advance(it, index);
@@ -357,6 +359,7 @@ namespace p3
     void Node::remove(std::shared_ptr<Node> const& node)
     {
         node->set_parent(nullptr);
+        node->release();
         _children.erase(std::remove_if(_children.begin(), _children.end(), [&](auto& item) {
             return item == node;
         }), _children.end());
@@ -373,11 +376,27 @@ namespace p3
         id_pool::free(_imgui_id);
     }
 
+    void Node::synchronize_with(Synchronizable& synchronized)
+    {
+        Synchronizable::synchronize_with(synchronized);
+        _style->synchronize_with(*this);
+        for (auto& node : _children)
+            node->synchronize_with(synchronized);
+    }
+
+    void Node::release()
+    {
+        Synchronizable::release();
+        _style->synchronize_with(*this);
+        for (auto& node : _children)
+            node->synchronize_with(*this);
+    }
+
     void Node::render(Context& context, float width, float height)
     {
         ImGui::GetStyle().Alpha = _disabled ? 0.2f : 1.0f;
         auto compiled_guard = _apply_style_compiled();
-        auto &work_rect = GImGui->CurrentWindow->WorkRect;
+        auto& work_rect = GImGui->CurrentWindow->WorkRect;
         ImVec2 work_rect_max = work_rect.Min;
         work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x;
         work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y;
@@ -453,11 +472,10 @@ namespace p3
         return _mouse.hovered;
     }
 
-    Node& Node::set_visible(bool visible)
+    void Node::set_visible(bool visible)
     {
         _visible = visible;
         set_needs_restyle();
-        return *this;
     }
 
     bool Node::visible() const
@@ -515,6 +533,7 @@ namespace p3
 
     std::shared_ptr<StyleBlock> const& Node::style() const
     {
+        // no lock needed, _style never changes
         return _style;
     }
 

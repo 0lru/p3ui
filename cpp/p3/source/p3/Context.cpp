@@ -33,8 +33,9 @@ namespace p3
         thread_local Context* current_context = nullptr;
     }
 
-    Context::Context(UserInterface& user_interface, RenderBackend& render_backend, MouseMove mouse_move)
+    Context::Context(UserInterface& user_interface, TaskQueue& task_queue, RenderBackend& render_backend, MouseMove mouse_move)
         : _user_interface(user_interface)
+        , _task_queue(task_queue)
         , _render_backend(render_backend)
         , _mouse_move(std::move(mouse_move))
     {
@@ -43,8 +44,6 @@ namespace p3
 
     Context::~Context()
     {
-        for (auto& postponed : _postponed)
-            postponed();
     }
 
     Context& Context::current()
@@ -78,9 +77,9 @@ namespace p3
         return rem() * std::get<Rem>(length).value;
     }
 
-    void Context::postpone(Postponed postponed)
+    TaskQueue& Context::task_queue() const
     {
-        _postponed.push_back(std::move(postponed));
+        return _task_queue;
     }
 
     float Context::rem() const

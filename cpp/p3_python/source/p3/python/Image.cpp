@@ -27,26 +27,20 @@
 namespace p3::python
 {
 
-    void Definition<Image>::parse(py::kwargs const& kwargs, Image& image)
-    {
-    }
-
     void Definition<Image>::apply(py::module& module)
     {
         py::class_<Image, Node, std::shared_ptr<Image>> image(module, "Image");
 
-        image.def(py::init<>([](std::shared_ptr<Texture> texture, float scale, py::kwargs kwargs) {
+        image.def(py::init<>([](std::optional<std::shared_ptr<Texture>> texture, std::optional<double> scale, py::kwargs kwargs) {
             auto image = std::make_shared<Image>();
-            if(texture)
-                image->set_texture(std::move(texture));
-            image->set_scale(scale);
-            Definition<Node>::parse(kwargs, *image);
+            ArgumentParser<Node>()(kwargs, *image);
+            assign(texture, *image, &Image::set_texture);
+            assign(scale, *image, &Image::set_scale);
             return image;
-        }), py::arg("texture")=py::none(), py::arg("scale")=1.0);
+        }), py::arg("texture")=py::none(), py::arg("scale")=py::none());
 
-        image.def_property("texture", &Image::texture, &Image::set_texture);
-        image.def("set_dirty", &Image::set_needs_update);
-        image.def_property("scale", &Image::scale, &Image::set_scale);
+        def_property(image, "texture", &Image::texture, &Image::set_texture);
+        def_property(image, "scale", &Image::scale, &Image::set_scale);
     }
 
 }

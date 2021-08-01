@@ -26,43 +26,22 @@
 namespace p3::python
 {
 
-    void Definition<Menu>::parse(py::kwargs const& kwargs, Menu& menu)
-    {
-        Definition<Node>::parse(kwargs, menu);
-        if (kwargs.contains("on_open"))
-            menu.set_on_open([f = kwargs["on_open"].cast<py::function>()]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        if (kwargs.contains("on_close"))
-            menu.set_on_close([f = kwargs["on_close"].cast<py::function>()]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-    }
-
     void Definition<Menu>::apply(py::module& module)
     {
-        py::class_<Menu, Node, std::shared_ptr<Menu>> menu(module, "Menu");
+        auto menu = py::class_<Menu, Node, std::shared_ptr<Menu>>(module, "Menu");
+
         menu.def(py::init<>([](std::string label, py::kwargs kwargs) {
             auto menu = std::make_shared<Menu>(label);
-            parse(kwargs, *menu);
+            ArgumentParser<Node>()(kwargs, *menu);
+            assign(kwargs, "on_open", *menu, &Menu::set_on_open);
+            assign(kwargs, "on_close", *menu, &Menu::set_on_close);
             return menu;
         }));
-        menu.def("add", &Menu::add);
-        menu.def("remove", &Menu::remove);
-        menu.def_property("on_open", &Menu::on_open, [](Menu& menu, py::function f) {
-            menu.set_on_open([f{std::move(f)}]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        });
-        menu.def_property("on_close", &Menu::on_close, [](Menu& menu, py::function f) {
-            menu.set_on_close([f{std::move(f)}]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        });
+
+        def_method(menu, "add", &Menu::add);
+        def_method(menu, "remove", &Menu::remove);
+        def_property(menu, "on_open", &Menu::on_open, &Menu::set_on_open);
+        def_property(menu, "on_close", &Menu::on_close, &Menu::set_on_close);
     }
 
 }

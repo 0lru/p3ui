@@ -39,42 +39,28 @@ namespace p3::python
     template<typename T>
     void Definition<InputScalar<T>>::parse(py::kwargs const& kwargs, InputScalar<T>& input_scalar)
     {
-        Definition<Node>::parse(kwargs, input_scalar);
-        if (kwargs.contains("format"))
-            input_scalar.set_format(kwargs["format"].cast<std::optional<std::string>>());
-        if (kwargs.contains("value"))
-            input_scalar.set_value(kwargs["value"].cast<T>());
-        if (kwargs.contains("step"))
-            input_scalar.set_step(kwargs["step"].cast<std::optional<T>>());
-        if (kwargs.contains("on_change"))
-        {
-            input_scalar.set_on_change([f{kwargs["on_change"].cast<py::function>()}](T value)
-            {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        }
+        ArgumentParser<Node>()(kwargs, input_scalar);
+        assign(kwargs, "format", input_scalar, &InputScalar<T>::set_format);
+        assign(kwargs, "value", input_scalar, &InputScalar<T>::set_value);
+        assign(kwargs, "step", input_scalar, &InputScalar<T>::set_step);
+        assign(kwargs, "on_change", input_scalar, &InputScalar<T>::set_on_change);
     }
 
     template<typename T>
     void Definition<InputScalar<T>>::apply(py::module& module)
     {
-        py::class_<InputScalar<T>, Node, std::shared_ptr<InputScalar<T>>> 
-            input_scalar(module, ("Input" + DataSuffix<T>).c_str());
+        auto input_scalar = py::class_<InputScalar<T>, Node, std::shared_ptr<InputScalar<T>>>(module, ("Input" + DataSuffix<T>).c_str());
+
         input_scalar.def(py::init<>([](py::kwargs kwargs) {
             auto input_scalar = std::make_shared<InputScalar<T>>();
             parse(kwargs, *input_scalar);
             return input_scalar;
         }));
-        input_scalar.def_property("on_change", &InputScalar<T>::on_change, [](InputScalar<T>& input, py::function f) {
-            input.set_on_change([f{ std::move(f) }](T value){
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        });
-        input_scalar.def_property("format", &InputScalar<T>::format, &InputScalar<T>::set_format);
-        input_scalar.def_property("value", &InputScalar<T>::value, &InputScalar<T>::set_value);
-        input_scalar.def_property("step", &InputScalar<T>::step, &InputScalar<T>::set_step);
+
+        def_property(input_scalar, "on_change", &InputScalar<T>::on_change, &InputScalar<T>::set_on_change);
+        def_property(input_scalar, "format", &InputScalar<T>::format, &InputScalar<T>::set_format);
+        def_property(input_scalar, "value", &InputScalar<T>::value, &InputScalar<T>::set_value);
+        def_property(input_scalar, "step", &InputScalar<T>::step, &InputScalar<T>::set_step);
     }
 
     template Definition<InputScalar<std::int8_t>>;

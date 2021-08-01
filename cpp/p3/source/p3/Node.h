@@ -22,11 +22,14 @@
 
 #pragma once
 
+#include "OnScopeExit.h"
 #include "StyleTypes.h"
 #include "StyleBlock.h"
 #include "StyleStrategy.h"
 #include "StyleComputation.h"
-#include "OnScopeExit.h"
+#include "Synchronizable.h"
+#include "TaskQueue.h"
+
 
 #include <optional>
 #include <memory>
@@ -50,19 +53,42 @@ namespace p3
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 
-    class Node 
+    /**
+    * this is the root of all evil. derived classes need to specify an
+    * element name, which may be considered equivalent as tag in the
+    * terminology of html.
+    *
+    * for synchronization/multi-threading, each node has a task-queue
+    * assigned. The default queue executes given tasks in the current
+    * thread. whenever assigned to a multi-threaded window/application,
+    * or a parent which is assigned to a multi-threaded window, it'll
+    * replace this default task queue with the one of it's anchestors.
+    *
+    * node are state-descriptions. concerning styling and sizing, the
+    * node can be in the state of
+    * - needs restyling (needs to perform a style cascade)
+    * - needs update (some sizing changed)
+    * - needs a redraw
+    * or it's "clean", which means, that it is in sync with the visual
+    * appearance.
+    **/
+    class Node
         : public std::enable_shared_from_this<Node>
         , public StyleBlock::Observer
+        , public Synchronizable
     {
     public:
         virtual ~Node();
+
+        virtual void synchronize_with(Synchronizable&) override;
+        virtual void release() override;
 
         std::string const& element_name() const;
         // this is used by the loader to apply xml attributes
         virtual void set_attribute(std::string const&, std::string const&);
 
         // ###### composition ##################################################
-        
+
         using Children = std::vector<std::shared_ptr<Node>>;
 
         void set_parent(Node*);
@@ -74,26 +100,12 @@ namespace p3
         void remove(std::shared_ptr<Node> const&);
 
         // #### style ##########################################################
-        
+
         static StyleStrategy DefaultStyleStrategy;
         virtual StyleStrategy& style_strategy() const;
 
         std::shared_ptr<StyleBlock> const& style() const;
 
-        /// set redraw flag for this branch up to the root
-        void set_needs_redraw();
-
-        /// inform that this node needs to update it's actual values
-        void set_needs_update();
-
-        /// inform that this node needs to update it's computed values
-        void set_needs_restyle();
-
-        /// wheter needs to update it's actual values
-        bool needs_update() const;
-
-        /// wheter needs to update it's computed values
-        bool needs_restyle() const;
 
         /// do update/restyle pass for the whole tree
         virtual void update_restyle(Context& context, bool force);
@@ -107,11 +119,11 @@ namespace p3
         float automatic_width() const;
         float automatic_height() const;
 
-        Node& set_visible(bool);
+        void set_visible(bool);
         bool visible() const;
 
         // ##### mouse #########################################################
-        
+
         class MouseEvent;
         using MouseEventHandler = std::function<void(MouseEvent)>;
 
@@ -127,7 +139,7 @@ namespace p3
         bool hovered() const;
 
         // ##### render ########################################################
-        
+
         virtual void render(Context&, float width, float height);
         virtual void update_content() {};
 
@@ -140,19 +152,30 @@ namespace p3
         void set_disabled(bool);
         bool disabled() const;
 
+        /// force redraw of the tree
+        virtual void redraw();
+
     protected:
         Node(std::string element_name);
+
+        /// inform that this node needs to update it's actual values
+        void set_needs_update();
+
+        /// inform that this node needs to update it's computed values
+        void set_needs_restyle();
+
+        bool needs_restyle() const;
+        bool needs_update() const;
 
         // TODO: make private
         float _automatic_width = 0.f;
         float _automatic_height = 0.f;
         void update_status();
+        // TODO: remove this
+        void postpone(std::function<void()>);
 
         // node specific render implementation
         virtual void render_impl(Context&, float width, float height) {};
-
-        // dom must not be modified during an update traversal of imgui, user callbacks need to be "postponed"
-        void postpone(std::function<void()>);
 
         [[nodiscard]] OnScopeExit _apply_style_compiled();
 
@@ -180,12 +203,6 @@ namespace p3
             MouseEventHandler move;
         } _mouse;
 
-        //
-        // Note: alignment is optimizable.
-        // this requires some work. at the moment it's 
-        // "recompute everything on every single frame"..
-        // 
-        bool _needs_redraw = true;
         bool _needs_update = true;
         bool _needs_restyle = true;
         void on_style_changed();
@@ -193,7 +210,7 @@ namespace p3
         std::shared_ptr<StyleBlock> _style = nullptr;
         StyleComputation _style_computation;
         std::vector<std::function<void()>> _style_compiled;
-        
+
         void _cascade_styles_from_parent(Context&);
         void _compile_style_computation(Context&);
     };
@@ -203,7 +220,7 @@ namespace p3
     public:
         MouseEvent(Node* source);
         Node* source() const;
-    
+
         float global_x() const;
         float global_y() const;
         float x() const;

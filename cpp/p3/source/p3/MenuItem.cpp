@@ -45,13 +45,13 @@ namespace p3
         
         if (ImGui::MenuItem(imgui_label().c_str(),
             _shortcut ? _shortcut.value().c_str() : nullptr,
-            _checkable ? &_checked : nullptr, _enabled))
+            _checkable ? &_value : nullptr, _enabled))
         {
             if (_on_click)
-                Context::current().postpone(_on_click);
+                postpone(_on_click);
             if (_checkable && _on_change)
-                Context::current().postpone([f = _on_change, checked=_checked]() {
-                    f(checked);
+                postpone([f = _on_change, value=_value]() {
+                    f(value);
                 });
         }
         update_status();
@@ -77,14 +77,14 @@ namespace p3
         return _shortcut;
     }
 
-    void MenuItem::set_checked(bool checked)
+    void MenuItem::set_value(bool value)
     {
-        _checked = checked;
+        _value = value;
     }
 
-    bool MenuItem::checked() const
+    bool MenuItem::value() const
     {
-        return _checked;
+        return _value;
     }
 
     void MenuItem::set_checkable(bool checkable)

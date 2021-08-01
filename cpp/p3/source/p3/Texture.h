@@ -24,6 +24,7 @@
 
 #include "RenderBackend.h"
 #include "OnScopeExit.h"
+#include "Synchronizable.h"
 
 #include <string>
 #include <memory>
@@ -35,7 +36,7 @@ namespace p3
 
     class Context;
 
-    class Texture
+    class Texture : public Synchronizable
     {
     public:
         class Observer

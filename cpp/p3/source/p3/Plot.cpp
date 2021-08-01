@@ -44,6 +44,24 @@ namespace p3
         return result;
     }
 
+    Plot::Colormap const Plot::Colormap::Deep = Colormap(ImPlotColormap_Deep);
+    Plot::Colormap const Plot::Colormap::Dark = Colormap(ImPlotColormap_Dark);
+    Plot::Colormap const Plot::Colormap::Pastel = Colormap(ImPlotColormap_Pastel);
+    Plot::Colormap const Plot::Colormap::Paired = Colormap(ImPlotColormap_Paired);
+    Plot::Colormap const Plot::Colormap::Viridis = Colormap(ImPlotColormap_Viridis);
+    Plot::Colormap const Plot::Colormap::Plasma = Colormap(ImPlotColormap_Plasma);
+    Plot::Colormap const Plot::Colormap::Hot = Colormap(ImPlotColormap_Hot);
+    Plot::Colormap const Plot::Colormap::Cool = Colormap(ImPlotColormap_Cool);
+    Plot::Colormap const Plot::Colormap::Pink = Colormap(ImPlotColormap_Pink);
+    Plot::Colormap const Plot::Colormap::Jet = Colormap(ImPlotColormap_Jet);
+    Plot::Colormap const Plot::Colormap::Twilight = Colormap(ImPlotColormap_Twilight);
+    Plot::Colormap const Plot::Colormap::RdBu = Colormap(ImPlotColormap_RdBu);
+    Plot::Colormap const Plot::Colormap::BrBG = Colormap(ImPlotColormap_BrBG);
+    Plot::Colormap const Plot::Colormap::PiYG = Colormap(ImPlotColormap_PiYG);
+    Plot::Colormap const Plot::Colormap::Spectral = Colormap(ImPlotColormap_Spectral);
+    Plot::Colormap const Plot::Colormap::Greys = Colormap(ImPlotColormap_Greys);
+
+
     Plot::Plot()
         : Node("Plot")
         , _x_axis(std::make_shared<Axis>())
@@ -153,13 +171,8 @@ namespace p3
 
     void Plot::Item::apply_style()
     {
-        if (opacity())
-            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity().value());
-    }
-
-    void Plot::AnnotatedItem::apply_style()
-    {
-        Item::apply_style();
+        //if (opacity())
+        //    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity().value());
         auto& context = Context::current();
         ImPlotMarker style = marker_style()
             ? static_cast<ImPlotMarker>(marker_style().value())
@@ -170,24 +183,59 @@ namespace p3
         float weight = marker_weight()
             ? context.to_actual(marker_weight().value())
             : -1.f;
+        ImPlot::GetStyle().Colormap = colormap().index();
         ImPlot::SetNextMarkerStyle(style, size, native_marker_fill_color(), weight, native_marker_line_color());
+    }
+
+    void Plot::Item::set_plot(Plot* plot)
+    {
+        _plot = plot;
+    }
+
+    void Plot::Item::redraw()
+    {
+        if (_plot)
+            _plot->redraw();
     }
 
     void Plot::add(std::shared_ptr<Item> item)
     {
+        item->synchronize_with(*this);
+        item->set_plot(this);
         _items.push_back(std::move(item));
     }
 
     void Plot::remove(std::shared_ptr<Item> item)
     {
         _items.erase(std::remove_if(_items.begin(), _items.end(), [&](auto iterated) {
-            return iterated == item;
+            if (iterated == item)
+            {
+                item->release();
+                item->set_plot(nullptr);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }), _items.end());
     }
 
     void Plot::clear()
     {
+        for (auto& item : _items)
+        {
+            item->release();
+            item->set_plot(nullptr);
+        }
         _items.clear();
+    }
+
+    void Plot::synchronize_with(Synchronizable& synchronizable)
+    {
+        Node::synchronize_with(synchronizable);
+        for (auto& item : _items)
+            item->synchronize_with(*this);
     }
 
     std::shared_ptr<Plot::Axis> const& Plot::x_axis() const
@@ -272,16 +320,16 @@ namespace p3
 
     void Plot::Annotation::render()
     {
-        if (clamped)
+        if (clamped())
             if (_fill_color == IMPLOT_AUTO_COL)
-                ImPlot::AnnotateClamped(x, y, offset, text.c_str());
+                ImPlot::AnnotateClamped(x(), y(), offset(), text().c_str());
             else
-                ImPlot::AnnotateClamped(x, y, offset, _fill_color, text.c_str());
+                ImPlot::AnnotateClamped(x(), y(), offset(), _fill_color, text().c_str());
         else
             if (_fill_color == IMPLOT_AUTO_COL)
-                ImPlot::Annotate(x, y, offset, text.c_str());
+                ImPlot::Annotate(x(), y(), offset(), text().c_str());
             else
-                ImPlot::Annotate(x, y, offset, _fill_color, text.c_str());
+                ImPlot::Annotate(x(), y(), offset(), _fill_color, text().c_str());
     }
 
     void Plot::Annotation::render_item_annotation()
@@ -289,16 +337,16 @@ namespace p3
         bool has_line_color = line_color() && fill_color() && fill_color().value().alpha() == 0.f;
         if (has_line_color)
             std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
-        if (clamped)
+        if (clamped())
         {
             if (_fill_color == IMPLOT_AUTO_COL)
             {
                 ImVec4 c = ImPlot::GetLastItemColor();
-                ImPlot::AnnotateClamped(x, y, offset, c, text.c_str());
+                ImPlot::AnnotateClamped(x(), y(), offset(), c, text().c_str());
             }
             else
             {
-                ImPlot::AnnotateClamped(x, y, offset, _fill_color, text.c_str());
+                ImPlot::AnnotateClamped(x(), y(), offset(), _fill_color, text().c_str());
             }
         }
         else
@@ -306,11 +354,11 @@ namespace p3
             if (_fill_color == IMPLOT_AUTO_COL)
             {
                 ImVec4 c = ImPlot::GetLastItemColor();
-                ImPlot::Annotate(x, y, offset, c, text.c_str());
+                ImPlot::Annotate(x(), y(), offset(), c, text().c_str());
             }
             else
             {
-                ImPlot::Annotate(x, y, offset, _fill_color, text.c_str());
+                ImPlot::Annotate(x(), y(), offset(), _fill_color, text().c_str());
             }
         }
         if (has_line_color)
@@ -347,73 +395,78 @@ namespace p3
         _opacity = std::move(opacity);
     }
 
-    std::optional<Color> Plot::AnnotatedItem::marker_line_color() const
+    std::optional<Color> Plot::Item::marker_line_color() const
     {
         return convert(_marker_line_color);
     }
 
-    void Plot::AnnotatedItem::set_marker_line_color(std::optional<Color> marker_line_color)
+    void Plot::Item::set_marker_line_color(std::optional<Color> marker_line_color)
     {
         _marker_line_color = convert(marker_line_color);
     }
 
-    std::optional<Color> Plot::AnnotatedItem::marker_fill_color() const
+    std::optional<Color> Plot::Item::marker_fill_color() const
     {
         return convert(_marker_fill_color);
     }
 
-    void Plot::AnnotatedItem::set_marker_fill_color(std::optional<Color> marker_fill_color)
+    void Plot::Item::set_marker_fill_color(std::optional<Color> marker_fill_color)
     {
         _marker_fill_color = convert(marker_fill_color);
     }
 
-    std::optional<Length> const& Plot::AnnotatedItem::marker_size() const
+    std::optional<Length> const& Plot::Item::marker_size() const
     {
         return _marker_size;
     }
 
-    void Plot::AnnotatedItem::set_marker_size(std::optional<Length> marker_size)
+    void Plot::Item::set_marker_size(std::optional<Length> marker_size)
     {
         _marker_size = std::move(marker_size);
     }
 
-    std::optional<Length> const& Plot::AnnotatedItem::marker_weight() const
+    std::optional<Length> const& Plot::Item::marker_weight() const
     {
         return _marker_weight;
     }
 
-    void Plot::AnnotatedItem::set_marker_weight(std::optional<Length> marker_weight)
+    void Plot::Item::set_marker_weight(std::optional<Length> marker_weight)
     {
         _marker_weight = std::move(marker_weight);
     }
 
-    std::optional<MarkerStyle> const& Plot::AnnotatedItem::marker_style() const
+    std::optional<MarkerStyle> const& Plot::Item::marker_style() const
     {
         return _marker_style;
     }
 
-    void Plot::AnnotatedItem::set_marker_style(std::optional<MarkerStyle> marker_style)
+    void Plot::Item::set_marker_style(std::optional<MarkerStyle> marker_style)
     {
         _marker_style = std::move(marker_style);
     }
 
-    void Plot::AnnotatedItem::add(std::shared_ptr<Annotation> annotation)
+    void Plot::Item::add(std::shared_ptr<Annotation> annotation)
     {
-        if (annotation)
-            _annotations.push_back(std::move(annotation));
+        if (!annotation)
+            return;
+        annotation->synchronize_with(*this);
+        _annotations.push_back(std::move(annotation));
     }
 
-    void Plot::AnnotatedItem::remove(std::shared_ptr<Annotation> annotation)
+    void Plot::Item::remove(std::shared_ptr<Annotation> annotation)
     {
+        if (!annotation)
+            return;
+        annotation->release();
         std::erase(_annotations, annotation);
     }
 
-    std::vector<std::shared_ptr<Plot::Annotation>> const& Plot::AnnotatedItem::annotations() const
+    std::vector<std::shared_ptr<Plot::Annotation>> const& Plot::Item::annotations() const
     {
         return _annotations;
     }
 
-    void Plot::AnnotatedItem::set_annotations(std::vector<std::shared_ptr<Annotation>> annotations)
+    void Plot::Item::set_annotations(std::vector<std::shared_ptr<Annotation>> annotations)
     {
         _annotations = std::move(annotations);
     }
@@ -431,6 +484,20 @@ namespace p3
     Location Plot::Legend::location() const
     {
         return _location;
+    }
+
+    Plot::Colormap::Colormap(int index)
+        : _index(index)
+    {
+    }
+
+    Plot::Colormap::Colormap(std::string const& name, std::vector<Color> colors, bool interpolated)
+    {
+        std::vector<ImVec4> native_colors(colors.size());
+        std::transform(colors.begin(), colors.end(), native_colors.begin(), [](auto const& color) {
+            return convert(color);
+        });
+        _index = ImPlot::AddColormap(name.c_str(), native_colors.data(), int(native_colors.size()), interpolated);
     }
 
 }

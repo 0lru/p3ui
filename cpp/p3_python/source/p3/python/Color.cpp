@@ -27,16 +27,6 @@
 namespace p3::python
 {
 
-    /*void Definition<Color>::parse(py::kwargs const& kwargs, Color& color)
-    {
-        Definition<Node>::parse(kwargs, color);
-    }*/
-
-    struct ColorTest
-    {
-        Color color;
-    };
-
     template<typename T>
     std::uint8_t color_component(T& object)
     {
@@ -86,15 +76,10 @@ namespace p3::python
             return std::format("[{}, {}, {}, {}]", color.red(), color.green(), color.blue(), color.alpha());
         });
 
-        py::class_<ColorTest> color_test(module, "ColorTest");
-        color_test.def(py::init<>());
-        color_test.def_readwrite("color", &ColorTest::color);
-
         // tuple -> color
         py::implicitly_convertible<py::tuple, Color>();
         py::implicitly_convertible<py::list, Color>();
         py::implicitly_convertible<std::string, Color>();
-
     }
 
 

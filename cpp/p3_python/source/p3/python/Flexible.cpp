@@ -28,11 +28,6 @@
 namespace p3::python
 {
 
-    void Definition<Layout>::parse(py::kwargs const& kwargs, Layout& flexible)
-    {
-        Definition<Node>::parse(kwargs, flexible);
-    }
-
     void Definition<Layout>::apply(py::module& module)
     {
         py::class_<Layout, Node, std::shared_ptr<Layout>> flexible(module, "Layout", R"doc(
@@ -41,12 +36,13 @@ namespace p3::python
 
         flexible.def(py::init<>([](py::kwargs kwargs) {
             auto flexible = std::make_shared<Layout>();
-            parse(kwargs, *flexible);
+            ArgumentParser<Node>()(kwargs, *flexible);
             return flexible;
         }));
-        flexible.def("add", &Layout::add, R"doc(
-        )doc");
-        flexible.def("insert", &Layout::insert);
+
+        def_method(flexible, "add", &Layout::add);
+        def_method(flexible, "insert", &Layout::insert);
+        def_method(flexible, "remove", &Layout::remove);
     }
 
 }

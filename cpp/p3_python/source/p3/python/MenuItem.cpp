@@ -26,27 +26,17 @@
 namespace p3::python
 {
 
-    void Definition<MenuItem>::parse(py::kwargs const& kwargs, MenuItem& menu_item)
+    void ArgumentParser<MenuItem>::operator()(py::kwargs const& kwargs, MenuItem& menu_item)
     {
-        Definition<Node>::parse(kwargs, menu_item);
-        if (kwargs.contains("enabled"))
-            menu_item.set_enabled(kwargs["enabled"].cast<bool>());
-        if (kwargs.contains("shortcut"))
-            menu_item.set_shortcut(kwargs["shortcut"].cast<std::optional<std::string>>());
-        if (kwargs.contains("checkable"))
-            menu_item.set_checkable(kwargs["checkable"].cast<bool>());
-        if (kwargs.contains("checked"))
-            menu_item.set_checked(kwargs["checked"].cast<bool>());
-        if (kwargs.contains("on_click"))
-            menu_item.set_on_click([f = kwargs["on_click"].cast<py::function>()]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        if (kwargs.contains("on_change"))
-            menu_item.set_on_change([f = kwargs["on_change"].cast<py::function>()](bool checked) {
-                py::gil_scoped_acquire acquire;
-                f(checked);
-            });
+        ArgumentParser<Node>()(kwargs, menu_item);
+        assign(kwargs, "enabled", menu_item, &MenuItem::set_enabled);
+        assign(kwargs, "shortcut", menu_item, &MenuItem::set_shortcut);
+        assign(kwargs, "checkable", menu_item, &MenuItem::set_checkable);
+        assign(kwargs, "value", menu_item, &MenuItem::set_value);
+        assign(kwargs, "enabled", menu_item, &MenuItem::set_enabled);
+        assign(kwargs, "enabled", menu_item, &MenuItem::set_enabled);
+        assign(kwargs, "on_click", menu_item, &MenuItem::set_on_click);
+        assign(kwargs, "on_change", menu_item, &MenuItem::set_on_change);
     }
 
     void Definition<MenuItem>::apply(py::module& module)
@@ -54,24 +44,15 @@ namespace p3::python
         py::class_<MenuItem, Node, std::shared_ptr<MenuItem>> menu_item(module, "MenuItem");
         menu_item.def(py::init<>([](std::string label, py::kwargs kwargs) {
             auto menu = std::make_shared<MenuItem>(std::move(label));
-            parse(kwargs, *menu);
+            ArgumentParser<MenuItem>()(kwargs, *menu);
             return menu;
         }));
-        menu_item.def_property("checkable", &MenuItem::checkable, &MenuItem::set_checkable);
-        menu_item.def_property("checked", &MenuItem::checked, &MenuItem::set_checked);
-        menu_item.def_property("enabled", &MenuItem::enabled, &MenuItem::set_enabled);
-        menu_item.def_property("on_click", &MenuItem::on_click, [](MenuItem& menu_item, py::function f) {
-            menu_item.set_on_click([f{std::move(f)}]() {
-                py::gil_scoped_acquire acquire;
-                f();
-            });
-        });
-        menu_item.def_property("on_change", &MenuItem::on_change, [](MenuItem& menu_item, py::function f) {
-            menu_item.set_on_change([f{std::move(f)}](bool checked) {
-                py::gil_scoped_acquire acquire;
-                f(checked);
-            });
-        });
+
+        def_property(menu_item, "checkable", &MenuItem::checkable, &MenuItem::set_checkable);
+        def_property(menu_item, "value", &MenuItem::value, &MenuItem::set_value);
+        def_property(menu_item, "enabled", &MenuItem::enabled, &MenuItem::set_enabled);
+        def_property(menu_item, "on_click", &MenuItem::on_click, &MenuItem::set_on_click);
+        def_property(menu_item, "on_change", &MenuItem::on_change, &MenuItem::set_on_change);
     }
 
 }

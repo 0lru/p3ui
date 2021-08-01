@@ -53,6 +53,8 @@ namespace p3
 
         void on_texture_resized() override;
 
+        virtual void synchronize_with(Synchronizable&) override;
+
     private:
         std::shared_ptr<Texture> _texture = nullptr;
         double _scale = 1.;

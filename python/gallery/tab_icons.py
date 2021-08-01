@@ -1,3 +1,6 @@
+import asyncio
+import threading
+
 from p3ui import *
 from material_icons import MaterialIcons
 
@@ -31,8 +34,10 @@ class TabIcons(Layout):
             yield icon_name
 
     def filter(self):
-        for icon_text in self.icons_list:
-            if icon_text is self.search:
-                continue
-            lbl = icon_text.value.split(' ')[1]
-            icon_text.visible = self.search.value.lower() in lbl.lower()
+        with self.lock:
+            text = self.search.value.lower()
+            for icon_text in self.icons_list:
+                if icon_text is self.search:
+                    continue
+                lbl = icon_text.value.split(' ')[1]
+                icon_text.visible = text in lbl.lower()

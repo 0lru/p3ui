@@ -26,41 +26,20 @@
 namespace p3::python
 {
 
-    void Definition<CheckBox>::parse(py::kwargs const& kwargs, CheckBox& check_box)
-    {
-        Definition<Node>::parse(kwargs, check_box);
-        if (kwargs.contains("on_change"))
-        {
-            check_box.set_on_change([f{ kwargs["on_change"].cast<py::function>() }](bool value)
-            {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        }
-        if (kwargs.contains("value"))
-            check_box.set_value(kwargs["value"].cast<bool>());
-    }
-
     void Definition<CheckBox>::apply(py::module& module)
     {
         py::class_<CheckBox, Node, std::shared_ptr<CheckBox>> check_box(module, "CheckBox");
 
-        check_box.def(py::init<>([](std::optional<bool> value, py::kwargs kwargs) {
+        check_box.def(py::init<>([](std::optional<py::function> on_change, std::optional<bool> value, py::kwargs kwargs) {
             auto check_box = std::make_shared<CheckBox>();
-            parse(kwargs, *check_box);
-            if (value)
-                check_box->set_value(value.value());
+            ArgumentParser<Node>()(kwargs, *check_box);
+            assign(on_change, *check_box, &CheckBox::set_on_change);
+            assign(value, *check_box, &CheckBox::set_value);
             return check_box;
-        }), py::kw_only(), py::arg("value")=py::none());
+        }), py::kw_only(), py::arg("on_change")=py::none(), py::arg("value")=py::none());
 
-        check_box.def_property("on_change", &CheckBox::on_change, [](CheckBox& check_box, py::function f) {
-            check_box.set_on_change([f{ std::move(f) }](bool value) {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        });
-
-        check_box.def_property("value", &CheckBox::value, &CheckBox::set_value);
+        def_property(check_box, "on_change", &CheckBox::on_change, &CheckBox::set_on_change);
+        def_property(check_box, "value", &CheckBox::value, &CheckBox::set_value);
     }
 
 }

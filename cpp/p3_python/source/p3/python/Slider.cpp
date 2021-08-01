@@ -39,44 +39,30 @@ namespace p3::python
     template<typename DataType>
     void Definition<Slider<DataType>>::parse(py::kwargs const& kwargs, Slider<DataType>& slider)
     {
-        Definition<Node>::parse(kwargs, slider);
-        if (kwargs.contains("format"))
-            slider.set_format(kwargs["format"].cast<std::optional<std::string>>());
-        if (kwargs.contains("value"))
-            slider.set_value(kwargs["value"].cast<DataType>());
-        if (kwargs.contains("min"))
-            slider.set_min(kwargs["min"].cast<DataType>());
-        if (kwargs.contains("max"))
-            slider.set_max(kwargs["max"].cast<DataType>());
-
-        if (kwargs.contains("on_change"))
-            slider.set_on_change([f=kwargs["on_change"].cast<py::function>()](DataType value)
-            {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
+        ArgumentParser<Node>()(kwargs, slider);
+        assign(kwargs, "format", slider, &Slider<DataType>::set_format);
+        assign(kwargs, "value", slider, &Slider<DataType>::set_value);
+        assign(kwargs, "min", slider, &Slider<DataType>::set_min);
+        assign(kwargs, "max", slider, &Slider<DataType>::set_max);
+        assign(kwargs, "on_change", slider, &Slider<DataType>::set_on_change);
     }
 
     template<typename ValueType>
     void Definition<Slider<ValueType>>::apply(py::module& module)
     {
-        py::class_<Slider<ValueType>, Node, std::shared_ptr<Slider<ValueType>>>
-            slider(module, ("Slider" + DataSuffix<ValueType>).c_str());
+        auto slider = py::class_<Slider<ValueType>, Node, std::shared_ptr<Slider<ValueType>>>(module, ("Slider" + DataSuffix<ValueType>).c_str());
+
         slider.def(py::init<>([](py::kwargs kwargs) {
             auto slider = std::make_shared<Slider<ValueType>>();
             parse(kwargs, *slider);
             return slider;
         }));
-        slider.def_property("on_change", &Slider<ValueType>::on_change, [](Slider<ValueType>& slider, py::function f) {
-            slider.set_on_change([f{ std::move(f) }](ValueType value) {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        });
-        slider.def_property("format", &Slider<ValueType>::format, &Slider<ValueType>::set_format);
-        slider.def_property("value", &Slider<ValueType>::value, &Slider<ValueType>::set_value);
-        slider.def_property("min", &Slider<ValueType>::min, &Slider<ValueType>::set_min);
-        slider.def_property("max", &Slider<ValueType>::max, &Slider<ValueType>::set_max);
+
+        def_property(slider, "on_change", &Slider<ValueType>::on_change, &Slider<ValueType>::set_on_change);
+        def_property(slider, "format", &Slider<ValueType>::format, &Slider<ValueType>::set_format);
+        def_property(slider, "value", &Slider<ValueType>::value, &Slider<ValueType>::set_value);
+        def_property(slider, "min", &Slider<ValueType>::min, &Slider<ValueType>::set_min);
+        def_property(slider, "max", &Slider<ValueType>::max, &Slider<ValueType>::set_max);
     }
 
     template Definition<Slider<std::uint8_t>>;

@@ -27,24 +27,17 @@
 namespace p3::python
 {
 
-    void Definition<ScrollArea>::parse(py::kwargs const& kwargs, ScrollArea& scroll_area)
-    {
-        Definition<Node>::parse(kwargs, scroll_area);
-    }
-
     void Definition<ScrollArea>::apply(py::module& module)
     {
         py::class_<ScrollArea, Node, std::shared_ptr<ScrollArea>> scroll_area(module, "ScrollArea");
 
-        scroll_area.def(py::init<>([](py::kwargs kwargs) {
+        scroll_area.def(py::init<>([](std::optional<std::shared_ptr<Node>> content, std::optional<bool> horizontal_scroll_enabled, py::kwargs kwargs) {
             auto scroll_area = std::make_shared<ScrollArea>();
-            parse(kwargs, *scroll_area);
-            if (kwargs.contains("horizontal_scroll_enabled"))
-                scroll_area->set_horizontal_scroll_enabled(kwargs["horizontal_scroll_enabled"].cast<bool>());
-            if (kwargs.contains("content"))
-                scroll_area->set_content(kwargs["content"].cast<std::shared_ptr<Node>>());
+            ArgumentParser<Node>()(kwargs, *scroll_area);
+            assign(content, *scroll_area, &ScrollArea::set_content);
+            assign(horizontal_scroll_enabled, *scroll_area, &ScrollArea::set_horizontal_scroll_enabled);
             return scroll_area;
-        }));
+        }), py::kw_only(), py::arg("content") = py::none(), py::arg("horizontal_scroll_enabled") = py::none());
 
         scroll_area.def_property("content", &ScrollArea::content, &ScrollArea::set_content);
     }

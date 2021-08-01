@@ -27,21 +27,16 @@
 namespace p3::python
 {
 
-    void Definition<MenuBar>::parse(py::kwargs const& kwargs, MenuBar& menu_bar)
-    {
-        Definition<Node>::parse(kwargs, menu_bar);
-    }
-
     void Definition<MenuBar>::apply(py::module& module)
     {
         py::class_<MenuBar, Node, std::shared_ptr<MenuBar>> menu_bar(module, "MenuBar");
         menu_bar.def(py::init<>([](py::kwargs kwargs) {
             auto menu_bar = std::make_shared<MenuBar>();
-            parse(kwargs, *menu_bar);
+            ArgumentParser<Node>()(kwargs, *menu_bar);
             return menu_bar;
         }));
-        menu_bar.def("add", &MenuBar::add);
-        menu_bar.def("add", &MenuBar::remove);
+        def_method(menu_bar, "add", &MenuBar::add);
+        def_method(menu_bar, "remove", &MenuBar::remove);
     }
 
 }

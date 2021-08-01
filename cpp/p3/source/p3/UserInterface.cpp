@@ -29,11 +29,21 @@ namespace p3
         _im_gui_context.reset();
     }
 
+    void UserInterface::synchronize_with(Synchronizable& synchronizable)
+    {
+        Node::synchronize_with(synchronizable);
+        if (_theme)
+            _theme->synchronize_with(synchronizable);
+    }
+
     //
     // theme
     void UserInterface::set_theme(std::shared_ptr<Theme> theme)
     {
+        if (_theme)
+            _theme->release();
         std::swap(theme, _theme);
+        _theme->synchronize_with(*this);
         _theme_observer.reset();
         if (_theme)
         {
@@ -223,12 +233,12 @@ namespace p3
         float width,
         float height)
     {
-        ImGui::NewFrame();
-
         //
         // make context
         ImGui::SetCurrentContext(_im_gui_context.get());
         ImPlot::SetCurrentContext(_im_plot_context.get());
+        
+        ImGui::NewFrame();
         
         update_restyle(context);
 

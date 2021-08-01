@@ -26,17 +26,12 @@
 namespace p3::python
 {
 
-    void Definition<Table>::parse(py::kwargs const& kwargs, Table& table)
-    {
-        Definition<Node>::parse(kwargs, table);
-    }
-
     void Definition<Table>::apply(py::module& module)
     {
         py::class_<Table, Node, std::shared_ptr<Table>> table(module, "Table");
         table.def(py::init<>([](py::kwargs kwargs) {
             auto table = std::make_shared<Table>();
-            parse(kwargs, *table);
+            ArgumentParser<Node>()(kwargs, *table);
             return table;
         }));
     }

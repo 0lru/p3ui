@@ -16,18 +16,35 @@ class ProcessInfo(p3.Layout):
     def utc_now_seconds(cls):
         return cls.utc_seconds(datetime.utcnow())
 
+    async def get_frames_per_second(self):
+        return await asyncio.get_event_loop().run_in_executor(None, getattr, self.window, 'frames_per_second')
+
+    async def get_idle_timer(self):
+        return await asyncio.get_event_loop().run_in_executor(None, getattr, self.window, 'idle_timer')
+
     async def update(self):
         while True:
-            self.__frames_per_second.value = f'{self.window.frames_per_second:.2f}'
-            self.__seconds_till_idle.value = f'{self.window.time_till_enter_idle_mode:.2f}'
-            self._memory_series.x = np.roll(self._memory_series.x, -1)
-            self._memory_series.y = np.roll(self._memory_series.y, -1)
-            self._memory_series.x[-1] = time.time()
-            self._memory_series.y[-1] = self.memory_usage
-            self._cpu_series.x = np.roll(self._cpu_series.x, -1)
-            self._cpu_series.y = np.roll(self._cpu_series.y, -1)
-            self._cpu_series.x[-1] = time.time()
-            self._cpu_series.y[-1] = self.cpu_usage
+            self.__frames_per_second.value = f'{await self.get_frames_per_second():.2f}'
+            self.__seconds_till_idle.value = f'{await self.get_idle_timer():.2f}'
+            with self.lock:
+                x = self._memory_series.x
+                x = np.roll(x, -1)
+                y = np.roll(self._memory_series.y, -1)
+                x[-1] = time.time()
+                y[-1] = self.memory_usage
+                ymin, ymax = y.min(), y.max()
+                offset = (ymax - ymin) * 0.1
+                self.__memory_plot.y_axis.limits = (ymin - offset, ymax + offset)
+                self._memory_series.x = x
+                self._memory_series.y = y
+
+                x = np.roll(self._cpu_series.x, -1)
+                y = np.roll(self._cpu_series.y, -1)
+                x[-1] = time.time()
+                y[-1] = self.cpu_usage
+                self._cpu_series.x = x
+                self._cpu_series.y = y
+
             await asyncio.sleep(1)
 
     def __init__(self, window):
@@ -45,19 +62,19 @@ class ProcessInfo(p3.Layout):
         self.add(self.__frames_per_second)
         self.add(self.__seconds_till_idle)
 
-        plot = p3.Plot(
+        self.__memory_plot = p3.Plot(
             label='Process Memory Usage',
             x_label='Time (UTC)',
             y_label='GB',
             x_type=p3.Plot.Axis.UniversalTime,
             width=(250 | p3.px, 1, 1),
             height=(18 | p3.em, 1, 0))
-        plot.x_axis.type = p3.Plot.Axis.UniversalTime
+        self.__memory_plot.x_axis.type = p3.Plot.Axis.UniversalTime
         self._memory_series = p3.Plot.LineSeriesDouble(self._process.name())
-        self._memory_series.x = np.arange(-100.0, .0, 1.0) + time.time()
+        self._memory_series.x = (np.arange(-100.0, .0, 1.0) + time.time())
         self._memory_series.y = np.zeros(100)
-        plot.add(self._memory_series)
-        self.add(plot)
+        self.__memory_plot.add(self._memory_series)
+        self.add(self.__memory_plot)
 
         plot = p3.Plot(
             label='CPU Usage',
@@ -91,10 +108,10 @@ class TabSystem(p3.ScrollArea):
         self.window = window
 
         window.idle_timeout = 60.0
-        window.idle_frame_time = 1.0
+        window.idle_frame_time = 0.5
         super().__init__()
 
-        self.monitors = window.monitors()
+        self.monitors = window.monitors
 
         self.monitor_combo_box = p3.ComboBox(
             label='Monitor',
@@ -163,13 +180,13 @@ class TabSystem(p3.ScrollArea):
                         children=[
                             p3.InputDouble(
                                 label='Idle Timeout (seconds)',
-                                value=window.idle_timeout,
+                                value=60.0,
                                 step=1.0,
                                 on_change=lambda value: setattr(window, 'idle_timeout', value)
                             ),
                             p3.InputDouble(
                                 label='Idle Frame Time (seconds)',
-                                value=window.idle_frame_time,
+                                value=window.idle_frame_time.microseconds / 1000000.0,
                                 step=0.1,
                                 on_change=lambda value: setattr(window, 'idle_frame_time', value)
                             ),

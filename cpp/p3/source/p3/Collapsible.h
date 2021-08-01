@@ -41,7 +41,7 @@ namespace p3
         std::shared_ptr<Node> content();
 
         void set_collapsed(bool);
-        bool is_collapsed() const;
+        bool collapsed() const;
 
         void update_content() override;
 

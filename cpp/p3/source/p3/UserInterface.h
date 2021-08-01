@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Node.h"
 #include "Theme.h"
 #include "OnScopeExit.h"
@@ -17,6 +18,7 @@ namespace p3
     class ChildWindow;
     class MenuBar;
     class RenderBackend;
+    class Window;
 
     class UserInterface
         : public Node
@@ -36,7 +38,6 @@ namespace p3
         void set_theme(std::shared_ptr<Theme>);
         std::shared_ptr<Theme> const& theme() const;
         void on_theme_changed() final override;
-
 
         //
         // aggregation
@@ -84,11 +85,14 @@ namespace p3
 
         void render(Context&, float width, float height) override;
 
+        virtual void synchronize_with(Synchronizable&) override;
+
     protected:
         void update_content() override;
         void update_restyle(Context&, bool whole_tree=false) override;
 
     private:
+        Window* _window = nullptr;
         std::size_t _width = 1024;
         std::size_t _height = 768;
 

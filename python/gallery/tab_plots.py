@@ -1,5 +1,6 @@
 from p3ui import *
 import numpy as np
+import asyncio
 
 from shared import VerticalScrollArea
 
@@ -56,17 +57,17 @@ class TabPlots(VerticalScrollArea):
 
         #
         # define sinus plot with height of 300 pixels, not allowed to shrink (vertically)
-        plot = Plot(
+        self.line_plot = Plot(
             label='Sinus',
             y_limits=(-1.1, 1.1),
             width=(250 | px, 1, 1),
             height=(300 | px, 1, 0)
         )
-        self.line_series = Plot.LineSeriesDouble("sin")
-        plot.add(self.line_series)
-        plot.add(Plot.HorizontalLinesFloat("lines", data=[0.5]))
+        self.line_series = Plot.LineSeriesDouble("sin", colormap=Plot.Colormap.Spectral)
+        self.line_plot.add(self.line_series)
+        self.line_plot.add(Plot.HorizontalLinesFloat("lines", values=[0.5]))
         self.line_series.add(Plot.Annotation('hline', y=0.5, clamped=True))
-        self.content.add(plot)
+        self.content.add(self.line_plot)
 
         #
         # bar plot
@@ -76,8 +77,7 @@ class TabPlots(VerticalScrollArea):
             height=(300 | px, 1, 0),
             x_ticks=[0, 1, 2, 3, 4, 5, 6, 7],
             x_tick_labels=['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'],
-            x_limits=(-1, 8),
-            y_limits=(0, 35))
+            x_limits=(-1, 8))
         bar_series1 = Plot.BarSeriesFloat("s1", width=0.2, shift=-0.1, values=[1, 5, 3, 5, 30, 5, 2, 1])
         bar_series2 = Plot.BarSeriesFloat("s2", width=0.2, shift=0.1, values=[2, 4, 8, 3, 15, 13, 11, 4])
         plot.add(bar_series1)
@@ -91,7 +91,6 @@ class TabPlots(VerticalScrollArea):
         bar_series1.add(Plot.Annotation('series-annotation', x=3, y=15,
                                         line_color='red',
                                         fill_color='#00000000'))
-        bar_series2.errors = np.random.standard_normal(8)
         self.content.add(plot)
 
         #
@@ -108,21 +107,30 @@ class TabPlots(VerticalScrollArea):
         # stems
         #
         plot = Plot(label='Stems', y_limits=(-0.1, 1.1), width=(250 | px, 1, 1), height=(300 | px, 1, 0))
-        self.stem_series = Plot.StemSeriesFloat("sin")
+        self.stem_series = Plot.StemSeriesDouble("sin")
         x = np.arange(0, 100)
         plot.add(Plot.StemSeriesFloat("stems", x=x, y=np.random.rand(x.shape[0])))
         self.content.add(plot)
 
         self.content.add(ColoredPlot(label='Colored Plot'))
 
-    def update(self):
-        self.line_series.x, self.line_series.y = next(self.sin_signal)
-        self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
-
     @staticmethod
     def create_sin_signal():
         shift = 0.0
         while True:
-            shift += 0.01
+            shift += 0.00020
             x = np.arange(0 + shift, 10.0 + shift, 0.001)
             yield x, np.sin(x)
+
+    async def update(self):
+        x, y = next(self.sin_signal)
+        self.line_plot.x_axis.limits = (x.min(), x.max())
+        while True:
+            with self.lock:
+                _, y = next(self.sin_signal)
+                # self.line_plot.x_axis.limits = (x.min(), x.max())
+                self.line_series.x = x
+                self.line_series.y = y
+                self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
+            # await asyncio.sleep(1.0/60.0)
+            await asyncio.sleep(0)

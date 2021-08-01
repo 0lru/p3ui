@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Cascadable.h"
+#include "Synchronizable.h"
 
 #include <optional>
 
@@ -29,6 +30,7 @@ namespace p3
 {
 
     class StyleBlock
+        : public Synchronizable
     {
     public:
         class Observer

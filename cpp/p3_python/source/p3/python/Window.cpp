@@ -21,8 +21,11 @@
 /******************************************************************************/
 
 #include "p3ui.h"
+#include "Promise.h"
+#include "AsyncTaskQueue.h"
+
 #include <p3/Popup.h>
-#include <p3/Window.h>
+#include <p3/platform/Window.h>
 #include <p3/Theme.h>
 #include <p3/UserInterface.h>
 #include <p3/MenuBar.h>
@@ -30,22 +33,34 @@
 namespace p3::python
 {
 
-    void Definition<Window>::parse(py::kwargs const& kwargs, Window& window)
+    template<typename Object, typename Result, typename ... Args>
+    auto gil_release(Result(Object::* member)(Args...) const)
     {
+        return [member](Object& object, typename WrapParameter<Args>::ParameterType... param) -> Result
+        {
+            py::gil_scoped_release release;
+            return (object.*member)(WrapParameter<Args>()(std::move(param))...);
+        };
+    }
+
+    template<typename Object, typename Result, typename ... Args>
+    auto gil_release(Result(Object::* member)(Args...))
+    {
+        return [member](Object& object, typename WrapParameter<Args>::ParameterType... param) -> Result
+        {
+            py::gil_scoped_release release;
+            return (object.*member)(WrapParameter<Args>()(std::move(param))...);
+        };
     }
 
     void Definition<Window>::apply(py::module& module)
     {
+        auto asyncio = py::module::import("asyncio");
+
         py::class_<Timer, std::shared_ptr<Timer>>(module, "Timer")
-            .def(py::init<>([]() {
-            return std::make_shared<Timer>();
-        }))
-            .def("time", [](Timer& timer) {
-            return std::chrono::duration_cast<std::chrono::duration<double>>(timer.time()).count();
-        })
-            .def("time_and_reset", [](Timer& timer) {
-            return std::chrono::duration_cast<std::chrono::duration<double>>(timer.time_and_reset()).count();
-        });
+            .def(py::init<>([]() { return std::make_shared<Timer>(); }))
+            .def("time", [](Timer& timer) { return std::chrono::duration_cast<std::chrono::duration<double>>(timer.time()).count(); })
+            .def("time_and_reset", [](Timer& timer) {return std::chrono::duration_cast<std::chrono::duration<double>>(timer.time_and_reset()).count(); });
 
         py::class_<VideoMode>(module, "VideoMode")
             .def_property_readonly("width", &VideoMode::width)
@@ -61,7 +76,7 @@ namespace p3::python
             return monitor == other;
         });
 
-        py::class_<Window, std::shared_ptr<Window>> window(module, "Window");
+        auto window = py::class_<Window, std::shared_ptr<Window>>(module, "Window");
 
         py::class_<Window::Position>(window, "Position")
             .def(py::init<>([](int x, int y) { return Window::Position{ .x = x, .y = y }; }))
@@ -73,63 +88,38 @@ namespace p3::python
             .def_readwrite("width", &Window::Size::width)
             .def_readwrite("height", &Window::Size::height);
 
-        window
-            .def(py::init<>([](
-                std::string title,
-                std::size_t width,
-                std::size_t height,
-                bool vsync,
-                std::optional<double> idle_timeout,
-                double idle_frame_time,
-                py::kwargs kwargs) {
+        window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
             auto window = std::make_shared<Window>(std::move(title), width, height);
-            if (kwargs.contains("user_interface"))
-                window->set_user_interface(kwargs["user_interface"].cast<std::shared_ptr<UserInterface>>());
-            window->set_vsync(vsync);
-            parse(kwargs, *window);
+            // window->set_vsync(vsync);
             return window;
-        }),
-        py::kw_only(),
-        py::arg("title") = "p3",
-        py::arg("width") = 1024,
-        py::arg("height") = 768,
-        py::arg("vsync") = true,
-        py::arg("idle_timeout") = py::none(),
-        py::arg("idle_frame_time") = 1.0)
-        .def_property("user_interface", &Window::user_interface, &Window::set_user_interface)
-        .def_static("monitors", &Window::monitors)
-        .def_property("position", &Window::position, &Window::set_position)
-        .def_property("size", &Window::size, &Window::set_size)
-        .def_property("vsync", &Window::vsync, &Window::set_vsync)
-        .def_property("idle_timeout", [](Window& window) {
-            return window.idle_timeout() ? std::optional<double>(window.idle_timeout().value().count()) : std::optional<double>();
-        }, [](Window& window, std::optional<double> idle_timeout) {
-            window.set_idle_timeout(idle_timeout
-                ? std::optional<Window::Seconds>(idle_timeout.value())
-                : std::nullopt);
-        })
-        .def_property("idle_frame_time", [](Window& window) {
-            return window.idle_frame_time().count();
-        }, [](Window& window, double idle_frame_time) {
-            window.set_idle_frame_time(Window::Seconds(idle_frame_time));
-        })
-        .def_property_readonly("time_till_enter_idle_mode", &Window::time_till_enter_idle_mode)
-        .def_property_readonly("frames_per_second", &Window::frames_per_second)
-        .def_property_readonly("monitor", &Window::monitor)
-        .def_static("primary_monitor", &Window::primary_monitor)
-        .def_property("video_mode", &Window::video_mode, &Window::set_video_mode)
-        .def("frame", &Window::frame)
-        .def_property_readonly("closed", &Window::closed)
-        .def("loop", [](Window& window, py::object f) {
-        Window::UpdateCallback on_frame;
-        if (!f.is(py::none()))
-            on_frame = [f{ f.cast<py::function>() }](auto window) {
-            py::gil_scoped_acquire acquire;
-            f(std::move(window));
-        };
-        py::gil_scoped_release release;
-        window.loop(on_frame);
-        }, py::kw_only(), py::arg("on_frame") = py::none());
+        }), py::kw_only(), py::arg("title") = "p3", py::arg("width") = 1024, py::arg("height") = 768);
+
+        window.def_property_readonly("monitor", gil_release(&Window::monitor));
+        window.def_property_readonly("primary_monitor", gil_release(&Window::primary_monitor));
+        window.def_property_readonly("monitors", gil_release(&Window::monitors));
+        window.def_property_readonly("user_interface", gil_release(&Window::user_interface));
+        window.def_property_readonly("frames_per_second", gil_release(&Window::frames_per_second));
+        window.def_property("video_mode", gil_release(&Window::video_mode), gil_release(&Window::set_video_mode));
+        window.def_property("position", gil_release(&Window::position), gil_release(&Window::set_position));
+        window.def_property("size", gil_release(&Window::size), gil_release(&Window::set_size));
+        window.def_property("vsync", gil_release(&Window::vsync), gil_release(&Window::set_vsync));
+        window.def_property_readonly("idle_timer", gil_release(&Window::time_till_enter_idle_mode));
+        window.def_property("idle_timeout", gil_release(&Window::idle_timeout), gil_release(&Window::set_idle_timeout));
+        window.def_property("idle_frame_time", gil_release(&Window::idle_frame_time), gil_release(&Window::set_idle_frame_time));
+
+        window.def("serve", [=](Window& window, std::shared_ptr<UserInterface> user_interface, py::object loop) mutable {
+            auto promise_impl = std::make_unique<Promise<void>>(asyncio);
+            auto future = promise_impl->get_future();
+            auto promise_loop = promise_impl->get_loop();
+            auto promise = p3::Promise<void>(std::move(promise_impl));
+            if (loop.is(py::none()))
+                loop = promise_loop;
+            window.serve(
+                std::move(promise),
+                std::move(user_interface),
+                std::make_shared<AsyncTaskQueue>(loop));
+            return future;
+        }, py::arg("user_interface"), py::arg("loop") = py::none());
     }
 
 }

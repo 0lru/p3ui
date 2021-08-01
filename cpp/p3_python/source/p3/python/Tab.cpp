@@ -27,27 +27,21 @@
 namespace p3::python
 {
 
-    void Definition<Tab>::parse(py::kwargs const& kwargs, Tab& tab)
-    {
-        Definition<Node>::parse(kwargs, tab);
-    }
-
     void Definition<Tab>::apply(py::module& module)
     {
         py::class_<Tab, Node, std::shared_ptr<Tab>> tab(module, "Tab");
 
         tab.def(py::init<>([](py::kwargs kwargs) {
             auto tab = std::make_shared<Tab>();
-            parse(kwargs, *tab);
+            ArgumentParser<Node>()(kwargs, *tab);
             return tab;
         }));
 
-        py::class_<Tab::Item, Node, std::shared_ptr<Tab::Item>> tab_item(module, "TabItem");
+        auto tab_item = py::class_<Tab::Item, Node, std::shared_ptr<Tab::Item>>(module, "TabItem");
 
         tab_item.def(py::init<>([](std::string name, py::kwargs kwargs) {
             auto tab_item = std::make_shared<Tab::Item>(std::move(name), kwargs.contains("content") ? kwargs["content"].cast<std::shared_ptr<Node>>(): nullptr);
-            if (kwargs.contains("content"))
-                tab_item->set_content(kwargs["content"].cast<std::shared_ptr<Node>>());
+            assign(kwargs, "content", *tab_item, &Tab::Item::set_content);
             return tab_item;
         }));
     }

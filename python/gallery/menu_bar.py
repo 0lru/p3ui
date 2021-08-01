@@ -16,7 +16,7 @@ class MenuBar(MenuBar):
             ), MenuItem(
                 'Toggle',
                 checkable=True,
-                on_change=lambda checked: print(f'menu checked: {checked}')
+                on_change=lambda value: print(f'menu checked: {value}')
             ), Menu(
                 'Sub',
                 children=[MenuItem(

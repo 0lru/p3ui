@@ -27,169 +27,81 @@
 namespace p3::python
 {
 
-    void Definition<Node>::parse(py::kwargs const& kwargs, Node& node)
+    struct NodeLocker
     {
-        if (kwargs.contains("label"))
-            node.set_label(kwargs["label"].cast<std::optional<std::string>>());
-        if (kwargs.contains("color"))
-            node.style()->set_color(kwargs["color"].cast<Color>());
-        if (kwargs.contains("spacing"))
-            node.style()->set_spacing(kwargs["spacing"].cast<Length2>());
-        if (kwargs.contains("padding"))
-            node.style()->set_padding(kwargs["padding"].cast<Length2>());
-        if (kwargs.contains("x"))
-            node.style()->set_x(kwargs["x"].cast<Length>());
-        if (kwargs.contains("y"))
-            node.style()->set_y(kwargs["y"].cast<Length>());
-        if (kwargs.contains("width"))
-            node.style()->set_width(kwargs["width"].cast<LayoutLength>());
-        if (kwargs.contains("height"))
-            node.style()->set_height(kwargs["height"].cast<LayoutLength>());
-        if (kwargs.contains("visible"))
-            node.style()->set_visible(kwargs["visible"].cast<bool>());
-        if (kwargs.contains("direction"))
-            node.style()->set_direction(kwargs["direction"].cast<Direction>());
-        if (kwargs.contains("align_items"))
-            node.style()->set_align_items(kwargs["align_items"].cast<Alignment>());
-        if (kwargs.contains("justify_content"))
-            node.style()->set_justify_content(kwargs["justify_content"].cast<Justification>());
-        if (kwargs.contains("visible"))
-            node.set_visible(kwargs["visible"].cast<bool>());
-        if (kwargs.contains("on_mouse_enter"))
-            node.set_on_mouse_enter([f{ kwargs["on_mouse_enter"].cast<py::function>() }](Node::MouseEvent e) {
-            py::gil_scoped_acquire acquire;
-            f(std::move(e));
-        });
-        if (kwargs.contains("on_mouse_move"))
-            node.set_on_mouse_move([f{ kwargs["on_mouse_move"].cast<py::function>() }](Node::MouseEvent e) {
-            py::gil_scoped_acquire acquire;
-            f(std::move(e));
-        });
-        if (kwargs.contains("on_mouse_leave"))
-            node.set_on_mouse_leave([f{ kwargs["on_mouse_leave"].cast<py::function>() }](Node::MouseEvent e) {
-            py::gil_scoped_acquire acquire;
-            f(std::move(e));
-        });
+        NodeLocker(Synchronizable *synchonizable)
+            : synchonizable(synchonizable)
+        {
+        }
+
+        void enter()
+        {
+            py::gil_scoped_release release;
+            lock = synchonizable->lock();
+        }
+
+        void exit(py::args)
+        {
+            lock.reset();
+        }
+
+        std::unique_ptr<std::lock_guard<std::recursive_mutex>> lock;
+        Synchronizable *synchonizable;
+    };
+
+    void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
+    {
+        ArgumentParser<StyleBlock>()(kwargs, *node.style());
+        assign(kwargs, "label", node, &Node::set_label);
+        assign(kwargs, "visible", node, &Node::set_visible);
+        assign(kwargs, "disabled", node, &Node::set_disabled);
+        assign(kwargs, "on_mouse_enter", node, &Node::set_on_mouse_enter);
+        assign(kwargs, "on_mouse_move", node, &Node::set_on_mouse_move);
+        assign(kwargs, "on_mouse_leave", node, &Node::set_on_mouse_leave);
+        //
+        // TODO: add setter and use assign
         if (kwargs.contains("children"))
         {
             auto children = kwargs["children"].cast<std::vector<std::shared_ptr<Node>>>();
             for (auto& child : children)
                 node.add(child);
         }
-        if (kwargs.contains("disabled"))
-            node.set_disabled(kwargs["disabled"].cast<bool>());
     }
 
     void Definition<Node>::apply(py::module& module)
     {
-        py::enum_<Direction>(module, "Direction")
-            .value("Horizontal", Direction::Horizontal)
-            .value("Vertical", Direction::Vertical)
-            .export_values();
-
-        py::enum_<Alignment>(module, "Alignment")
-            .value("Start", Alignment::Start)
-            .value("Center", Alignment::Center)
-            .value("End", Alignment::End)
-            .value("Stretch", Alignment::Stretch)
-            .value("Baseline", Alignment::Center) // for now ..
-            .export_values();
-
-        py::enum_<Justification>(module, "Justification")
-            .value("Start", Justification::Start)
-            .value("Center", Justification::Center)
-            .value("End", Justification::End)
-            .value("SpaceAround", Justification::SpaceAround)
-            .value("SpaceBetween", Justification::SpaceBetween)
-            .export_values();
-
-        py::class_<Node::MouseEvent>(module, "MouseEvent")
-            .def_property_readonly("source", [](Node::MouseEvent& e) {
+        //
+        // by value, no need for sync
+        py::class_<Node::MouseEvent> mouse_event(module, "MouseEvent");
+        mouse_event.def_property_readonly("source", [](Node::MouseEvent& e) {
             return e.source()->shared_from_this();
-        })
-            .def_property_readonly("x", &Node::MouseEvent::x)
-            .def_property_readonly("y", &Node::MouseEvent::y)
-            .def_property_readonly("global_x", &Node::MouseEvent::global_x)
-            .def_property_readonly("global_y", &Node::MouseEvent::global_y);
+        });
+        mouse_event.def_property_readonly("x", &Node::MouseEvent::x);
+        mouse_event.def_property_readonly("y", &Node::MouseEvent::y);
+        mouse_event.def_property_readonly("global_x", &Node::MouseEvent::global_x);
+        mouse_event.def_property_readonly("global_y", &Node::MouseEvent::global_y);
 
+        //
+        // NodeLocker
+        auto node_locker = py::class_<NodeLocker, std::shared_ptr<NodeLocker>>(module, "NodeLocker");
+        node_locker.def("__enter__", &NodeLocker::enter);
+        node_locker.def("__exit__", &NodeLocker::exit);
+
+        //
+        // Node, synced
         py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
-        node.def_property("visible", &Node::visible, &Node::set_visible);
-        node.def_property_readonly("children", &Node::children);
-        node.def_property("disabled", &Node::disabled, &Node::set_disabled);
-        node.def_property("label", &Node::label, &Node::set_label);
-        node.def_property_readonly("style", &Node::style);
-        node.def_property("on_mouse_enter", &Node::on_mouse_enter, [](Node& node, py::function f) {
-            node.set_on_mouse_enter([f{ std::move(f) }](Node::MouseEvent e) {
-                py::gil_scoped_acquire acquire;
-                f(std::move(e));
-            });
+        def_property_readonly(node, "children", &Node::children);
+        def_property_readonly(node, "style", &Node::style);
+        def_property(node, "visible", &Node::visible, &Node::set_visible);
+        def_property(node, "disabled", &Node::disabled, &Node::set_disabled);
+        def_property(node, "label", &Node::label, &Node::set_label);
+        def_property(node, "on_mouse_enter", &Node::on_mouse_enter, &Node::set_on_mouse_enter);
+        def_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
+        def_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
+        def_method(node, "redraw", &Node::redraw);
+        node.def_property_readonly("lock", [](Node& node) {
+            return std::make_shared<NodeLocker>(&node);
         });
-        node.def_property("on_mouse_move", &Node::on_mouse_move, [](Node& node, py::function f) {
-            node.set_on_mouse_move([f{ std::move(f) }](Node::MouseEvent e) {
-                py::gil_scoped_acquire acquire;
-                f(std::move(e));
-            });
-        });
-        node.def_property("on_mouse_leave", &Node::on_mouse_leave, [](Node& node, py::function f) {
-            node.set_on_mouse_leave([f{ std::move(f) }](Node::MouseEvent e) {
-                py::gil_scoped_acquire acquire;
-                f(std::move(e));
-            });
-        });
-
-
-        //
-        // em
-        py::class_<Em>(module, "Em")
-            .def(py::init<>([](double value) { return Em{ static_cast<float>(value) }; }))
-            .def("__float__", [](Em const& self) { return self.value; })
-            .def_readwrite("value", &Em::value);
-
-        py::class_<UnitType<Em>>(module, "EmUnit")
-            .def("__ror__", [](UnitType<Em> const&, double value) {return Em{ static_cast<float>(value) }; });
-
-        module.attr("em") = UnitType<Em>();
-
-        //
-        // em
-        py::class_<Rem>(module, "Rem")
-            .def(py::init<>([](double value) { return Rem{ static_cast<float>(value) }; }))
-            .def("__float__", [](Rem const& self) { return self.value; })
-            .def_readwrite("value", &Rem::value);
-
-        py::class_<UnitType<Rem>>(module, "REmUnit")
-            .def("__ror__", [](UnitType<Rem> const&, double value) {return Rem{ static_cast<float>(value) }; });
-
-        module.attr("rem") = UnitType<Rem>();
-
-        //
-        // px
-        py::class_<Px>(module, "Px")
-            .def(py::init<>([](double value) { return Px{ static_cast<float>(value) }; }))
-            .def("__float__", [](Px const& self) { return self.value; })
-            .def_readwrite("value", &Px::value);
-
-        py::class_<UnitType<Px>>(module, "PxUnit")
-            .def("__ror__", [](UnitType<Px> const&, double value) {return Px{ static_cast<float>(value) }; });
-
-        module.attr("px") = UnitType<Px>();
-
-        //
-        // percent
-        py::class_<Percentage>(module, "Percentage")
-            .def(py::init<>([](double value) { return Percentage{ static_cast<float>(value) }; }))
-            .def("__float__", [](Percentage const& self) { return self.value; })
-            .def_readwrite("value", &Percentage::value);
-
-        py::class_<UnitType<Percentage>>(module, "PercentageUnit")
-            .def("__ror__", [](UnitType<Percentage> const&, double value) {return Percentage{ static_cast<float>(value) }; });
-
-        module.attr("percent") = UnitType<Percentage>();
-
-        //
-        // auto
-        py::class_<std::nullptr_t>(module, "Automatic");
-        module.attr("auto") = std::nullopt;
     }
 
 }

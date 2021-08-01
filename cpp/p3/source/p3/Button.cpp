@@ -64,7 +64,6 @@ namespace p3
         Node::set_attribute(name, value);
     }
 
-
     void Button::render_impl(Context&, float width, float height)
     {
         

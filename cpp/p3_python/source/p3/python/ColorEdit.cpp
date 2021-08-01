@@ -26,34 +26,18 @@
 namespace p3::python
 {
 
-    void Definition<ColorEdit>::parse(py::kwargs const& kwargs, ColorEdit& color_edit)
-    {
-        Definition<Node>::parse(kwargs, color_edit);
-        if (kwargs.contains("on_change"))
-        {
-            color_edit.set_on_change([f{ kwargs["on_change"].cast<py::function>() }](Color value)
-            {
-                py::gil_scoped_acquire acquire;
-                f(std::move(value));
-            });
-        }    
-    }
-
     void Definition<ColorEdit>::apply(py::module& module)
     {
         py::class_<ColorEdit, Node, std::shared_ptr<ColorEdit>> color_edit(module, "ColorEdit");
-        color_edit.def(py::init<>([](py::kwargs kwargs) {
+        color_edit.def(py::init<>([](std::optional<py::function> on_change, std::optional<Color> value, py::kwargs kwargs) {
             auto color_edit = std::make_shared<ColorEdit>();
-            parse(kwargs, *color_edit);
+            ArgumentParser<Node>()(kwargs, *color_edit);
+            assign(on_change, *color_edit, &ColorEdit::set_on_change);
+            assign(value, *color_edit, &ColorEdit::set_value);
             return color_edit;
-        }));
-        color_edit.def_property("on_change", &ColorEdit::on_change, [](ColorEdit& color_edit, py::function f) {
-            color_edit.set_on_change([f{ std::move(f) }](Color value) {
-                py::gil_scoped_acquire acquire;
-                f(std::move(value));
-            });
-        });
-        color_edit.def_property("value", &ColorEdit::value, &ColorEdit::set_value);
+        }), py::kw_only(), py::arg("on_change")=py::none(), py::arg("value")=py::none());
+        def_property(color_edit, "on_change", &ColorEdit::on_change, &ColorEdit::set_on_change);
+        def_property(color_edit, "value", &ColorEdit::value, &ColorEdit::set_value);
     }
 
 }

@@ -52,5 +52,5 @@ namespace p3
         F<float>()(std::forward<Args>(args)...);
         F<double>()(std::forward<Args>(args)...);
     }
-
+    
 }

@@ -22,10 +22,14 @@
 #pragma once
 #define NOMINMAX
 
+// TODO:
+//   * Annotation (add, remove etc. in plot, drawing methods ..)
+
+
 #include "Node.h"
 #include "Color.h"
 
-#include <implot.h>
+#include <implot.h> // TODO: move to cpp
 
 #include <string>
 #include <functional>
@@ -73,12 +77,50 @@ namespace p3
         using Ticks = std::vector<double>;
         using TickLabels = std::vector<std::string>;
 
-        class Item
+        class Colormap
+        {
+        public:
+            static Colormap const Deep;
+            static Colormap const Dark;
+            static Colormap const Pastel;
+            static Colormap const Paired;
+            static Colormap const Viridis;
+            static Colormap const Plasma;
+            static Colormap const Hot;
+            static Colormap const Cool;
+            static Colormap const Pink;
+            static Colormap const Jet;
+            static Colormap const Twilight;
+            static Colormap const RdBu;
+            static Colormap const BrBG;
+            static Colormap const PiYG;
+            static Colormap const Spectral;
+            static Colormap const Greys;
+
+            Colormap(int index=0);
+            Colormap(std::string const& name, std::vector<Color>, bool interpolated);
+
+            Colormap(Colormap const&) = default;
+            Colormap(Colormap &&) = default;
+
+            Colormap& operator=(Colormap const&) = default;
+            Colormap& operator=(Colormap &&) = default;
+
+            int index() const { return _index; }
+
+        private:
+            int _index;
+        };
+
+        class Item : public Synchronizable
         {
         public:
             virtual ~Item() = default;
             virtual void render() = 0;
             virtual void apply_style();
+
+            void set_plot(Plot*);
+            void redraw();
 
             std::optional<Color> line_color() const;
             ImVec4& native_line_color() { return _line_color; }
@@ -91,15 +133,6 @@ namespace p3
             std::optional<float> const& opacity() const;
             void set_opacity(std::optional<float>);
 
-        protected:
-            std::optional<float> _opacity = std::nullopt;
-            ImVec4 _line_color = IMPLOT_AUTO_COL;
-            ImVec4 _fill_color = IMPLOT_AUTO_COL;
-        };
-
-        class AnnotatedItem : public Item
-        {
-        public:
             void add(std::shared_ptr<Annotation>);
             void remove(std::shared_ptr<Annotation>);
 
@@ -107,12 +140,10 @@ namespace p3
             void set_annotations(std::vector<std::shared_ptr<Annotation>>);
 
             std::optional<Color> marker_line_color() const;
-            ImVec4& native_marker_line_color() { return _marker_line_color; }
             void set_marker_line_color(std::optional<Color>);
 
             std::optional<Color> marker_fill_color() const;
             void set_marker_fill_color(std::optional<Color>);
-            ImVec4& native_marker_fill_color() { return _marker_fill_color; }
 
             std::optional<Length> const& marker_size() const;
             void set_marker_size(std::optional<Length>);
@@ -123,10 +154,19 @@ namespace p3
             std::optional<MarkerStyle> const& marker_style() const;
             void set_marker_style(std::optional<MarkerStyle>);
 
-        protected:
-            void apply_style() override;
+            ImVec4& native_marker_line_color() { return _marker_line_color; }
+            ImVec4& native_marker_fill_color() { return _marker_fill_color; }
 
-        private:
+            Colormap colormap() const { return _colormap; }
+            void set_colormap(Colormap colormap) { _colormap = std::move(colormap); }
+
+        protected:
+            Plot* _plot = nullptr;
+
+            Colormap _colormap;
+            std::optional<float> _opacity = std::nullopt;
+            ImVec4 _line_color = IMPLOT_AUTO_COL;
+            ImVec4 _fill_color = IMPLOT_AUTO_COL;
             std::vector<std::shared_ptr<Annotation>> _annotations;
             ImVec4 _marker_line_color = IMPLOT_AUTO_COL;
             ImVec4 _marker_fill_color = IMPLOT_AUTO_COL;
@@ -138,72 +178,122 @@ namespace p3
         class Annotation : public Item
         {
         public:
-            std::string text;
-            double x;
-            double y;
-            ImVec2 offset{ 0.f, 0.f };
-            bool clamped = false;
+            void set_text(std::string text) { _text = std::move(text); }
+            std::string const& text() const { return _text; }
+
+            void set_x(double x) { _x = x; }
+            double x() const { return _x; }
+
+            void set_y(double y) { _y = y; }
+            double y() const { return _y; }
+
+            void set_offset_x(float value) { _offset.x = value; }
+            float offset_x() const { return _offset.x; }
+
+            void set_offset_y(float value) { _offset.y = value; }
+            float offset_y() const { return _offset.y; }
+
+            void set_clamped(bool clamped) { _clamped = clamped; }
+            bool clamped() const { return _clamped; }
+
+            ImVec2 const& offset() const { return _offset; }
+
             void render() override;
             void render_item_annotation();
+
+        private:
+            std::string _text;
+            double _x, _y;
+            ImVec2 _offset{ 0.f, 0.f };
+            bool _clamped = false;
+        };
+
+        template<typename Decorated>
+        class Named : public Decorated
+        {
+        public:
+            void set_name(std::string name) { _name = std::move(name); Decorated::redraw(); }
+            std::string const& name() const { return _name; }
+
+        private:
+            std::string _name;
+        };
+
+        template<typename Decorated, typename T>
+        class Series1D : public Decorated
+        {
+        public:
+            void set_values(std::vector<T> values) { _values = std::move(values); Decorated::redraw(); }
+            std::vector<T> const& values() const { return _values; }
+
+        private:
+            std::vector<T> _values;
+        };
+
+        template<typename Decorated, typename T>
+        class Series2D : public Decorated
+        {
+        public:
+            void set_x(std::vector<T>);
+            std::vector<T> const& x() const;
+
+            void set_y(std::vector<T>);
+            std::vector<T> const& y() const;
+
+        private:
+            std::vector<T> _x;
+            std::vector<T> _y;
         };
 
         template<typename T>
-        class BarSeries : public AnnotatedItem
+        class BarSeries : public Named<Series1D<Item, T>>
         {
         public:
-            std::string name;
-            std::vector<T> values;
-            std::optional<std::vector<T>> errors;
-            double shift = 0.;
-            double width = 1.;
+            void set_shift(double shift) { _shift = shift; }
+            double shift() const { return _shift; }
+
+            void set_width(double width) { _width = width; }
+            double width() const { return _width; }
+
+            void render() override;
+
+        private:
+            double _shift = 0.;
+            double _width = 1.;
+        };
+
+        template<typename T>
+        class LineSeries : public Named<Series2D<Item, T>>
+        {
+        public:
             void render() override;
         };
 
         template<typename T>
-        class LineSeries : public AnnotatedItem
+        class StemSeries : public Named<Series2D<Item, T>>
         {
         public:
-            std::string name;
-            std::vector<T> x;
-            std::vector<T> y;
             void render() override;
         };
 
         template<typename T>
-        class StemSeries : public AnnotatedItem
+        class ScatterSeries : public Named<Series2D<Item, T>>
         {
         public:
-            std::string name;
-            std::vector<T> x;
-            std::vector<T> y;
             void render() override;
         };
 
         template<typename T>
-        class ScatterSeries : public AnnotatedItem
+        class HorizontalLines : public Named<Series1D<Item, T>>
         {
         public:
-            std::string name;
-            std::vector<T> x;
-            std::vector<T> y;
             void render() override;
         };
 
         template<typename T>
-        class HorizontalLines : public AnnotatedItem
+        class VerticalLines : public Named<Series1D<Item, T>>
         {
         public:
-            std::string name;
-            std::vector<T> data;
-            void render() override;
-        };
-
-        template<typename T>
-        class VerticalLines : public AnnotatedItem
-        {
-        public:
-            std::string name;
-            std::vector<T> data;
             void render() override;
         };
 
@@ -222,6 +312,8 @@ namespace p3
         void add(std::shared_ptr<Item>);
         void remove(std::shared_ptr<Item>);
         void clear();
+
+        virtual void synchronize_with(Synchronizable&) override;
 
     private:
         std::string _title;
@@ -283,49 +375,75 @@ namespace p3
     template<typename T>
     void Plot::BarSeries<T>::render()
     {
-        auto sample_count = values.size();
-        ImPlot::PlotBars(name.c_str(), values.data(), int(values.size()), width, shift);
-        for (auto& annotation : annotations())
+        auto sample_count = this->values().size();
+        ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
+        for (auto& annotation : this->annotations())
             annotation->render_item_annotation();
+    }
+
+    template<typename Decorated, typename T>
+    inline void Plot::Series2D<Decorated, T>::set_x(std::vector<T> x)
+    {
+        _x = std::move(x);
+        Decorated::redraw();
+    }
+
+    template<typename Decorated, typename T>
+    inline std::vector<T> const& Plot::Series2D<Decorated, T>::x() const
+    {
+        return _x;
+    }
+
+    template<typename Decorated, typename T>
+    inline void Plot::Series2D<Decorated, T>::set_y(std::vector<T> y)
+    {
+        _y = std::move(y);
+        Decorated::redraw();
+    }
+
+    template<typename Decorated, typename T>
+    inline std::vector<T> const& Plot::Series2D<Decorated, T>::y() const
+    {
+        return _y;
     }
 
     template<typename T>
     void Plot::LineSeries<T>::render()
     {
-        auto sample_count = std::min(x.size(), y.size());
-        ImPlot::PlotLine(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
-        for (auto& annotation : annotations())
+        auto sample_count = std::min(this->x().size(), this->y().size());
+        ImPlot::PlotLine(this->name().c_str(), this->x().data(), this->y().data(), static_cast<int>(sample_count));
+        for (auto& annotation : this->annotations())
             annotation->render_item_annotation();
     }
 
     template<typename T>
     void Plot::ScatterSeries<T>::render()
     {
-        auto count = int(std::min(x.size(), y.size()));
-        ImPlot::PlotScatter(name.c_str(), x.data(), y.data(), count);
-        for (auto& annotation : annotations())
+        auto count = int(std::min(this->x().size(), this->y().size()));
+        ImPlot::PlotScatter(this->name().c_str(), this->x().data(), this->y().data(), count);
+        for (auto& annotation : this->annotations())
             annotation->render_item_annotation();
     }
 
     template<typename T>
     void Plot::StemSeries<T>::render()
     {
-        auto sample_count = std::min(x.size(), y.size());
-        ImPlot::PlotStems(name.c_str(), x.data(), y.data(), static_cast<int>(sample_count));
-        for (auto& annotation : annotations())
+        auto sample_count = std::min(this->x().size(), this->y().size());
+        ImPlot::PlotStems(this->name().c_str(), this->x().data(), this->y().data(), static_cast<int>(sample_count));
+        for (auto& annotation : this->annotations())
             annotation->render_item_annotation();
     }
 
     template<typename T>
     void Plot::HorizontalLines<T>::render()
     {
-        ImPlot::PlotHLines(name.c_str(), data.data(), static_cast<int>(data.size()));
+        ImPlot::PlotHLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
     }
 
     template<typename T>
     void Plot::VerticalLines<T>::render()
     {
-        ImPlot::PlotVLines(name.c_str(), data.data(), static_cast<int>(data.size()));
+        ImPlot::PlotVLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
     }
 
 }

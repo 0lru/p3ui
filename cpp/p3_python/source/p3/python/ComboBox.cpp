@@ -27,42 +27,23 @@
 namespace p3::python
 {
 
-    void Definition<ComboBox>::parse(py::kwargs const& kwargs, ComboBox& combo)
-    {
-        Definition<Node>::parse(kwargs, combo);
-        if (kwargs.contains("options"))
-            combo.set_options(kwargs["options"].cast<std::vector<std::string>>());
-        if (kwargs.contains("selected_index"))
-            combo.set_selected_index(kwargs["selected_index"].cast<int>());
-        if (kwargs.contains("on_change"))
-        {
-            combo.set_on_change([f{kwargs["on_change"].cast<py::function>()}](int index)
-            {
-                py::gil_scoped_acquire acquire;
-                f(index);
-            });
-        }
-    }
-
     void Definition<ComboBox>::apply(py::module& module)
     {
         py::class_<ComboBox, Node, std::shared_ptr<ComboBox>> combo(module, "ComboBox");
 
         combo.def(py::init<>([](py::kwargs kwargs) {
             auto combo = std::make_shared<ComboBox>();
-            parse(kwargs, *combo);
+            ArgumentParser<Node>()(kwargs, *combo);
+            assign(kwargs, "options", *combo, &ComboBox::set_options);
+            assign(kwargs, "selected_index", *combo, &ComboBox::set_selected_index);
+            assign(kwargs, "on_change", *combo, &ComboBox::set_on_change);
             return combo;
         }));
 
-        combo.def_property("on_change", &ComboBox::on_change, [](ComboBox& check_box, ComboBox::OnChange f) {
-            check_box.set_on_change([f{ std::move(f) }](bool value) {
-                py::gil_scoped_acquire acquire;
-                f(value);
-            });
-        });
-        combo.def_property("options", &ComboBox::options, &ComboBox::set_options);
-        combo.def_property("selected_index", &ComboBox::selected_index, &ComboBox::set_selected_index);
-        combo.def_property("hint", &ComboBox::hint, &ComboBox::set_hint);
+        def_property(combo, "on_change", &ComboBox::on_change, &ComboBox::set_on_change);
+        def_property(combo, "options", &ComboBox::options, &ComboBox::set_options);
+        def_property(combo, "selected_index", &ComboBox::selected_index, &ComboBox::set_selected_index);
+        def_property(combo, "hint", &ComboBox::hint, &ComboBox::set_hint);
     }
 
 }

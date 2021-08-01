@@ -26,22 +26,16 @@
 namespace p3::python
 {
 
-    void Definition<ProgressBar>::parse(py::kwargs const& kwargs, ProgressBar& progress_bar)
-    {
-        Definition<Node>::parse(kwargs, progress_bar);
-        if (kwargs.contains("value"))
-            progress_bar.set_value(kwargs["value"].cast<float>());
-    }
-
     void Definition<ProgressBar>::apply(py::module& module)
     {
         py::class_<ProgressBar, Node, std::shared_ptr<ProgressBar>> progress_bar(module, "ProgressBar");
         progress_bar.def(py::init<>([](py::kwargs kwargs) {
             auto progress_bar = std::make_shared<ProgressBar>();
-            parse(kwargs, *progress_bar);
+            ArgumentParser<Node>()(kwargs, *progress_bar);
+            assign(kwargs, "value", *progress_bar, &ProgressBar::set_value);
             return progress_bar;
         }));
-        progress_bar.def_property("value", &ProgressBar::value, &ProgressBar::set_value);
+        def_property(progress_bar, "value", &ProgressBar::value, &ProgressBar::set_value);
     }
 
 }

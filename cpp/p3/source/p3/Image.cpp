@@ -89,7 +89,10 @@ namespace p3
             _texture->remove_observer(*this);
         _texture = std::move(texture);
         if (_texture)
+        {
             _texture->add_observer(*this);
+            _texture->synchronize_with(*this);
+        }
         set_needs_update();
     }
 
@@ -112,6 +115,13 @@ namespace p3
     void Image::on_texture_resized()
     {
         Node::set_needs_update();
+    }
+
+    void Image::synchronize_with(Synchronizable& synchronizable)
+    {
+        Node::synchronize_with(synchronizable);
+        if (_texture)
+            _texture->synchronize_with(synchronizable);
     }
 
 }

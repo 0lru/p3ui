@@ -20,10 +20,13 @@
   SOFTWARE.
 /******************************************************************************/
 
-#include "Context.h"
-#include "Node.h"
-#include "Theme.h"
+#include "Monitor.h"
 #include "Timer.h"
+
+#include <p3/Context.h>
+#include <p3/Node.h>
+#include <p3/Theme.h>
+#include <p3/TaskQueue.h>
 
 #include <imgui.h>
 
@@ -31,12 +34,13 @@
 #include <string>
 #include <functional>
 #include <string>
+#include <mutex>
+#include <thread>
 #include <chrono>
 #include <optional>
+#include <atomic>
 
 struct GLFWwindow;
-struct GLFWmonitor;
-struct GLFWvidmode;
 
 namespace p3
 {
@@ -46,51 +50,11 @@ namespace p3
     class Popup;
     class RenderBackend;
 
-    class VideoMode
+    class Window : public Node
     {
     public:
-        VideoMode() = default;
-        VideoMode(VideoMode const&) = default;
-        VideoMode(GLFWmonitor*, int width, int height, int hz);
-        int width() const;
-        int height() const;
-        int hz() const;
+        class TaskQueue;
 
-        GLFWmonitor* glfw_monitor() const;
-
-    private:
-        GLFWmonitor* _monitor = nullptr;
-        int _width;
-        int _height;
-        int _hz;
-    };
-
-    class Monitor
-    {
-    public:
-        Monitor() = default;
-        Monitor(Monitor const&) = default;
-        explicit Monitor(GLFWmonitor*);
-
-        bool operator==(Monitor const&) const = default;
-        bool operator!=(Monitor const&) const = default;
-
-        VideoMode mode() const;
-        void set_mode(VideoMode);
-
-        std::vector<VideoMode> modes() const;
-
-        std::string name() const;
-
-        double dpi() const;
-
-    private:
-        GLFWmonitor* _handle = nullptr;
-    };
-
-    class Window : public std::enable_shared_from_this<Window>
-    {
-    public:
         using MousePosition = std::array<double, 2>;
         using UpdateCallback = std::function<void(std::shared_ptr<Window>)>;
         using Seconds = std::chrono::duration<double>;
@@ -102,21 +66,20 @@ namespace p3
         ~Window();
 
         void set_title(std::string);
-        const std::string& title() const;
+        std::string title() const;
 
-        void set_user_interface(std::shared_ptr<UserInterface>);
-        std::shared_ptr<UserInterface> const& user_interface() const;
+        void serve(Promise<void>&&, std::shared_ptr<UserInterface>, std::shared_ptr<p3::TaskQueue>);
+        std::shared_ptr<UserInterface> user_interface() const;
 
         void frame();
-        void loop(UpdateCallback);
         bool closed() const;
 
         std::optional<VideoMode> video_mode() const;
         void set_video_mode(std::optional<VideoMode>);
 
         Monitor monitor() const;
-        static Monitor primary_monitor();
-        static std::vector<Monitor> monitors();
+        Monitor primary_monitor() const;
+        std::vector<Monitor> monitors() const;
 
         Position position() const;
         void set_position(Position);
@@ -138,17 +101,36 @@ namespace p3
         double frames_per_second() const;
         double time_till_enter_idle_mode() const;
 
+        void redraw() override;
+
+        std::shared_ptr<Window const> shared_ptr() const;
+
     private:
         bool _vsync = true;
         std::string _title;
 
         std::shared_ptr<RenderBackend> _render_backend;
+        std::shared_ptr<TaskQueue> _task_queue;
+
+        void thread(std::shared_ptr<std::promise<void>>, std::string title, std::size_t width, std::size_t height);
+        std::thread _thread;
+
+        using Task = std::function<void()>;
+
+        struct
+        {
+            MousePosition mouse{ 0.f, 0.f };
+            Size framebuffer_size;
+        } _window_state;
 
         mutable Position _position{ 10, 10 };
         mutable Size _size{ 1024, 768 };
-        std::shared_ptr<GLFWwindow> _glfw_window;
 
-        std::shared_ptr<UserInterface> _user_interface;
+        std::shared_ptr<GLFWwindow> _glfw_window = nullptr;
+
+        Promise<void> _serve_promise;
+        std::shared_ptr<p3::TaskQueue> _serve_queue = nullptr;
+        std::shared_ptr<UserInterface> _user_interface = nullptr;
 
         Timer _frame_timer;
         Timer _idle_timer;
@@ -160,7 +142,8 @@ namespace p3
         static void GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
         static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
         static void GlfwCharCallback(GLFWwindow* window, unsigned int c);
-        MousePosition _mouse_position{0.f, 0.f};
+        static void GlfwFramebufferSizeCallback(GLFWwindow* window, int, int);
+        static void GlfwCursorPosCallback(GLFWwindow* window, double, double);
     };
 
 }

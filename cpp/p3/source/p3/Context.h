@@ -33,9 +33,10 @@
 namespace p3
 {
 
-    struct Theme;
+    class Theme;
     class UserInterface;
     class RenderBackend;
+    class TaskQueue;
 
     class Context : public std::enable_shared_from_this<Context>
     {
@@ -43,7 +44,7 @@ namespace p3
         using MouseMove = std::optional<std::array<float, 2>>;
         using Postponed = std::function<void()>;
 
-        Context(UserInterface&, RenderBackend&, MouseMove);
+        Context(UserInterface&, TaskQueue&, RenderBackend&, MouseMove);
         ~Context();
         static Context& current();
 
@@ -56,13 +57,14 @@ namespace p3
         MouseMove const& mouse_move() const;
         float to_actual(Length const&) const;
 
-        void postpone(Postponed);
+        // task queue related to the user interface
+        TaskQueue& task_queue() const;
 
     private:
         UserInterface& _user_interface;
+        TaskQueue& _task_queue;
         RenderBackend& _render_backend;
         MouseMove _mouse_move;
-        std::vector<Postponed> _postponed;
     };
 
 }

@@ -41,9 +41,6 @@ namespace p3
         {
             ImGui::SetNextTreeNodeOpen(_force_open.value());
             _force_open.reset();
-/*                postpone([self = shared_from_this()]() {
-                    self->set_needs_restyle();
-                });*/
         }
         auto window = ImGui::GetCurrentWindow();
 
@@ -52,11 +49,9 @@ namespace p3
         if (collapsed != _collapsed)
         {
             if (_content)
-            {
-                postpone([self = shared_from_this()]() {
-                    self->set_needs_restyle();
+                postpone([content = _content, collapsed]() {
+                    content->set_visible(!collapsed);
                 });
-            }
             _collapsed = collapsed;
         }
         if (!_automatic_width || !_automatic_height)
@@ -95,7 +90,7 @@ namespace p3
         _force_open = !collapsed;
     }
 
-    bool Collapsible::is_collapsed() const
+    bool Collapsible::collapsed() const
     {
         return _force_open ? !_force_open : _collapsed;
     }
@@ -108,7 +103,7 @@ namespace p3
         _automatic_width = 5 * font_size;
         _automatic_height = font_size + 2 * frame_padding.y;
         _child_offset = _automatic_height + context.Style.ItemSpacing.y;
-        if (_content && !this->is_collapsed())
+        if (_content && !this->collapsed())
         {
             _automatic_width = std::max(_automatic_width, _content->automatic_width());
             _automatic_height += _content->height(0) + context.Style.ItemSpacing.y;
