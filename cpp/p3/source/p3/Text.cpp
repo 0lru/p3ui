@@ -75,7 +75,7 @@ namespace p3
             // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentConvalue()->Style.FramePadding.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
             ImGui::Text(_value.c_str());
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
+            // ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
             // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
         }
     }

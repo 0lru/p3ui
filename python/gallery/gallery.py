@@ -11,7 +11,7 @@ from tab_layout import TabLayout
 from tab_styles import TabStyles
 from tab_system import TabSystem
 from tab_icons import TabIcons
-
+from tab_tables import TabTables
 
 class Gallery(UserInterface):
 
@@ -37,7 +37,8 @@ class Gallery(UserInterface):
                         TabItem(f'{MaterialIcons.LightbulbOutline} Icons', content=TabIcons()),
                         TabItem(f'{MaterialIcons.MultilineChart} Plots', content=tab_plots),
                         TabItem(f'{MaterialIcons.BorderOuter} Styles', content=TabStyles(self)),
-                        TabItem(f'{MaterialIcons.Settings} System', content=tab_system)
+                        TabItem(f'{MaterialIcons.Settings} System', content=tab_system),
+                        TabItem(f'{MaterialIcons.Tab} Tables', content=TabTables())
                     ]),
                 Layout(
                     height=(None, 0, 0),

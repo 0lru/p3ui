@@ -32,56 +32,73 @@ namespace p3
     Table::Table()
         : Node("Table")
     {
+        for (auto& column : _columns)
+            column->release();
     }
 
-    void Table::render_impl(Context&, float width, float height)
+    void Table::set_columns(std::vector<std::shared_ptr<Column>> columns)
     {
-        
+        for (auto& column : _columns)
+            column->release();
+        _columns = std::move(columns);
+        for (auto& column : _columns)
+            column->synchronize_with(*this);
+    }
+
+    std::vector<std::shared_ptr<Table::Column>> Table::columns() const
+    {
+        return _columns;
+    }
+
+    void Table::render_impl(Context& context, float width, float height)
+    {
+
         ImVec2 size(width, height);
         //
         // NOTE: todo: scrollbars.. borders.. 
-        ImGuiTableFlags flags=ImGuiTableFlags_RowBg 
-            | ImGuiTableFlags_BordersOuterH 
-            | ImGuiTableFlags_BordersOuterV 
+        ImGuiTableFlags flags = ImGuiTableFlags_RowBg
+            | ImGuiTableFlags_BordersOuterH
+            | ImGuiTableFlags_BordersOuterV
             | ImGuiTableFlags_BordersInnerV
-            | ImGuiTableFlags_ScrollX 
+            | ImGuiTableFlags_ScrollX
             | ImGuiTableFlags_ScrollY;
+
+        
         ImGui::BeginTable(imgui_label().c_str(), 3, flags, size);
-        ImGui::TableSetupColumn("One", ImGuiTableColumnFlags_WidthFixed, 200.f);
-        ImGui::TableSetupColumn("Two", ImGuiTableColumnFlags_WidthFixed, 200.f);
-        ImGui::TableSetupColumn("Three", ImGuiTableColumnFlags_WidthFixed, 200.f);
-        ImGui::TableHeadersRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Test1");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test2");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test3");
+        if (_columns.size())
+        {
+            std::size_t suffix=0;
+            for (auto& column : _columns)
+            {
+                auto infix = std::to_string(imgui_id());
+                auto label = column->title() + "##" + infix + "_" + std::to_string(suffix++);
+                ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthFixed, 200.f);
+            }
+            ImGui::TableHeadersRow();
+        }
 
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Test1");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test2");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test3");
-
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Test1");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test2");
-        ImGui::TableNextColumn();
-        ImGui::Text("Test3");
+        for (auto& child : children())
+            child->render(context, width, height);
 
         ImGui::EndTable();
     }
 
     void Table::update_content()
     {
-        
+
         auto const em = ImGui::GetCurrentContext()->FontSize;
-        _automatic_width = _automatic_height =  DefaultItemWidthEm * em;
+        _automatic_width = _automatic_height = DefaultItemWidthEm * em;
+    }
+
+    void Table::Row::render_impl(Context& context, float width, float height)
+    {
+        ImGui::TableNextRow();
+        for (auto& child : children())
+        {
+           ImGui::TableNextColumn();
+           // auto s = ImGui::GetContentRegionAvail() - pad;
+           child->render(context, 0, 0);
+        }
     }
 
 }
