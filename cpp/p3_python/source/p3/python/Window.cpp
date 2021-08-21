@@ -80,13 +80,17 @@ namespace p3::python
 
         py::class_<Window::Position>(window, "Position")
             .def(py::init<>([](int x, int y) { return Window::Position{ .x = x, .y = y }; }))
+            .def(py::init<>([](std::tuple<int, int> size) { return Window::Position{ .x = std::get<0>(size), .y = std::get<1>(size) };}))
             .def_readwrite("x", &Window::Position::x)
             .def_readwrite("y", &Window::Position::y);
+        py::implicitly_convertible<py::tuple, Window::Position>();
 
         py::class_<Window::Size>(window, "Size")
             .def(py::init<>([](int width, int height) { return Window::Size{ .width = width, .height = height }; }))
+            .def(py::init<>([](std::tuple<int, int> size) { return Window::Size{ .width = std::get<0>(size), .height = std::get<1>(size) };}))
             .def_readwrite("width", &Window::Size::width)
             .def_readwrite("height", &Window::Size::height);
+        py::implicitly_convertible<py::tuple, Window::Size>();
 
         window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
             auto window = std::make_shared<Window>(std::move(title), width, height);
