@@ -18,8 +18,8 @@ namespace p3
             {
                 std::lock_guard<std::mutex> l(_mutex);
                 _tasks.push_back(std::move(task));
-               glfwPostEmptyEvent();
             }
+            glfwPostEmptyEvent();
         }
 
         void process()
@@ -41,7 +41,6 @@ namespace p3
                     log_fatal(std::format("uncaught exception/internal error:\n{}", e.what()));
                 }
             }
-            tasks.clear();
         }
 
     private:
