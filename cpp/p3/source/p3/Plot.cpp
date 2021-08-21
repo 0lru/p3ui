@@ -160,8 +160,12 @@ namespace p3
                     ImPlot::SetNextLineStyle(item->native_line_color());
                 if (item->fill_color())
                     ImPlot::SetNextFillStyle(item->native_fill_color());
+                if (item->opacity())
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
                 item->apply_style();
                 item->render();
+                if (item->opacity())
+                    ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
                 //for (auto& annotation : item->annotations())
                 //    annotation->render_item_annotation();
             }
