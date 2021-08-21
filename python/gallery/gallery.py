@@ -13,6 +13,7 @@ from tab_system import TabSystem
 from tab_icons import TabIcons
 from tab_tables import TabTables
 
+
 class Gallery(UserInterface):
 
     def __init__(self, window):
@@ -25,28 +26,17 @@ class Gallery(UserInterface):
         assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
         self.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
         self.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
-        self.content = Layout(
-            direction=Direction.Vertical,
-            children=[
-                Tab(
-                    padding=(1.5 | em, 0.5 | em),
+        self.content = Tab(
+            padding=(1.5 | em, 0.5 | em),
 
-                    children=[
-                        TabItem(f'{MaterialIcons.VerticalAlignCenter} Layout', content=TabLayout()),
-                        TabItem(f'{MaterialIcons.Widgets} Widgets', content=TabWidgets(self, assets)),
-                        TabItem(f'{MaterialIcons.LightbulbOutline} Icons', content=TabIcons()),
-                        TabItem(f'{MaterialIcons.MultilineChart} Plots', content=tab_plots),
-                        TabItem(f'{MaterialIcons.BorderOuter} Styles', content=TabStyles(self)),
-                        TabItem(f'{MaterialIcons.Settings} System', content=tab_system),
-                        TabItem(f'{MaterialIcons.Tab} Tables', content=TabTables())
-                    ]),
-                Layout(
-                    height=(None, 0, 0),
-                    direction=Horizontal,
-                    align_items=Alignment.Center,
-                    justify_content=Justification.End,
-                    children=[Text(f'{MaterialIcons.Timer}')]
-                )
+            children=[
+                TabItem(f'{MaterialIcons.VerticalAlignCenter} Layout', content=TabLayout()),
+                TabItem(f'{MaterialIcons.Widgets} Widgets', content=TabWidgets(self, assets)),
+                TabItem(f'{MaterialIcons.LightbulbOutline} Icons', content=TabIcons()),
+                TabItem(f'{MaterialIcons.MultilineChart} Plots', content=tab_plots),
+                TabItem(f'{MaterialIcons.BorderOuter} Styles', content=TabStyles(self)),
+                TabItem(f'{MaterialIcons.Settings} System', content=tab_system),
+                TabItem(f'{MaterialIcons.Tab} Tables', content=TabTables())
             ])
 
         asyncio.get_event_loop().create_task(tab_system.update())
