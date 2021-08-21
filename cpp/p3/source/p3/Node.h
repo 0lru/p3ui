@@ -54,16 +54,9 @@ namespace p3
     }
 
     /**
-    * this is the root of all evil. derived classes need to specify an
-    * element name, which may be considered equivalent as tag in the
-    * terminology of html.
-    *
-    * for synchronization/multi-threading, each node has a task-queue
-    * assigned. The default queue executes given tasks in the current
-    * thread. whenever assigned to a multi-threaded window/application,
-    * or a parent which is assigned to a multi-threaded window, it'll
-    * replace this default task queue with the one of it's anchestors.
-    *
+    * for synchronization/multi-threading, a shared mutex is used. the
+    * mutex is assigned to the one of the parent.
+    * 
     * node are state-descriptions. concerning styling and sizing, the
     * node can be in the state of
     * - needs restyling (needs to perform a style cascade)
