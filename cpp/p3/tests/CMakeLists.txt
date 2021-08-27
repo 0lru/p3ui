@@ -1,12 +1,5 @@
-add_executable(p3_tests 
-
-    source/main.cpp
-    "source/TestBuilder.cpp"
-
-)
-
-add_test(NAME p3_tests COMMAND p3_tests)
-target_link_libraries(p3_tests PUBLIC gtest p3)
+add_executable(p3_tests "source/TestBuilder.cpp")
+target_link_libraries(p3_tests PRIVATE p3 Catch2 Catch2::Catch2WithMain)
 
 add_custom_command(
     TARGET p3_tests

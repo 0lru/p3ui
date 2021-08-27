@@ -22,10 +22,6 @@
 #pragma once
 #define NOMINMAX
 
-// TODO:
-//   * Annotation (add, remove etc. in plot, drawing methods ..)
-
-
 #include "Node.h"
 #include "Color.h"
 
@@ -35,7 +31,6 @@
 #include <functional>
 #include <optional>
 #include <variant>
-
 
 namespace p3
 {
@@ -97,14 +92,14 @@ namespace p3
             static Colormap const Spectral;
             static Colormap const Greys;
 
-            Colormap(int index=0);
+            Colormap(int index = 0);
             Colormap(std::string const& name, std::vector<Color>, bool interpolated);
 
             Colormap(Colormap const&) = default;
-            Colormap(Colormap &&) = default;
+            Colormap(Colormap&&) = default;
 
             Colormap& operator=(Colormap const&) = default;
-            Colormap& operator=(Colormap &&) = default;
+            Colormap& operator=(Colormap&&) = default;
 
             int index() const { return _index; }
 
