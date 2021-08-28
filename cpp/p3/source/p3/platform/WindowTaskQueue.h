@@ -38,7 +38,7 @@ namespace p3
                 }
                 catch (std::exception& e)
                 {
-                    log_fatal(std::format("uncaught exception/internal error:\n{}", e.what()));
+                    log_fatal(fmt::format("uncaught exception/internal error:\n{}", e.what()));
                 }
             }
         }

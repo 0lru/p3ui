@@ -57,6 +57,8 @@
 #include <list>
 #include <regex>
 
+#include <fmt/format.h>
+
 namespace p3
 {
 
@@ -145,7 +147,7 @@ namespace p3
         // find definition ("how to build the node") by (tag-)name
         auto pair = definitions().find(pugi_node.name());
         if (pair == definitions().end())
-            throw std::runtime_error(std::format(R"(no definition found for node type "{}")", pugi_node.name()));
+            throw std::runtime_error(fmt::format(R"(no definition found for node type "{}")", pugi_node.name()));
 
         //
         // call node constructor

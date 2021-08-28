@@ -1,6 +1,8 @@
 set(CATCH_BUILD_STATIC_LIBRARY ON CACHE BOOL "" FORCE)
 add_subdirectory(catch2)
 
+add_subdirectory(fmtlib)
+
 add_subdirectory(glad)
 # add_library(glad INTERFACE)
 # target_include_directories(glad INTERFACE glad/source)

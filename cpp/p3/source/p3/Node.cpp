@@ -104,7 +104,7 @@ namespace p3
         };
         auto it = setter.find(name);
         if (it == setter.end())
-            throw parser::ParserError(std::format("attribute {} not found", name));
+            throw parser::ParserError(fmt::format("attribute {} not found", name));
         it->second(*this, value);
     }
 

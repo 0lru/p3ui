@@ -26,7 +26,6 @@
 #include <optional>
 
 #include <iostream>
-#include <format>
 
 #include <imgui.h>
 #include <imgui_internal.h>

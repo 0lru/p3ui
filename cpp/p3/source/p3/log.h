@@ -24,7 +24,7 @@
 // #define LOG_LEVEL 10
 #define NOMINMAX
 #include <source_location>
-#include <format>
+#include <fmt/format.h>
 #include <cstdint>
 #include <iostream>
 #include <filesystem>
@@ -59,14 +59,14 @@ namespace logger
     {
         if (current == nullptr)
             return;
-        current->log(std::move(location), level, std::format(text, std::forward<Args>(args)...));
+        current->log(std::move(location), level, fmt::format(text, std::forward<Args>(args)...));
     }*/
 
     inline std::string __log_format(std::source_location location)
     {
         std::string file_name = location.file_name();
         std::transform(file_name.begin(), file_name.end(), file_name.begin(), [](auto c) { return std::tolower(c); });
-        return std::format(" ({}:{}:{})",
+        return fmt::format(" ({}:{}:{})",
             std::filesystem::path(file_name).stem().string(),
             location.line(),
             location.function_name());
@@ -83,7 +83,7 @@ namespace logger
             << rang::fg::red
             << rang::bg::black
             << "[fat!] "
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << __log_format(location)
             << std::endl; // flush..
         exit(-1);
@@ -100,7 +100,7 @@ namespace logger
             << rang::fg::red
             << rang::bg::black
             << "[err!] "
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << __log_format(location)
             << std::endl; // flush..
         exit(-1);
@@ -117,7 +117,7 @@ namespace logger
             << rang::fg::yellow
             << rang::bg::black
             << "[warn] "
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << __log_format(location)
             << std::endl; // flush..
     }
@@ -136,7 +136,7 @@ namespace logger
             << rang::style::reset
             << rang::fg::reset
             << rang::bg::reset
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black
@@ -158,7 +158,7 @@ namespace logger
             << rang::style::reset
             << rang::fg::reset
             << rang::bg::reset
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black
@@ -180,7 +180,7 @@ namespace logger
             << rang::style::reset
             << rang::fg::reset
             << rang::bg::reset
-            << std::format(text, std::forward<Args>(args)...)
+            << fmt::format(text, std::forward<Args>(args)...)
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black

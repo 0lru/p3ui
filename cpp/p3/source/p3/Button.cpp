@@ -24,7 +24,6 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <format>
 
 namespace p3
 {

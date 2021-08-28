@@ -39,7 +39,7 @@ namespace p3::python
         {
             log_info("about to bind function (id={})", _callbacks.size());
             _callbacks.push_back(f);
-            return "{" + std::format("cb{}", _callbacks.size() - 1) + "}";
+            return "{" + fmt::format("cb{}", _callbacks.size() - 1) + "}";
         }
 
     protected:

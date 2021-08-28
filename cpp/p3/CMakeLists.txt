@@ -11,6 +11,7 @@ target_link_libraries(p3
     rang
     pugixml
     p3_parser
+    fmt-header-only
     ${OPENGL_LIBRARIES})
 
 add_subdirectory(tests)

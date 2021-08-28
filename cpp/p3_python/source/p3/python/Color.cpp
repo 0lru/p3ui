@@ -22,7 +22,8 @@
 
 #include "p3ui.h"
 #include <p3/Color.h>
-#include <format>
+#include <fmt/format.h>
+
 
 namespace p3::python
 {
@@ -73,7 +74,7 @@ namespace p3::python
         color.def(py::init<std::string>());
         color.def(py::init<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>());
         color.def("__repr__", [](Color const& color) {
-            return std::format("[{}, {}, {}, {}]", color.red(), color.green(), color.blue(), color.alpha());
+            return fmt::format("[{}, {}, {}, {}]", color.red(), color.green(), color.blue(), color.alpha());
         });
 
         // tuple -> color
