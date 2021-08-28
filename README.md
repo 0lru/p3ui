@@ -11,4 +11,4 @@ Using pip:
 
 An example is [provided here](python/gallery)
 
-![widgets](https://github.com/0lru/p3ui/blob/main/doc/widgets.png)
+![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/widgets.png)
