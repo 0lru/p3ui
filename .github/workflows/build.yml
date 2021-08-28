@@ -27,5 +27,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Setup
+    - name: Install setuptools
       run: python -m pip install --upgrade wheel setuptools
+
+    - name: Build and install
+      run: pip install --verbose .
