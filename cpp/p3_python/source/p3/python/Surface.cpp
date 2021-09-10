@@ -145,7 +145,7 @@ namespace p3::python
             if (!_skia_context)
             {
                 _skia_context = _skia.attr("GrDirectContext").attr("MakeGL")();
-                log_info("created skia context");
+                log_debug("created skia context");
             }
 
             if (!_render_target ||

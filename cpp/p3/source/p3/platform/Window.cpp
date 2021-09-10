@@ -55,7 +55,7 @@ namespace p3
         auto f = promise->get_future();
         _thread = std::thread([this, promise, title, width, height]() { thread(promise, title, width, height); });
         f.get();
-        log_info("window created");
+        log_debug("window created");
     }
 
     Window::~Window()

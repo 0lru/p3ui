@@ -31,11 +31,11 @@ namespace p3
         glBindRenderbuffer(GL_RENDERBUFFER, _depth_id);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _width, _height);
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depth_id);
+        
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        {
             throw std::runtime_error("failed to create render target, framebuffer incomplete");
-        }
-        log_info("render target created ({}x{})", _width, _height);
+        
+        log_debug("render target created ({}x{})", _width, _height);
     }
 
     OpenGLRenderTarget::~OpenGLRenderTarget()
