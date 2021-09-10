@@ -19,6 +19,8 @@ namespace p3
         , _im_gui_context(ImGui::CreateContext(), &ImGui::DestroyContext)
         , _im_plot_context(ImPlot::CreateContext(), &ImPlot::DestroyContext)
     {
+        IMGUI_CHECKVERSION();
+
         set_theme(Theme::make_default());
         _im_gui_context->IO.IniFilename = nullptr;
     }
