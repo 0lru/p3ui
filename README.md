@@ -17,6 +17,8 @@ Installation with pip:
 
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/widgets.png)
 
+![plots](https://raw.githubusercontent.com/0lru/p3ui/main/doc/plots.png)
+
 ## Canvas with Skia 
 ([source code](python/canvas))
 
