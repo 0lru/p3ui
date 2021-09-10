@@ -102,6 +102,7 @@ namespace p3
         double time_till_enter_idle_mode() const;
 
         void redraw() override;
+        void set_needs_update() override final;
 
         std::shared_ptr<Window const> shared_ptr() const;
 

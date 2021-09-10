@@ -152,7 +152,7 @@ namespace p3
         Node(std::string element_name);
 
         /// inform that this node needs to update it's actual values
-        void set_needs_update();
+        virtual void set_needs_update();
 
         /// inform that this node needs to update it's computed values
         void set_needs_restyle();

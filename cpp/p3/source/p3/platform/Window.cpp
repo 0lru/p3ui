@@ -463,8 +463,12 @@ namespace p3
 
     void Window::redraw()
     {
-        // possibly wakes up the thread (force state evaluation)
         glfwPostEmptyEvent();
+    }
+
+    void Window::set_needs_update()
+    {
+        redraw();
     }
 
 }

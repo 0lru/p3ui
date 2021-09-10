@@ -62,7 +62,6 @@ namespace p3
         void merge_font(std::string const&, float size);
         void set_default_font(Font);
 
-
         //
         // img gui/plot context & options
         ImGuiContext& im_gui_context() const;
@@ -86,6 +85,8 @@ namespace p3
         void render(Context&, float width, float height) override;
 
         virtual void synchronize_with(Synchronizable&) override;
+
+
 
     protected:
         void update_content() override;
