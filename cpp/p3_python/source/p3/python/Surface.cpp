@@ -72,6 +72,7 @@ namespace p3::python
         std::optional<py::object> _skia_context;
         std::optional<py::object> _skia_target;
         std::optional<py::object> _skia_picture;
+        std::optional<py::object> _skia_surface;
     };
 
     namespace
@@ -157,6 +158,11 @@ namespace p3::python
                     _render_target->framebuffer_id(), GL_RGBA8);
                 _skia_target = _skia.attr("GrBackendRenderTarget")(
                     _width, _height, 0, 0, framebuffer_info);
+                auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
+                auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
+                auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
+                auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
+                _skia_surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
             }
 
             //
@@ -166,12 +172,8 @@ namespace p3::python
                 _render_target->bind();
                 glClearColor(0.f, 0.f, 0.f, 0.f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
-                auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
-                auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
-                auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
-                auto surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
-                auto canvas = surface.attr("getCanvas")();
+                auto canvas = _skia_surface.value().attr("getCanvas")();
+                // if nothing is saved, that'll reset the matrices
                 canvas.attr("restore")();
                 canvas.attr("drawPicture")(_skia_picture);
                 _skia_context.value().attr("flush")();
@@ -192,7 +194,7 @@ namespace p3::python
 
     void Surface::exit(py::args)
     {
-        // need to finalize recording with gild held
+        // need to finalize recording with gil held
         std::optional<py::object> recording = _skia_recorder.attr("finishRecordingAsPicture")();
         {
             //
