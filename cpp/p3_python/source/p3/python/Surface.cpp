@@ -65,7 +65,7 @@ namespace p3::python
     private:
         std::uint32_t _width;
         std::uint32_t _height;
-        bool _is_dirty = true;
+        bool _is_dirty = false;
         std::shared_ptr<p3::RenderTarget> _render_target;
         py::object _skia;
         py::object _skia_recorder;
@@ -165,19 +165,23 @@ namespace p3::python
 
             //
             // draw recorded picture onto skia surface
-            _render_target->bind();
-            glClearColor(0.f, 0.f, 0.f, 0.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
-            auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
-            auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
-            auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
-            auto surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
-            auto canvas = surface.attr("getCanvas")();
-            canvas.attr("restore")();
-            canvas.attr("drawPicture")(_skia_picture);
-            _skia_context.value().attr("flush")();
-            _render_target->release();
+            if (_is_dirty)
+            {
+                _render_target->bind();
+                glClearColor(0.f, 0.f, 0.f, 0.f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
+                auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
+                auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
+                auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
+                auto surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
+                auto canvas = surface.attr("getCanvas")();
+                canvas.attr("restore")();
+                canvas.attr("drawPicture")(_skia_picture);
+                _skia_context.value().attr("flush")();
+                _render_target->release();
+                _is_dirty = false;
+            }
         }
         ImVec2 size(width, height);
         ImGui::Image(_render_target->texture_id(), size);
@@ -202,6 +206,7 @@ namespace p3::python
             {
                 auto guard = lock();
                 std::swap(recording, _skia_picture);
+                _is_dirty = true;
                 redraw();
             }
         }
