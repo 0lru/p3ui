@@ -25,6 +25,9 @@
 #include <string>
 #include <memory>
 
+#include <glad/gl.h>
+#include <imgui.h>
+
 #include <p3/Node.h>
 #include <p3/Context.h>
 #include <p3/RenderBackend.h>
@@ -48,19 +51,27 @@ namespace p3::python
         void set_height(std::uint32_t);
         std::uint32_t height() const;
 
-        // force update in ui-thread (initiate call to render_impl)
-        void update();
-
         // sets automatic width/height values
         void update_content() override;
 
         void render_impl(Context& context, float width, float height) final override;
+
+        std::optional<py::object> picture() const { return _skia_picture; }
+
+        // python context for accessing the canvas of the surface
+        py::object enter();
+        void exit(py::args);
 
     private:
         std::uint32_t _width;
         std::uint32_t _height;
         bool _is_dirty = true;
         std::shared_ptr<p3::RenderTarget> _render_target;
+        py::object _skia;
+        py::object _skia_recorder;
+        std::optional<py::object> _skia_context;
+        std::optional<py::object> _skia_target;
+        std::optional<py::object> _skia_picture;
     };
 
     namespace
@@ -92,6 +103,8 @@ namespace p3::python
         , _width(width)
         , _height(height)
     {
+        _skia = py::module::import("skia");
+        _skia_recorder = _skia.attr("PictureRecorder")();
     }
 
     void Surface::update_content()
@@ -122,21 +135,76 @@ namespace p3::python
         return _height;
     }
 
-    void Surface::update()
-    {
-        set_needs_update();
-    }
-
     void Surface::render_impl(Context& context, float width, float height)
     {
-        if (width * height < 0)
+        if (width * height < 0 || !_skia_picture)
             return;
-        if (!_render_target || _width != _render_target->width() || _height != _render_target->height())
-            _render_target = context.render_backend().create_render_target(_width, _height);
-//        ImVec2 size(width, height);
-//        auto id = reinterpret_cast<ImTextureID>(_texture->use(context));
-//        ImGui::Image(id, size);
-//        update_status();
+        {
+            py::gil_scoped_acquire acquire;
+            // TODO: import once
+            if (!_skia_context)
+            {
+                _skia_context = _skia.attr("GrDirectContext").attr("MakeGL")();
+                log_info("created skia context");
+            }
+
+            if (!_render_target ||
+                _width != _render_target->width() ||
+                _height != _render_target->height())
+            {
+                _render_target = context.render_backend().create_render_target(_width, _height);
+                _render_target->bind();
+                // 
+                // TODO: get rgba from skia library
+                auto GL = py::module::import("OpenGL.GL");
+                auto framebuffer_info = _skia.attr("GrGLFramebufferInfo")(
+                    _render_target->framebuffer_id(), GL_RGBA8);
+                _skia_target = _skia.attr("GrBackendRenderTarget")(
+                    _width, _height, 0, 0, framebuffer_info);
+            }
+
+            //
+            // draw recorded picture onto skia surface
+            _render_target->bind();
+            auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
+            auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
+            auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
+            auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
+            auto surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
+            auto canvas = surface.attr("getCanvas")();
+            canvas.attr("restore")();
+            canvas.attr("drawPicture")(_skia_picture);
+            _skia_context.value().attr("flush")();
+            _render_target->release();
+        }
+        ImVec2 size(width, height);
+        ImGui::Image(_render_target->texture_id(), size);
+        update_status();
+    }
+
+    py::object Surface::enter()
+    {
+        auto skia = py::module::import("skia");
+        return _skia_recorder.attr("beginRecording")(_width, _height);
+    }
+
+    void Surface::exit(py::args)
+    {
+        // need to finalize recording with gild held
+        std::optional<py::object> recording = _skia_recorder.attr("finishRecordingAsPicture")();
+        {
+            //
+            // skia painting is done with acquired gil in the render thread
+            // need to release the gil before the lock of the node..
+            py::gil_scoped_release release;
+            {
+                auto guard = lock();
+                std::swap(recording, _skia_picture);
+                redraw();
+            }
+        }
+        // need to reset with gil
+        recording.reset();
     }
 
     void Definition<Surface>::apply(py::module& module)
@@ -151,6 +219,9 @@ namespace p3::python
 
         def_property(surface, "width", &Surface::width, &Surface::set_width);
         def_property(surface, "height", &Surface::width, &Surface::set_height);
+        surface.def("__enter__", &Surface::enter);
+        surface.def("__exit__", &Surface::exit);
+        surface.def_property_readonly("picture", &Surface::picture);
     }
 
 }
