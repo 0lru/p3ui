@@ -40,6 +40,7 @@ namespace py = pybind11;
 namespace p3::python
 {
     class Builder;
+    class Surface;
 
     //
     // wrap parameters

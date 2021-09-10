@@ -80,4 +80,5 @@ PYBIND11_MODULE(p3ui, module)
     python::Definition<Window>::apply(module);
 
     python::Definition<python::Builder>::apply(module);
+    python::Definition<python::Surface>::apply(module);
 }
