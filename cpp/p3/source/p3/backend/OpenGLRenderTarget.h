@@ -11,6 +11,7 @@ namespace p3
         OpenGLRenderTarget(std::uint32_t width, std::uint32_t height);
         ~OpenGLRenderTarget();
 
+        unsigned int framebuffer_id() const override;
         TextureId texture_id() const override;
         void bind() override;
         void release() override;

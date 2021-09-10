@@ -45,6 +45,10 @@ namespace p3
         glDeleteRenderbuffers(1, &_depth_id);
     }
 
+    unsigned int OpenGLRenderTarget::framebuffer_id() const
+    {
+        return _framebuffer_id;
+    }
 
     TextureId OpenGLRenderTarget::texture_id() const
     {
@@ -55,6 +59,8 @@ namespace p3
     {
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
         glViewport(0, 0, static_cast<GLsizei>(_width), static_cast<GLsizei>(_height));
+        glClearColor(1.f, 1.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     }
 
     void OpenGLRenderTarget::release()

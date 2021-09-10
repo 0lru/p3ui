@@ -16,6 +16,7 @@ namespace p3
     public:
         virtual ~RenderTarget() = default;
 
+        virtual unsigned int framebuffer_id() const = 0;
         virtual TextureId texture_id() const = 0;
         virtual void bind() = 0;
         virtual void release() = 0;
