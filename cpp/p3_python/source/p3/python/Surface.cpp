@@ -141,7 +141,6 @@ namespace p3::python
             return;
         {
             py::gil_scoped_acquire acquire;
-            // TODO: import once
             if (!_skia_context)
             {
                 _skia_context = _skia.attr("GrDirectContext").attr("MakeGL")();
@@ -154,9 +153,6 @@ namespace p3::python
             {
                 _render_target = context.render_backend().create_render_target(_width, _height);
                 _render_target->bind();
-                // 
-                // TODO: get rgba from skia library
-                auto GL = py::module::import("OpenGL.GL");
                 auto framebuffer_info = _skia.attr("GrGLFramebufferInfo")(
                     _render_target->framebuffer_id(), GL_RGBA8);
                 _skia_target = _skia.attr("GrBackendRenderTarget")(
