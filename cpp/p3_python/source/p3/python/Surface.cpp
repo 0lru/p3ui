@@ -166,6 +166,8 @@ namespace p3::python
             //
             // draw recorded picture onto skia surface
             _render_target->bind();
+            glClearColor(0.f, 0.f, 0.f, 0.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
             auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
             auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
