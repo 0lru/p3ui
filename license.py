@@ -20,7 +20,7 @@
 
 import os
 import argparse
-from pathlib2 import Path
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description='add a header/license from a template to some files')
 
