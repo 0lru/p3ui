@@ -18,6 +18,11 @@ namespace p3
             std::size_t width, 
             std::size_t height, 
             const std::uint8_t *data) override;
+
+        std::shared_ptr<RenderTarget> create_render_target(
+            std::uint32_t width, 
+            std::uint32_t height) override;
+        void delete_render_target(std::shared_ptr<RenderTarget>) override;
     };
 
 }

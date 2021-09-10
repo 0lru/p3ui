@@ -1,8 +1,9 @@
-#include "OpenGL2RenderBackend.h"
-
 #include <imgui.h>
 #include <backends/imgui_impl_opengl2.h>
 #include <glad/gl.h>
+
+#include "OpenGL2RenderBackend.h"
+#include "OpenGLRenderTarget.h"
 
 namespace p3
 {
@@ -55,6 +56,16 @@ namespace p3
             GL_RGBA, 
             GL_UNSIGNED_BYTE, 
             data);
+    }
+
+    std::shared_ptr<RenderTarget> OpenGL2RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
+    {
+        return std::make_shared<OpenGLRenderTarget>(width, height);
+    }
+
+    void OpenGL2RenderBackend::delete_render_target(std::shared_ptr<RenderTarget>)
+    {
+        // ...
     }
 
 }

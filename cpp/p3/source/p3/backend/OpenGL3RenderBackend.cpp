@@ -1,8 +1,9 @@
-#include "OpenGL3RenderBackend.h"
-
 #include <imgui.h>
 #include <backends/imgui_impl_OpenGL3.h>
 #include <glad/gl.h>
+
+#include "OpenGL3RenderBackend.h"
+#include "OpenGLRenderTarget.h"
 
 namespace p3
 {
@@ -47,15 +48,28 @@ namespace p3
         std::uint8_t const* data)
     {
         glTexImage2D(
-            GL_TEXTURE_2D, 
-            0, GL_RGBA, 
-            static_cast<GLsizei>(width), 
-            static_cast<GLsizei>(height), 
-            0, 
-            GL_RGBA, 
-            GL_UNSIGNED_BYTE, 
+            GL_TEXTURE_2D,
+            0, GL_RGBA,
+            static_cast<GLsizei>(width),
+            static_cast<GLsizei>(height),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
             data);
     }
+
+    std::shared_ptr<RenderTarget> OpenGL3RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
+    {
+        return std::make_shared<OpenGLRenderTarget>(width, height);
+    }
+
+    void OpenGL3RenderBackend::delete_render_target(std::shared_ptr<RenderTarget>)
+    {
+        // ...
+    }
+
+
+
 
 }
 
