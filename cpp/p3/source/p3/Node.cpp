@@ -121,7 +121,7 @@ namespace p3
     void Node::update_status()
     {
         ImGuiWindow* window = GImGui->CurrentWindow;
-        auto const status_flag = window->DC.LastItemStatusFlags;
+        auto const status_flag = GImGui->LastItemData.StatusFlags;
         if (status_flag == _status_flag)
         {
             if (_mouse.hovered && _mouse.move && Context::current().mouse_move()) postpone([f = _mouse.move, e = MouseEvent(this)]() {
@@ -521,7 +521,7 @@ namespace p3
         ImGuiContext& context = *GImGui;
         _global_x = context.IO.MousePos.x;
         _global_y = context.IO.MousePos.y;
-        auto& last_rect = context.CurrentWindow->DC.LastItemRect;
+        auto& last_rect = context.LastItemData.Rect;
         _x = _global_x - last_rect.Min.x;
         _y = _global_y - last_rect.Min.y;
     }
