@@ -157,15 +157,14 @@ namespace p3::python
                 auto series = std::make_shared<Plot::BarSeries<T>>();
                 series->set_name(std::move(name));
                 parse_kwargs<Plot::Item>(kwargs, *series);
-                assign(kwargs, "values", static_cast<Plot::Series1D<Plot::Item, T>&>(*series), &Plot::Series1D<Plot::Item, T>::set_values);
+                assign(kwargs, "values", static_cast<Plot::Series1D<Plot::Series, T>&>(*series), &Plot::Series1D<Plot::Series, T>::set_values);
                 assign(kwargs, "shift", *series, &Plot::BarSeries<T>::set_shift);
                 assign(kwargs, "width", *series, &Plot::BarSeries<T>::set_width);
                 return series;
             }));
-            def_property(series, "name", &Plot::BarSeries<T>::name, &Plot::BarSeries<T>::set_name);
             def_property(series, "shift", &Plot::BarSeries<T>::shift, &Plot::BarSeries<T>::set_shift);
             def_property(series, "width", &Plot::BarSeries<T>::width, &Plot::BarSeries<T>::set_width);
-            series.def_property("values", wrap(&Plot::BarSeries<T>::values), wrap(&Plot::BarSeries<T>::set_values));
+            series.def_property("values", wrap<Plot::BarSeries<T>>(&Plot::BarSeries<T>::values), wrap<Plot::BarSeries<T>>(&Plot::BarSeries<T>::set_values));
         }
     };
 
@@ -177,15 +176,14 @@ namespace p3::python
         void operator()(Module& module)
         {
             auto class_name = prefix + DataSuffix<T>;
-            auto lines = py::class_<Type, Plot::Item, std::shared_ptr<Type>>(module, class_name.c_str());
+            auto lines = py::class_<Type, Plot::Series, std::shared_ptr<Type>>(module, class_name.c_str());
             lines.def(py::init<>([](std::string name, py::kwargs kwargs) {
                 auto series = std::make_shared<Type>();
                 series->set_name(std::move(name));
                 ArgumentParser<Plot::Item>()(kwargs, *series);
-                assign(kwargs, "values", static_cast<Plot::Series1D<Plot::Item, T>&>(*series), &Plot::Series1D<Plot::Item, T>::set_values);
+                assign(kwargs, "values", static_cast<Plot::Series1D<Plot::Series, T>&>(*series), &Plot::Series1D<Plot::Series, T>::set_values);
                 return series;
             }));
-            def_property(lines, "name", &Type::name, &Type::set_name);
             lines.def_property("values", wrap<Type>(&Type::values), wrap<Type>(&Type::set_values));
         }
     };
@@ -198,17 +196,16 @@ namespace p3::python
         void operator()(Module& module)
         {
             auto class_name = prefix + DataSuffix<T>;
-            auto series = py::class_<Type, Plot::Item, std::shared_ptr<Type>>(module, class_name.c_str());
+            auto series = py::class_<Type, Plot::Series, std::shared_ptr<Type>>(module, class_name.c_str());
 
             series.def(py::init<>([](std::string name, py::kwargs kwargs) {
                 auto series = std::make_shared<Type>();
                 series->set_name(std::move(name));
-                assign(kwargs, "x", static_cast<Plot::Series2D<Plot::Item, T>&>(*series), &Plot::Series2D<Plot::Item, T>::set_x);
-                assign(kwargs, "y", static_cast<Plot::Series2D<Plot::Item, T>&>(*series), &Plot::Series2D<Plot::Item, T>::set_y);
+                assign(kwargs, "x", static_cast<Plot::Series2D<Plot::Series, T>&>(*series), &Plot::Series2D<Plot::Series, T>::set_x);
+                assign(kwargs, "y", static_cast<Plot::Series2D<Plot::Series, T>&>(*series), &Plot::Series2D<Plot::Series, T>::set_y);
                 parse_kwargs<Plot::Item>(kwargs, *series);
                 return series;
             }));
-            def_property(series, "name", &Type::name, &Type::set_name);
             series.def_property("x", wrap<Type>(&Type::x), wrap<Type>(&Type::set_x));
             series.def_property("y", wrap<Type>(&Type::y), wrap<Type>(&Type::set_y));
         }
@@ -316,6 +313,9 @@ namespace p3::python
         def_property(plot_item, "marker_size", &Plot::Item::marker_size, &Plot::Item::set_marker_size);
         def_property(plot_item, "marker_weight", &Plot::Item::marker_weight, &Plot::Item::set_marker_weight);
         def_property(plot_item, "colormap", &Plot::Item::colormap, &Plot::Item::set_colormap);
+
+        auto plot_series = py::class_<Plot::Series, Plot::Item, std::shared_ptr<Plot::Series>>(plot, "Series");
+        def_property(plot_series, "name", &Plot::Series::name, &Plot::Series::set_name);
 
         auto annotation = py::class_<Plot::Annotation, Plot::Item, std::shared_ptr<Plot::Annotation>>(plot, "Annotation");
         annotation.def(py::init<>([](std::string text, py::kwargs kwargs) {

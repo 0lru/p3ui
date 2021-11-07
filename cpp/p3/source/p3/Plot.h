@@ -203,11 +203,10 @@ namespace p3
             bool _clamped = false;
         };
 
-        template<typename Decorated>
-        class Named : public Decorated
+        class Series : public Item
         {
         public:
-            void set_name(std::string name) { _name = std::move(name); Decorated::redraw(); }
+            void set_name(std::string name) { _name = std::move(name); Item::redraw(); }
             std::string const& name() const { return _name; }
 
         private:
@@ -241,7 +240,7 @@ namespace p3
         };
 
         template<typename T>
-        class BarSeries : public Named<Series1D<Item, T>>
+        class BarSeries : public Series1D<Series, T>
         {
         public:
             void set_shift(double shift) { _shift = shift; }
@@ -258,35 +257,35 @@ namespace p3
         };
 
         template<typename T>
-        class LineSeries : public Named<Series2D<Item, T>>
+        class LineSeries : public Series2D<Series, T>
         {
         public:
             void render() override;
         };
 
         template<typename T>
-        class StemSeries : public Named<Series2D<Item, T>>
+        class StemSeries : public Series2D<Series, T>
         {
         public:
             void render() override;
         };
 
         template<typename T>
-        class ScatterSeries : public Named<Series2D<Item, T>>
+        class ScatterSeries : public Series2D<Series, T>
         {
         public:
             void render() override;
         };
 
         template<typename T>
-        class HorizontalLines : public Named<Series1D<Item, T>>
+        class HorizontalLines : public Series1D<Series, T>
         {
         public:
             void render() override;
         };
 
         template<typename T>
-        class VerticalLines : public Named<Series1D<Item, T>>
+        class VerticalLines : public Series1D<Series, T>
         {
         public:
             void render() override;
