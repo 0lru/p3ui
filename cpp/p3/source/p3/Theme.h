@@ -318,35 +318,14 @@ namespace p3
         std::optional<Color> plot_inlay_text_color() const;
         void set_plot_inlay_text_color(std::optional<Color>);
 
-        std::optional<Color> plot_x_axis_color() const;
-        void set_plot_x_axis_color(std::optional<Color>);
+        std::optional<Color> plot_axis_color() const;
+        void set_plot_axis_color(std::optional<Color>);
 
-        std::optional<Color> plot_x_axis_grid_color() const;
-        void set_plot_x_axis_grid_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis_color() const;
-        void set_plot_y_axis_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis_grid_color() const;
-        void set_plot_y_axis_grid_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis2_color() const;
-        void set_plot_y_axis2_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis_grid2_color() const;
-        void set_plot_y_axis_grid2_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis3_color() const;
-        void set_plot_y_axis3_color(std::optional<Color>);
-
-        std::optional<Color> plot_y_axis_grid3_color() const;
-        void set_plot_y_axis_grid3_color(std::optional<Color>);
+        std::optional<Color> plot_axis_grid_color() const;
+        void set_plot_axis_grid_color(std::optional<Color>);
 
         std::optional<Color> plot_selection_color() const;
         void set_plot_selection_color(std::optional<Color>);
-
-        std::optional<Color> plot_query_color() const;
-        void set_plot_query_color(std::optional<Color>);
 
         std::optional<Color> plot_crosshairs_color() const;
         void set_plot_crosshairs_color(std::optional<Color>);
@@ -448,16 +427,9 @@ namespace p3
         std::optional<Color> _plot_legend_text_color;
         std::optional<Color> _plot_title_text_color;
         std::optional<Color> _plot_inlay_text_color;
-        std::optional<Color> _plot_x_axis_color;
-        std::optional<Color> _plot_x_axis_grid_color;
-        std::optional<Color> _plot_y_axis_color;
-        std::optional<Color> _plot_y_axis_grid_color;
-        std::optional<Color> _plot_y_axis2_color;
-        std::optional<Color> _plot_y_axis_grid2_color;
-        std::optional<Color> _plot_y_axis3_color;
-        std::optional<Color> _plot_y_axis_grid3_color;
+        std::optional<Color> _plot_axis_color;
+        std::optional<Color> _plot_axis_grid_color;
         std::optional<Color> _plot_selection_color;
-        std::optional<Color> _plot_query_color;
         std::optional<Color> _plot_crosshairs_color;
     };
 

@@ -149,16 +149,9 @@ namespace p3
         assign(im_plot_style->Colors[ImPlotCol_LegendText], _plot_legend_text_color);
         assign(im_plot_style->Colors[ImPlotCol_TitleText], _plot_title_text_color);
         assign(im_plot_style->Colors[ImPlotCol_InlayText], _plot_inlay_text_color);
-        assign(im_plot_style->Colors[ImPlotCol_XAxis], _plot_x_axis_color);
-        assign(im_plot_style->Colors[ImPlotCol_XAxisGrid], _plot_x_axis_grid_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxis], _plot_y_axis_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxisGrid], _plot_y_axis_grid_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxis2], _plot_y_axis2_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxisGrid2], _plot_y_axis_grid2_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxis3], _plot_y_axis3_color);
-        assign(im_plot_style->Colors[ImPlotCol_YAxisGrid3], _plot_y_axis_grid3_color);
+        assign(im_plot_style->Colors[ImPlotCol_AxisText], _plot_axis_color);
+        assign(im_plot_style->Colors[ImPlotCol_AxisGrid], _plot_axis_grid_color);
         assign(im_plot_style->Colors[ImPlotCol_Selection], _plot_selection_color);
-        assign(im_plot_style->Colors[ImPlotCol_Query], _plot_query_color);
         assign(im_plot_style->Colors[ImPlotCol_Crosshairs], _plot_crosshairs_color);
         im_plot_style->LineWeight = 3.0f;
         im_plot_style->AntiAliasedLines = false;
@@ -1123,91 +1116,25 @@ namespace p3
         _on_change();
     }
 
-    std::optional<Color> Theme::plot_x_axis_color() const
+    std::optional<Color> Theme::plot_axis_color() const
     {
-        return _plot_x_axis_color;
+        return _plot_axis_color;
     }
 
-    void Theme::set_plot_x_axis_color(std::optional<Color> plot_x_axis_color)
+    void Theme::set_plot_axis_color(std::optional<Color> plot_x_axis_color)
     {
-        _plot_x_axis_color = std::move(plot_x_axis_color);
+        _plot_axis_color = std::move(plot_x_axis_color);
         _on_change();
     }
 
-    std::optional<Color> Theme::plot_x_axis_grid_color() const
+    std::optional<Color> Theme::plot_axis_grid_color() const
     {
-        return _plot_x_axis_grid_color;
+        return _plot_axis_grid_color;
     }
 
-    void Theme::set_plot_x_axis_grid_color(std::optional<Color> plot_x_axis_grid_color)
+    void Theme::set_plot_axis_grid_color(std::optional<Color> plot_x_axis_grid_color)
     {
-        _plot_x_axis_grid_color = std::move(plot_x_axis_grid_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis_color() const
-    {
-        return _plot_y_axis_color;
-    }
-
-    void Theme::set_plot_y_axis_color(std::optional<Color> plot_y_axis_color)
-    {
-        _plot_y_axis_color = std::move(plot_y_axis_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis_grid_color() const
-    {
-        return _plot_y_axis_grid_color;
-    }
-
-    void Theme::set_plot_y_axis_grid_color(std::optional<Color> plot_y_axis_grid_color)
-    {
-        _plot_y_axis_grid_color = std::move(plot_y_axis_grid_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis2_color() const
-    {
-        return _plot_y_axis2_color;
-    }
-
-    void Theme::set_plot_y_axis2_color(std::optional<Color> plot_y_axis2_color)
-    {
-        _plot_y_axis2_color = std::move(plot_y_axis2_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis_grid2_color() const
-    {
-        return _plot_y_axis_grid2_color;
-    }
-
-    void Theme::set_plot_y_axis_grid2_color(std::optional<Color> plot_y_axis_grid2_color)
-    {
-        _plot_y_axis_grid2_color = std::move(plot_y_axis_grid2_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis3_color() const
-    {
-        return _plot_y_axis3_color;
-    }
-
-    void Theme::set_plot_y_axis3_color(std::optional<Color> plot_y_axis3_color)
-    {
-        _plot_y_axis3_color = std::move(plot_y_axis3_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_y_axis_grid3_color() const
-    {
-        return _plot_y_axis_grid3_color;
-    }
-
-    void Theme::set_plot_y_axis_grid3_color(std::optional<Color> plot_y_axis_grid3_color)
-    {
-        _plot_y_axis_grid3_color = std::move(plot_y_axis_grid3_color);
+        _plot_axis_grid_color = std::move(plot_x_axis_grid_color);
         _on_change();
     }
 
@@ -1219,17 +1146,6 @@ namespace p3
     void Theme::set_plot_selection_color(std::optional<Color> plot_selection_color)
     {
         _plot_selection_color = std::move(plot_selection_color);
-        _on_change();
-    }
-
-    std::optional<Color> Theme::plot_query_color() const
-    {
-        return _plot_query_color;
-    }
-
-    void Theme::set_plot_query_color(std::optional<Color> plot_query_color)
-    {
-        _plot_query_color = std::move(plot_query_color);
         _on_change();
     }
 
@@ -1309,16 +1225,9 @@ namespace p3
         assign(_plot_legend_text_color, im_plot_style.Colors[ImPlotCol_LegendText]);
         assign(_plot_title_text_color, im_plot_style.Colors[ImPlotCol_TitleText]);
         assign(_plot_inlay_text_color, im_plot_style.Colors[ImPlotCol_InlayText]);
-        assign(_plot_x_axis_color, im_plot_style.Colors[ImPlotCol_XAxis]);
-        assign(_plot_x_axis_grid_color, im_plot_style.Colors[ImPlotCol_XAxisGrid]);
-        assign(_plot_y_axis_color, im_plot_style.Colors[ImPlotCol_YAxis]);
-        assign(_plot_y_axis_grid_color, im_plot_style.Colors[ImPlotCol_YAxisGrid]);
-        assign(_plot_y_axis2_color, im_plot_style.Colors[ImPlotCol_YAxis2]);
-        assign(_plot_y_axis_grid2_color, im_plot_style.Colors[ImPlotCol_YAxisGrid2]);
-        assign(_plot_y_axis3_color, im_plot_style.Colors[ImPlotCol_YAxis3]);
-        assign(_plot_y_axis_grid3_color, im_plot_style.Colors[ImPlotCol_YAxisGrid3]);
+        assign(_plot_axis_color, im_plot_style.Colors[ImPlotCol_AxisText]);
+        assign(_plot_axis_grid_color, im_plot_style.Colors[ImPlotCol_AxisGrid]);
         assign(_plot_selection_color, im_plot_style.Colors[ImPlotCol_Selection]);
-        assign(_plot_query_color, im_plot_style.Colors[ImPlotCol_Query]);
         assign(_plot_crosshairs_color, im_plot_style.Colors[ImPlotCol_Crosshairs]);
     }
 
@@ -1330,8 +1239,7 @@ namespace p3
         ImPlot::StyleColorsLight(&im_plot_style);
         assign(im_plot_style.Colors[ImPlotCol_PlotBg], Color::named::white);
         assign(im_plot_style.Colors[ImPlotCol_FrameBg], Color(0xF5F5F5FF));
-        im_plot_style.Colors[ImPlotCol_XAxisGrid] = im_gui_style.Colors[ImGuiCol_Border];
-        im_plot_style.Colors[ImPlotCol_YAxisGrid] = im_gui_style.Colors[ImGuiCol_Border];
+        im_plot_style.Colors[ImPlotCol_AxisGrid] = im_gui_style.Colors[ImGuiCol_Border];
         im_plot_style.Colors[ImPlotCol_PlotBorder] = im_gui_style.Colors[ImGuiCol_Border];
         assign_colors(im_gui_style, im_plot_style);
         _on_change();

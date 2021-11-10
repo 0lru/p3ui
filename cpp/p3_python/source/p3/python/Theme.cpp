@@ -129,16 +129,9 @@ namespace p3::python
         def_property(theme, "plot_legend_text_color", &Theme::plot_legend_text_color, &Theme::set_plot_legend_text_color);
         def_property(theme, "plot_title_text_color", &Theme::plot_title_text_color, &Theme::set_plot_title_text_color);
         def_property(theme, "plot_inlay_text_color", &Theme::plot_inlay_text_color, &Theme::set_plot_inlay_text_color);
-        def_property(theme, "plot_x_axis_color", &Theme::plot_x_axis_color, &Theme::set_plot_x_axis_color);
-        def_property(theme, "plot_x_axis_grid_color", &Theme::plot_x_axis_grid_color, &Theme::set_plot_x_axis_grid_color);
-        def_property(theme, "plot_y_axis_color", &Theme::plot_y_axis_color, &Theme::set_plot_y_axis_color);
-        def_property(theme, "plot_y_axis_grid_color", &Theme::plot_y_axis_grid_color, &Theme::set_plot_y_axis_grid_color);
-        def_property(theme, "plot_y_axis2_color", &Theme::plot_y_axis2_color, &Theme::set_plot_y_axis2_color);
-        def_property(theme, "plot_y_axis_grid2_color", &Theme::plot_y_axis_grid2_color, &Theme::set_plot_y_axis_grid2_color);
-        def_property(theme, "plot_y_axis3_color", &Theme::plot_y_axis3_color, &Theme::set_plot_y_axis3_color);
-        def_property(theme, "plot_y_axis_grid3_color", &Theme::plot_y_axis_grid3_color, &Theme::set_plot_y_axis_grid3_color);
+        def_property(theme, "plot_axis_color", &Theme::plot_axis_color, &Theme::set_plot_axis_color);
+        def_property(theme, "plot_axis_grid_color", &Theme::plot_axis_grid_color, &Theme::set_plot_axis_grid_color);
         def_property(theme, "plot_selection_color", &Theme::plot_selection_color, &Theme::set_plot_selection_color);
-        def_property(theme, "plot_query_color", &Theme::plot_query_color, &Theme::set_plot_query_color);
         def_property(theme, "plot_crosshairs_color", &Theme::plot_crosshairs_color, &Theme::set_plot_crosshairs_color);
     }
 

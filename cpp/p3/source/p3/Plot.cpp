@@ -104,40 +104,15 @@ namespace p3
         }
 
         if (_x_axis->limits())
-            ImPlot::SetNextPlotLimitsX(_x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
+            ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
         else
             x_flags |= ImPlotAxisFlags_AutoFit;
 
         if (_y_axis->limits())
-            ImPlot::SetNextPlotLimitsY(_y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
+            ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
         else
             y_flags |= ImPlotAxisFlags_AutoFit;
 
-        if (_x_axis->ticks())
-        {
-            if (_x_axis->tick_labels())
-            {
-                auto references = reference_tick_labels(_x_axis->tick_labels().value());
-                auto count = int(std::min(_x_axis->ticks().value().size(), _x_axis->tick_labels().value().size()));
-                ImPlot::SetNextPlotTicksX(_x_axis->ticks().value().data(), count, references.data(), false);
-            }
-            else
-                ImPlot::SetNextPlotTicksX(_x_axis->ticks().value().data(), int(_x_axis->ticks().value().size()), 0, false);
-        }
-
-        if (_y_axis->ticks())
-        {
-            if (_y_axis->tick_labels())
-            {
-                auto references = reference_tick_labels(_y_axis->tick_labels().value());
-                auto count = int(std::min(_y_axis->ticks().value().size(), _y_axis->tick_labels().value().size()));
-                ImPlot::SetNextPlotTicksY(_y_axis->ticks().value().data(), count, references.data(), false);
-            }
-            else
-            {
-                ImPlot::SetNextPlotTicksY(_y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
-            }
-        }
 
         if (ImPlot::BeginPlot(
             imgui_label().c_str(),
@@ -148,24 +123,51 @@ namespace p3
             x_flags,
             y_flags))
         {
-        if(legend())
-            ImPlot::SetLegendLocation(
-                static_cast<ImPlotLocation>(legend()->location()),
-                legend()->style_computation().direction == Direction::Vertical 
-                    ? ImPlotOrientation_Vertical 
-                    : ImPlotOrientation_Horizontal, false);
+            if (_x_axis->ticks())
+            {
+                if (_x_axis->tick_labels())
+                {
+                    auto references = reference_tick_labels(_x_axis->tick_labels().value());
+                    auto count = int(std::min(_x_axis->ticks().value().size(), _x_axis->tick_labels().value().size()));
+                    ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), count, references.data(), false);
+                }
+                else
+                    ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), int(_x_axis->ticks().value().size()), 0, false);
+            }
+
+            if (_y_axis->ticks())
+            {
+                if (_y_axis->tick_labels())
+                {
+                    auto references = reference_tick_labels(_y_axis->tick_labels().value());
+                    auto count = int(std::min(_y_axis->ticks().value().size(), _y_axis->tick_labels().value().size()));
+                    ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), count, references.data(), false);
+                }
+                else
+                {
+                    ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
+                }
+            }
+
+
+            if(legend())
+                ImPlot::SetupLegend(
+                    static_cast<ImPlotLocation>(legend()->location()),
+                    legend()->style_computation().direction == Direction::Vertical 
+                        ? ImPlotLegendFlags_None 
+                        : ImPlotLegendFlags_Horizontal);
             for (auto& item : _items)
             {
                 if (item->line_color())
                     ImPlot::SetNextLineStyle(item->native_line_color());
                 if (item->fill_color())
                     ImPlot::SetNextFillStyle(item->native_fill_color());
-                if (item->opacity())
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
+//                if (item->opacity())
+//                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
                 item->apply_style();
-                item->render();
-                if (item->opacity())
-                    ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
+                 item->render();
+ //               if (item->opacity())
+ //                   ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
                 //for (auto& annotation : item->annotations())
                 //    annotation->render_item_annotation();
             }
@@ -324,16 +326,7 @@ namespace p3
 
     void Plot::Annotation::render()
     {
-        if (clamped())
-            if (_fill_color == IMPLOT_AUTO_COL)
-                ImPlot::AnnotateClamped(x(), y(), offset(), text().c_str());
-            else
-                ImPlot::AnnotateClamped(x(), y(), offset(), _fill_color, text().c_str());
-        else
-            if (_fill_color == IMPLOT_AUTO_COL)
-                ImPlot::Annotate(x(), y(), offset(), text().c_str());
-            else
-                ImPlot::Annotate(x(), y(), offset(), _fill_color, text().c_str());
+        ImPlot::Annotation(x(), y(), _fill_color, offset(), clamped(), text().c_str());
     }
 
     void Plot::Annotation::render_item_annotation()
@@ -341,30 +334,7 @@ namespace p3
         bool has_line_color = line_color() && fill_color() && fill_color().value().alpha() == 0.f;
         if (has_line_color)
             std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
-        if (clamped())
-        {
-            if (_fill_color == IMPLOT_AUTO_COL)
-            {
-                ImVec4 c = ImPlot::GetLastItemColor();
-                ImPlot::AnnotateClamped(x(), y(), offset(), c, text().c_str());
-            }
-            else
-            {
-                ImPlot::AnnotateClamped(x(), y(), offset(), _fill_color, text().c_str());
-            }
-        }
-        else
-        {
-            if (_fill_color == IMPLOT_AUTO_COL)
-            {
-                ImVec4 c = ImPlot::GetLastItemColor();
-                ImPlot::Annotate(x(), y(), offset(), c, text().c_str());
-            }
-            else
-            {
-                ImPlot::Annotate(x(), y(), offset(), _fill_color, text().c_str());
-            }
-        }
+        ImPlot::Annotation(x(), y(), _fill_color, offset(), clamped(), text().c_str());
         if (has_line_color)
             std::swap(ImPlot::GetStyle().Colors[ImPlotCol_InlayText], native_line_color());
     }
