@@ -90,6 +90,7 @@ namespace p3::python
         //
         // Node, synced
         py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
+        def_property_readonly(node, "parent", &Node::shared_parent);
         def_property_readonly(node, "children", &Node::children);
         def_property_readonly(node, "style", &Node::style);
         def_property(node, "visible", &Node::visible, &Node::set_visible);

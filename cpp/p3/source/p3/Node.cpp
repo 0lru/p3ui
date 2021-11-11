@@ -255,6 +255,11 @@ namespace p3
         return _parent;
     }
 
+    std::shared_ptr<Node> Node::shared_parent() const
+    {
+        return _parent ? _parent->shared_from_this() : nullptr;
+    }
+
     void Node::update_restyle(Context& context, bool force)
     {
         //

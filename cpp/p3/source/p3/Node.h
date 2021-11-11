@@ -86,6 +86,7 @@ namespace p3
 
         void set_parent(Node*);
         Node* parent() const;
+        std::shared_ptr<Node> shared_parent() const;
         Children const& children() const;
 
         void add(std::shared_ptr<Node>);
