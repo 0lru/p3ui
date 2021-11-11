@@ -163,6 +163,23 @@ namespace p3
         Node::add(popup);
     }
 
+    void UserInterface::remove(std::shared_ptr<ChildWindow> const& child_window)
+    {
+        _child_windows.erase(std::remove_if(_child_windows.begin(), _child_windows.end(), [&](auto& item) {
+            return item == child_window;
+        }), _child_windows.end());
+        Node::remove(child_window);
+    }
+
+    void UserInterface::remove(std::shared_ptr<Popup> const& popup)
+    {
+        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& item) {
+            return item == popup;
+        }), _popups.end());
+        _popups.push_back(popup);
+        Node::remove(popup);
+    }
+
     void UserInterface::set_menu_bar(std::shared_ptr<MenuBar> menu_bar)
     {
         if (_menu_bar)

@@ -62,6 +62,16 @@ namespace p3::python
             auto guard = user_interface.lock();
             user_interface.add(std::move(child_window));
         });
+        user_interface.def("remove", [](UserInterface& user_interface, std::shared_ptr<Popup> popup) {
+            py::gil_scoped_release release;
+            auto guard = user_interface.lock();
+            user_interface.remove(std::move(popup));
+        });
+        user_interface.def("remove", [](UserInterface& user_interface, std::shared_ptr<ChildWindow> child_window) {
+            py::gil_scoped_release release;
+            auto guard = user_interface.lock();
+            user_interface.remove(std::move(child_window));
+        });
         def_method(user_interface, "load_font", &UserInterface::load_font);
         def_method(user_interface, "merge_font", &UserInterface::merge_font);
         def_property(user_interface, "menu_bar", &UserInterface::menu_bar, &UserInterface::set_menu_bar);
