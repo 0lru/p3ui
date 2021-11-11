@@ -33,6 +33,8 @@ namespace p3
     class ChildWindow : public Node
     {
     public:
+        using OnClose = std::function<void()>;
+
         ChildWindow();
 
         void render_impl(Context&, float width, float height) override;
@@ -48,11 +50,15 @@ namespace p3
         void set_resizeable(bool);
         bool resizeable() const;
 
+        void set_on_close(OnClose);
+        OnClose on_close() const;
+
     private:
         std::shared_ptr<Node> _content;
         bool _collapsed;
         bool _moveable=true;
         bool _resizeable=false;
+        OnClose _on_close = nullptr;
     };
 
 }

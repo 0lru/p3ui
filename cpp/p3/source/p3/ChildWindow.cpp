@@ -50,11 +50,15 @@ namespace p3
         ImVec2 size(width, height);
         ImGui::SetNextWindowSize(size, conditions);
         ImGui::Begin(imgui_label().c_str(), &open, flags);
-        auto const& style = ImGui::GetStyle();
         auto avail = ImGui::GetContentRegionAvail();
         if (_content)
             _content->render(context, avail.x, avail.y);
         ImGui::End();
+
+        if (!open && _on_close)
+            postpone([f=_on_close]() {
+                f();
+            });
         update_status();
     }
 
@@ -109,6 +113,16 @@ namespace p3
     bool ChildWindow::resizeable() const
     {
         return _resizeable;
+    }
+
+    void ChildWindow::set_on_close(OnClose on_close)
+    {
+        _on_close = on_close;
+    }
+
+    ChildWindow::OnClose ChildWindow::on_close() const
+    {
+        return _on_close;
     }
 
 }
