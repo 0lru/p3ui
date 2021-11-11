@@ -203,6 +203,7 @@ namespace p3
         if (_user_interface)
         {
             _render_backend->new_frame();
+            glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplGlfw_NewFrame();
             {
                 {
