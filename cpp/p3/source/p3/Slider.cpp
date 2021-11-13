@@ -43,6 +43,8 @@ namespace p3
             const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);
             _automatic_width += label_size.x + context_ptr->Style.ItemInnerSpacing.x;
         }
+        if (style_computation().direction == Direction::Vertical)
+            std::swap(_automatic_height, _automatic_width);
     }
 
     template<typename DataType>
@@ -54,14 +56,31 @@ namespace p3
             ImGui::SetNextItemWidth(width);
         DataType value = _value;
         auto vptr = disabled() ? &value : &_value;
-        bool change = ImGui::SliderScalar(
-            imgui_label().c_str(),
-            imgui_datatype<DataType>, 
-            vptr, 
-            &_min, 
-            &_max,
-            _format ? _format.value().c_str() : nullptr);
-        if (change && _on_change && !disabled())
+        
+        bool changed = false;
+        if (style_computation().direction == Direction::Horizontal)
+        {
+            changed = ImGui::SliderScalar(
+                imgui_label().c_str(),
+                imgui_datatype<DataType>,
+                vptr,
+                &_min,
+                &_max,
+                _format ? _format.value().c_str() : nullptr);
+        }
+        else
+        {
+            auto size = ImVec2(width, height);
+            changed = ImGui::VSliderScalar(
+                imgui_label().c_str(),
+                size,
+                imgui_datatype<DataType>,
+                vptr,
+                &_min,
+                &_max,
+                _format ? _format.value().c_str() : nullptr);
+        }
+        if (changed && _on_change && !disabled())
             postpone([f = _on_change, value = _value]() {
                 f(value);
             });

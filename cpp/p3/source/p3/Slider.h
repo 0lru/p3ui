@@ -37,7 +37,7 @@ namespace p3
     public:
         using OnChange = std::function<void(DataType)>;
 
-        Slider() : Node("Slider") {}
+        Slider() : Node("Slider") { style()->set_direction(Direction::Horizontal); }
 
         void render_impl(Context&, float width, float height) override;
 
