@@ -100,6 +100,7 @@ namespace p3::python
 
         window.def_property_readonly("monitor", gil_release(&Window::monitor));
         window.def_property_readonly("primary_monitor", gil_release(&Window::primary_monitor));
+        window.def_property_readonly("framebuffer_size", gil_release(&Window::framebuffer_size));
         window.def_property_readonly("monitors", gil_release(&Window::monitors));
         window.def_property_readonly("user_interface", gil_release(&Window::user_interface));
         window.def_property_readonly("frames_per_second", gil_release(&Window::frames_per_second));
