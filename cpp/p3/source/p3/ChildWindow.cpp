@@ -22,6 +22,7 @@
 
 #include "constant.h"
 #include "ChildWindow.h"
+#include "Context.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -40,15 +41,21 @@ namespace p3
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
-        bool open;
+        bool open=true;
         if (!_moveable)
             flags |= ImGuiWindowFlags_NoMove;
         if (!_resizeable)
             flags |= ImGuiWindowFlags_NoResize;
-        else
-            conditions |= ImGuiCond_Appearing;
+        ImVec2 pos(
+            std::holds_alternative<Percentage>(style_computation().x)
+            ? width * std::get<Percentage>(style_computation().x).value / 100.f
+            : context.to_actual(std::get<Length>(style_computation().x)),
+            std::holds_alternative<Percentage>(style_computation().y)
+            ? width * std::get<Percentage>(style_computation().y).value / 100.f
+            : context.to_actual(std::get<Length>(style_computation().y)));
+        ImGui::SetNextWindowPos(pos, _moveable ? ImGuiCond_Appearing : ImGuiCond_Always);
         ImVec2 size(width, height);
-        ImGui::SetNextWindowSize(size, conditions);
+        ImGui::SetNextWindowSize(size, _resizeable ? ImGuiCond_Appearing : ImGuiCond_Always);
         ImGui::Begin(imgui_label().c_str(), &open, flags);
         auto avail = ImGui::GetContentRegionAvail();
         if (_content)
