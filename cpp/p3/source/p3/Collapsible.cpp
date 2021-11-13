@@ -49,9 +49,14 @@ namespace p3
         if (collapsed != _collapsed)
         {
             if (_content)
+            {
                 postpone([content = _content, collapsed]() {
                     content->set_visible(!collapsed);
                 });
+                postpone([content = _content, collapsed]() {
+                    content->set_visible(!collapsed);
+                });
+            }
             _collapsed = collapsed;
         }
         if (!_automatic_width || !_automatic_height)
