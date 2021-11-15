@@ -43,7 +43,7 @@ namespace p3
     }
 
     StyleBlock::Item<Color> const& StyleBlock::color() const { return _color; }
-    void StyleBlock::set_color(Item<Color> color) { _color = std::move(color);  }
+    void StyleBlock::set_color(Item<Color> color) { _color = std::move(color);  _on_change(); }
     StyleBlock::Item<Length> const& StyleBlock::border_width() const { return _border_width; };
     void StyleBlock::set_border_width(Item<Length> border_width) { _border_width = std::move(border_width); _on_change(); };
     StyleBlock::Item<Length> const& StyleBlock::border_radius() const { return _border_radius; };
