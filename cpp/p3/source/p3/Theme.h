@@ -278,6 +278,9 @@ namespace p3
         Color modal_window_dim_background_color() const;
         void set_modal_window_dim_background_color(Color);
 
+        Color progress_bar_color() const;
+        void set_progress_bar_color(Color);
+
         // plot
         std::optional<Color> plot_line_color() const;
         void set_plot_line_color(std::optional<Color>);
@@ -389,6 +392,7 @@ namespace p3
         Color _button_hovered_color;
         Color _button_active_color;
         Color _header_color;
+        Color _progress_bar_color;
         Color _header_hovered_color;
         Color _header_active_color;
         Color _separator_color;

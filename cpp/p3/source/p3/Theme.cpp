@@ -110,6 +110,7 @@ namespace p3
         assign(im_gui_style->Colors[ImGuiCol_ButtonHovered], _button_hovered_color);
         assign(im_gui_style->Colors[ImGuiCol_ButtonActive], _button_active_color);
         assign(im_gui_style->Colors[ImGuiCol_Header], _header_color);
+        assign(im_gui_style->Colors[ImGuiCol_PlotHistogram], _progress_bar_color);
         assign(im_gui_style->Colors[ImGuiCol_HeaderHovered], _header_hovered_color);
         assign(im_gui_style->Colors[ImGuiCol_HeaderActive], _header_active_color);
         assign(im_gui_style->Colors[ImGuiCol_Separator], _separator_color);
@@ -705,6 +706,17 @@ namespace p3
     void Theme::set_header_color(Color header_color)
     {
         _header_color = std::move(header_color);
+        _on_change();
+    }
+
+    Color Theme::progress_bar_color() const
+    {
+        return _progress_bar_color;
+    }
+
+    void Theme::set_progress_bar_color(Color progress_bar_color)
+    {
+        _progress_bar_color = std::move(progress_bar_color);
         _on_change();
     }
 

@@ -91,6 +91,7 @@ namespace p3::python
         def_property(theme, "button_hovered_color", &Theme::button_hovered_color, &Theme::set_button_hovered_color);
         def_property(theme, "button_active_color", &Theme::button_active_color, &Theme::set_button_active_color);
         def_property(theme, "header_color", &Theme::header_color, &Theme::set_header_color);
+        def_property(theme, "progress_bar_color", &Theme::progress_bar_color, &Theme::set_progress_bar_color);
         def_property(theme, "header_hovered_color", &Theme::header_hovered_color, &Theme::set_header_hovered_color);
         def_property(theme, "header_active_color", &Theme::header_active_color, &Theme::set_header_active_color);
         def_property(theme, "separator_color", &Theme::separator_color, &Theme::set_separator_color);
