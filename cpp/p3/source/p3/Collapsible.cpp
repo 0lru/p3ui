@@ -53,9 +53,6 @@ namespace p3
                 postpone([content = _content, collapsed]() {
                     content->set_visible(!collapsed);
                 });
-                postpone([content = _content, collapsed]() {
-                    content->set_visible(!collapsed);
-                });
             }
             _collapsed = collapsed;
         }

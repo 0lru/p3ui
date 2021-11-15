@@ -33,7 +33,7 @@ namespace p3
     class Collapsible : public Node
     {
     public:
-        Collapsible(std::string title="");
+        Collapsible(std::string title = "");
 
         void render_impl(Context&, float width, float height) override;
 
@@ -47,9 +47,9 @@ namespace p3
 
     private:
         std::shared_ptr<Node> _content;
-        bool _collapsed;
+        bool _collapsed = false;
         float _child_offset;
-        std::optional<bool> _force_open=false;
+        std::optional<bool> _force_open = std::nullopt;
     };
 
 }
