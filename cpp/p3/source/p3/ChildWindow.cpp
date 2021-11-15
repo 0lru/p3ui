@@ -39,9 +39,10 @@ namespace p3
 
     void ChildWindow::render_impl(Context& context, float width, float height)
     {
-        ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags flags =
+            ImGuiWindowFlags_HorizontalScrollbar
+            | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
-        bool open=true;
         if (!_moveable)
             flags |= ImGuiWindowFlags_NoMove;
         if (!_resizeable)
@@ -56,13 +57,14 @@ namespace p3
         ImGui::SetNextWindowPos(pos, _moveable ? ImGuiCond_Appearing : ImGuiCond_Always);
         ImVec2 size(width, height);
         ImGui::SetNextWindowSize(size, _resizeable ? ImGuiCond_Appearing : ImGuiCond_Always);
-        ImGui::Begin(imgui_label().c_str(), &open, flags);
+        bool open=true;
+        ImGui::Begin(imgui_label().c_str(), _on_close ? &open : nullptr, flags);
         auto avail = ImGui::GetContentRegionAvail();
         if (_content)
             _content->render(context, avail.x, avail.y);
         ImGui::End();
 
-        if (!open && _on_close)
+        if (_on_close && !open)
             postpone([f=_on_close]() {
                 f();
             });
