@@ -39,9 +39,7 @@ namespace p3
 
     void ChildWindow::render_impl(Context& context, float width, float height)
     {
-        ImGuiWindowFlags flags =
-            ImGuiWindowFlags_HorizontalScrollbar
-            | ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
         if (!_moveable)
             flags |= ImGuiWindowFlags_NoMove;
