@@ -148,7 +148,7 @@ namespace p3
                     width -= std::max(.1f, remaining * (child->style_computation().width_shrink() / grow_total));
                 if (!first)
                     ImGui::SameLine();
-                std::optional<float> y;
+                std::optional<float> y = std::nullopt;
                 switch (style_computation().align_items)
                 {
                 case Alignment::Stretch:
