@@ -403,8 +403,8 @@ namespace p3
         auto compiled_guard = _apply_style_compiled();
         auto& work_rect = GImGui->CurrentWindow->WorkRect;
         ImVec2 work_rect_max = work_rect.Min;
-        work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x;
-        work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y;
+        work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x * 2;
+        work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y * 2;
         std::swap(work_rect.Max, work_rect_max);
         render_impl(context, width, height);
         std::swap(work_rect.Max, work_rect_max);

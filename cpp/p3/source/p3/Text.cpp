@@ -64,19 +64,18 @@ namespace p3
 
     void Text::render_impl(Context&, float width, float height)
     {
-        
-        ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
         if (label())
         {
+        ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
             ImGui::LabelText(label().value().c_str(), _value.c_str());
         }
         else
         {
-            // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentConvalue()->Style.FramePadding.x);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
             ImGui::Text(_value.c_str());
-            // ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
-            // ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
+            //ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
+            //ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
         }
     }
 
@@ -97,9 +96,9 @@ namespace p3
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;
-        _automatic_height = font_size + 2.f * frame_padding.y;
         const ImVec2 label_size = ImGui::CalcTextSize(_value.c_str(), NULL, true);
-        _automatic_width = label_size.x;
+        _automatic_height = font_size + 2.f * frame_padding.y;
+        _automatic_width = label_size.x + 2.f * frame_padding.x;
         if (label())
         {
             _automatic_width += context_ptr->Style.ItemInnerSpacing.x;
