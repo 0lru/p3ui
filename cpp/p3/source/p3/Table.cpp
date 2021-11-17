@@ -22,6 +22,7 @@
 
 #include "constant.h"
 #include "Table.h"
+#include "Context.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -63,24 +64,33 @@ namespace p3
             | ImGuiTableFlags_ScrollX
             | ImGuiTableFlags_ScrollY;
 
-        
-        ImGui::BeginTable(imgui_label().c_str(), 3, flags, size);
-        if (_columns.size())
+
+        if (ImGui::BeginTable(imgui_label().c_str(), _columns.size(), flags, size))
         {
-            std::size_t suffix=0;
-            for (auto& column : _columns)
+            if (_columns.size())
             {
-                auto infix = std::to_string(imgui_id());
-                auto label = column->title() + "##" + infix + "_" + std::to_string(suffix++);
-                ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthFixed, 200.f);
+                std::size_t suffix = 0;
+                for (auto& column : _columns)
+                {
+                    auto infix = std::to_string(imgui_id());
+                    auto label = column->title() + "##" + infix + "_" + std::to_string(suffix++);
+                    ImGuiTableColumnFlags flags = ImGuiTableColumnFlags_None;
+                    float width = 0.f;
+                    if (column->width())
+                    {
+                        flags |= ImGuiTableColumnFlags_WidthFixed;
+                        width = context.to_actual(column->width().value());
+                    }
+                    ImGui::TableSetupColumn(label.c_str(), flags, width);
+                }
+                ImGui::TableHeadersRow();
             }
-            ImGui::TableHeadersRow();
+
+            for (auto& child : children())
+                child->render(context, width, height);
+
+            ImGui::EndTable();
         }
-
-        for (auto& child : children())
-            child->render(context, width, height);
-
-        ImGui::EndTable();
     }
 
     void Table::update_content()
@@ -95,9 +105,9 @@ namespace p3
         ImGui::TableNextRow();
         for (auto& child : children())
         {
-           ImGui::TableNextColumn();
-           // auto s = ImGui::GetContentRegionAvail() - pad;
-           child->render(context, 0, 0);
+            ImGui::TableNextColumn();
+            // auto s = ImGui::GetContentRegionAvail() - pad;
+            child->render(context, 0, 0);
         }
     }
 
