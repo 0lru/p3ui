@@ -35,6 +35,9 @@ namespace p3::python
             assign(kwargs, "columns", *table, &Table::set_columns);
             return table;
         }));
+        def_method(table, "add", &Table::add);
+        def_method(table, "insert", &Table::insert);
+        def_method(table, "remove", &Table::remove);
 
         py::class_<Table::Column, std::shared_ptr<Table::Column>> column(table, "Column");
         column.def(py::init<>([](std::string title, py::kwargs kwargs) {
@@ -54,6 +57,9 @@ namespace p3::python
             ArgumentParser<Node>()(kwargs, *row);
             return row;
         }));
+        def_method(row, "add", &Table::Row::add);
+        def_method(row, "insert", &Table::Row::insert);
+        def_method(row, "remove", &Table::Row::remove);
     }
 
 }
