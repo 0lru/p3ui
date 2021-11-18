@@ -44,6 +44,7 @@ namespace p3
 
         set_theme(Theme::make_default());
         _im_gui_context->IO.IniFilename = nullptr;
+        _im_gui_context->IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     }
 
     UserInterface::~UserInterface()
@@ -224,6 +225,13 @@ namespace p3
             _theme_apply_function = _theme
                 ? _theme->compile(context)
                 : nullptr;
+            if (_theme_apply_function)
+            {
+                _theme_guard = _theme_apply_function();
+                _theme_apply_function = _theme
+                    ? _theme->compile(context)
+                    : nullptr;
+            }
         }
         if (needs_update())
         {

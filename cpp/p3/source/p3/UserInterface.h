@@ -107,6 +107,7 @@ namespace p3
         void update_restyle(Context&, bool whole_tree=false) override;
 
     private:
+        std::optional<p3::OnScopeExit> _theme_guard;
         Window* _window = nullptr;
         std::size_t _width = 1024;
         std::size_t _height = 768;
