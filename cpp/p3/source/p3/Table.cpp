@@ -51,6 +51,46 @@ namespace p3
         return _columns;
     }
 
+    int Table::freezed_columns() const
+    {
+        return _freezed_columns;
+    }
+
+    void Table::set_freezed_columns(int freezed_columns)
+    {
+        _freezed_columns = freezed_columns;
+    }
+
+    int Table::freezed_rows() const
+    {
+        return _freezed_rows;
+    }
+
+    void Table::set_freezed_rows(int freezed_rows)
+    {
+        _freezed_rows = freezed_rows;
+    }
+
+    bool Table::resizeable() const
+    {
+        return _resizeable;
+    }
+
+    void Table::set_resizeable(bool resizeable)
+    {
+        _resizeable = resizeable;
+    }
+
+    bool Table::reorderable() const
+    {
+        return _reorderable;
+    }
+
+    void Table::set_reorderable(bool reorderable)
+    {
+        _reorderable = reorderable;
+    }
+
     void Table::render_impl(Context& context, float width, float height)
     {
 
@@ -64,9 +104,14 @@ namespace p3
             | ImGuiTableFlags_ScrollX
             | ImGuiTableFlags_ScrollY;
 
+        if (_resizeable)
+            flags |= ImGuiTableFlags_Resizable;
+        if (_reorderable)
+            flags |= ImGuiTableFlags_Reorderable;
 
-        if (ImGui::BeginTable(imgui_label().c_str(), _columns.size(), flags, size))
+        if (ImGui::BeginTable(imgui_label().c_str(), int(_columns.size()), flags, size))
         {
+            ImGui::TableSetupScrollFreeze(_freezed_columns, _freezed_rows);
             if (_columns.size())
             {
                 std::size_t suffix = 0;

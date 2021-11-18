@@ -58,6 +58,18 @@ namespace p3
         void set_columns(std::vector<std::shared_ptr<Column>>);
         std::vector<std::shared_ptr<Column>> columns() const;
 
+        int freezed_columns() const;
+        void set_freezed_columns(int);
+
+        int freezed_rows() const;
+        void set_freezed_rows(int);
+
+        bool resizeable() const;
+        void set_resizeable(bool);
+
+        bool reorderable() const;
+        void set_reorderable(bool);
+
         //
         // a row ..
         class Row : public Node
@@ -72,6 +84,10 @@ namespace p3
 
     private:
         std::vector<std::shared_ptr<Column>> _columns;
+        int _freezed_columns = 0;
+        int _freezed_rows = 1;
+        bool _resizeable = false;
+        bool _reorderable = false;
     };
 
 }

@@ -33,11 +33,21 @@ namespace p3::python
             auto table = std::make_shared<Table>();
             ArgumentParser<Node>()(kwargs, *table);
             assign(kwargs, "columns", *table, &Table::set_columns);
+            assign(kwargs, "resizeable", *table, &Table::set_resizeable);
+            assign(kwargs, "reorderable", *table, &Table::set_reorderable);
+            assign(kwargs, "reorderable", *table, &Table::set_reorderable);
+            assign(kwargs, "freezed_columns", *table, &Table::set_freezed_columns);
+            assign(kwargs, "freezed_rows", *table, &Table::set_freezed_rows);
             return table;
         }));
         def_method(table, "add", &Table::add);
         def_method(table, "insert", &Table::insert);
         def_method(table, "remove", &Table::remove);
+        def_property(table, "columns", &Table::columns, &Table::set_columns);
+        def_property(table, "resizeable", &Table::resizeable, &Table::set_resizeable);
+        def_property(table, "reorderable", &Table::reorderable, &Table::set_reorderable);
+        def_property(table, "freezed_columns", &Table::freezed_columns, &Table::set_freezed_columns);
+        def_property(table, "freezed_rows", &Table::freezed_rows, &Table::set_freezed_rows);
 
         py::class_<Table::Column, std::shared_ptr<Table::Column>> column(table, "Column");
         column.def(py::init<>([](std::string title, py::kwargs kwargs) {
