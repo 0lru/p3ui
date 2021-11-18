@@ -103,16 +103,19 @@ namespace p3
             }
         }
 
-        if (_x_axis->limits())
-            ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
-        else
+        if (_x_axis->auto_fit())
             x_flags |= ImPlotAxisFlags_AutoFit;
+        else if(_x_axis->fixed() && _x_axis->limits())
+            ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
+        else if(!_x_axis->fixed() && _x_axis->check_behavior() && _x_axis->limits())
+            ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
 
-        if (_y_axis->limits())
-            ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
-        else
+        if (_y_axis->auto_fit())
             y_flags |= ImPlotAxisFlags_AutoFit;
-
+        else if(_y_axis->fixed() && _y_axis->limits())
+            ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
+        else if(!_y_axis->fixed() && _y_axis->check_behavior() && _y_axis->limits())
+            ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
 
         if (ImPlot::BeginPlot(
             imgui_label().c_str(),
@@ -150,26 +153,26 @@ namespace p3
             }
 
 
-            if(legend())
+            if (legend())
                 ImPlot::SetupLegend(
                     static_cast<ImPlotLocation>(legend()->location()),
-                    legend()->style_computation().direction == Direction::Vertical 
-                        ? ImPlotLegendFlags_None 
-                        : ImPlotLegendFlags_Horizontal);
+                    legend()->style_computation().direction == Direction::Vertical
+                    ? ImPlotLegendFlags_None
+                    : ImPlotLegendFlags_Horizontal);
             for (auto& item : _items)
             {
                 if (item->line_color())
                     ImPlot::SetNextLineStyle(item->native_line_color());
                 if (item->fill_color())
                     ImPlot::SetNextFillStyle(item->native_fill_color());
-//                if (item->opacity())
-//                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
+                //                if (item->opacity())
+                //                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
                 item->apply_style();
-                 item->render();
- //               if (item->opacity())
- //                   ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
-                //for (auto& annotation : item->annotations())
-                //    annotation->render_item_annotation();
+                item->render();
+                //               if (item->opacity())
+                //                   ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
+                               //for (auto& annotation : item->annotations())
+                               //    annotation->render_item_annotation();
             }
             ImPlot::EndPlot();
         }
@@ -264,9 +267,38 @@ namespace p3
         _automatic_height = _automatic_width = 0.f;
     }
 
+    void Plot::Axis::set_auto_fit(bool auto_fit)
+    {
+        _auto_fit = auto_fit;
+        _check_behavior = true;
+    }
+
+    bool Plot::Axis::auto_fit() const
+    {
+        return _auto_fit;
+    }
+
+    void Plot::Axis::set_fixed(bool fixed)
+    {
+        _fixed = fixed;
+        _check_behavior = true;
+    }
+
+    bool Plot::Axis::fixed() const
+    {
+        return _fixed;
+    }
+
     void Plot::Axis::set_label(Label label)
     {
         _label = std::move(label);
+    }
+
+    bool Plot::Axis::check_behavior()
+    {
+        bool check_behavior = false;
+        std::swap(check_behavior, _check_behavior);
+        return check_behavior;
     }
 
     Plot::Label const& Plot::Axis::label() const
@@ -277,6 +309,7 @@ namespace p3
     void Plot::Axis::set_limits(Limits limits)
     {
         _limits = std::move(limits);
+        _check_behavior = true;
     }
 
     Plot::Axis::Axis()

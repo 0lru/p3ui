@@ -345,6 +345,12 @@ namespace p3
         void set_type(Type);
         Type type() const;
 
+        void set_fixed(bool);
+        bool fixed() const;
+
+        void set_auto_fit(bool);
+        bool auto_fit() const;
+
         void set_label(Label);
         Label const& label() const;
 
@@ -358,12 +364,17 @@ namespace p3
         void set_tick_labels(std::optional<TickLabels>);
         std::optional<TickLabels> const& tick_labels() const;
 
+        bool check_behavior();
+
     private:
         Type _type = Type::Numeric;
+        bool _auto_fit = true;
+        bool _fixed = false;
         Label _label;
         Limits _limits;
         std::optional<Ticks> _ticks = std::nullopt;
         std::optional<TickLabels> _tick_labels = std::nullopt;
+        bool _check_behavior = true;
     };
 
     template<typename T>

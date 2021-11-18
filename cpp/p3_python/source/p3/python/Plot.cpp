@@ -269,6 +269,8 @@ namespace p3::python
         def_property(axis, "tick_labels", &Plot::Axis::tick_labels, &Plot::Axis::set_tick_labels);
         def_property(axis, "label", &Plot::Axis::label, &Plot::Axis::set_label);
         def_property(axis, "limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
+        def_property(axis, "fixed", &Plot::Axis::fixed, &Plot::Axis::set_fixed);
+        def_property(axis, "auto_fit", &Plot::Axis::auto_fit, &Plot::Axis::set_auto_fit);
 
         py::enum_<Plot::Axis::Type>(axis, "Type")
             .value("Numeric", Plot::Axis::Type::Numeric)
