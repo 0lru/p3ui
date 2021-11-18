@@ -37,11 +37,6 @@ namespace p3
     {
     }
 
-    ChildWindow::~ChildWindow()
-    {
-        std::cout << "~ChildWindow" << std::endl;
-    }
-
     void ChildWindow::render_impl(Context& context, float width, float height)
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;

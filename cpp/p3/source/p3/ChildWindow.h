@@ -36,7 +36,6 @@ namespace p3
         using OnClose = std::function<void()>;
 
         ChildWindow();
-        ~ChildWindow();
 
         void render_impl(Context&, float width, float height) override;
 
