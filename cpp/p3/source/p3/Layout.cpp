@@ -193,7 +193,10 @@ namespace p3
                 if (x) cursor.x += x.value();
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
+                float backup = 0.f;
+                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 child->render(context, width, height);
+                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 cursor.x += width + ImGui::GetStyle().ItemSpacing.x;
                 cursor.y = initial_cursor.y;
                 first = false;
@@ -270,7 +273,11 @@ namespace p3
                 if (x) cursor.x += x.value();
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
+
+                float backup = 0.f;
+                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 child->render(context, width, height);
+                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 cursor.y += height + ImGui::GetStyle().ItemSpacing.y;
                 cursor.x = initial_cursor.x;
                 first = false;
