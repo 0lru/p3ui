@@ -40,7 +40,7 @@ namespace p3::python
         auto tab_item = py::class_<Tab::Item, Node, std::shared_ptr<Tab::Item>>(module, "TabItem");
 
         tab_item.def(py::init<>([](std::string name, py::kwargs kwargs) {
-            auto tab_item = std::make_shared<Tab::Item>(std::move(name), kwargs.contains("content") ? kwargs["content"].cast<std::shared_ptr<Node>>(): nullptr);
+            auto tab_item = std::make_shared<Tab::Item>(std::move(name));
             assign(kwargs, "content", *tab_item, &Tab::Item::set_content);
             return tab_item;
         }));
