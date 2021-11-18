@@ -42,7 +42,6 @@ namespace p3
 
     void MenuItem::render_impl(Context&, float width, float height)
     {
-        
         if (ImGui::MenuItem(imgui_label().c_str(),
             _shortcut ? _shortcut.value().c_str() : nullptr,
             _checkable ? &_value : nullptr, _enabled))

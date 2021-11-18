@@ -75,7 +75,7 @@ namespace p3
             add(_content);
     }
 
-    void Tab::Item::render(Context& context, float width, float height)
+    void Tab::Item::render(Context& context, float width, float height, bool)
     {
         if (!ImGui::BeginTabItem(label() ? label().value().c_str() : ""))
             return;

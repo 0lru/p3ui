@@ -397,17 +397,26 @@ namespace p3
             node->synchronize_with(*this);
     }
 
-    void Node::render(Context& context, float width, float height)
+    void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
         ImGui::GetStyle().Alpha = _disabled ? 0.2f : 1.0f;
         auto compiled_guard = _apply_style_compiled();
-        auto& work_rect = GImGui->CurrentWindow->WorkRect;
-        ImVec2 work_rect_max = work_rect.Min;
-        work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x * 2;
-        work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y * 2;
-        std::swap(work_rect.Max, work_rect_max);
-        render_impl(context, width, height);
-        std::swap(work_rect.Max, work_rect_max);
+        if (adjust_worksrect)
+        {
+            //
+            // TODO: better do this to Layout.cpp?
+            auto& work_rect = GImGui->CurrentWindow->WorkRect;
+            ImVec2 work_rect_max = work_rect.Min;
+            work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x * 2;
+            work_rect_max.y += height + ImGui::GetCurrentContext()->Style.FramePadding.y * 2;
+            std::swap(work_rect.Max, work_rect_max);
+            render_impl(context, width, height);
+            std::swap(work_rect.Max, work_rect_max);
+        }
+        else
+        {
+            render_impl(context, width, height);
+        }
     }
 
     void Node::set_label(std::optional<std::string> label)

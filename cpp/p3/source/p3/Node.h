@@ -134,7 +134,7 @@ namespace p3
 
         // ##### render ########################################################
 
-        virtual void render(Context&, float width, float height);
+        virtual void render(Context&, float width, float height, bool adjust_worksrect=false);
         virtual void update_content() {};
 
         void set_label(std::optional<std::string>);

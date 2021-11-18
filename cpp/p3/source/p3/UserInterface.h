@@ -103,7 +103,7 @@ namespace p3
         void set_circle_tessellation_maximum_error(float);
         float circle_tessellation_maximum_error() const;
 
-        void render(Context&, float width, float height) override;
+        void render(Context&, float width, float height, bool) override;
 
         virtual void synchronize_with(Synchronizable&) override;
 

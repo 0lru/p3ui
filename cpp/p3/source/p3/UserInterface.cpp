@@ -271,7 +271,8 @@ namespace p3
     void UserInterface::render(
         Context& context,
         float width,
-        float height)
+        float height,
+        bool)
     {
         //
         // make context

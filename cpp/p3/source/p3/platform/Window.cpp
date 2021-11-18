@@ -209,7 +209,7 @@ namespace p3
                 {
                     auto guard = _user_interface->lock();
                     Context context(*_user_interface, *_serve_queue, *_render_backend, mouse_move);
-                    _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height));
+                    _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
                 }
                 glViewport(0, 0, _window_state.framebuffer_size.width, _window_state.framebuffer_size.height);
                 if (_user_interface)
