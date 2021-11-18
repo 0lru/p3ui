@@ -389,7 +389,7 @@ namespace p3
         std::advance(it, index);
         (*_children.insert(it, std::move(node)))->set_needs_restyle();
     }
-
+    
     void Node::remove(std::shared_ptr<Node> node)
     {
         node->dispose();
@@ -424,7 +424,9 @@ namespace p3
 
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
-        ImGui::GetStyle().Alpha = _disabled ? 0.2f : 1.0f;
+        float disabled_alpha = 0.2f;
+        if (_disabled)
+            std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
         auto compiled_guard = _apply_style_compiled();
         if (adjust_worksrect)
         {
@@ -442,6 +444,8 @@ namespace p3
         {
             render_impl(context, width, height);
         }
+        if (_disabled)
+            std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
     }
 
     void Node::set_label(std::optional<std::string> label)
