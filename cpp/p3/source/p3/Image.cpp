@@ -74,6 +74,10 @@ namespace p3
         ImVec2 size(width, height);
         auto id = reinterpret_cast<ImTextureID>(_texture->use(context));
         ImGui::Image(id, size);
+        if (ImGui::IsItemClicked() && _on_click && !disabled())
+            postpone([f=_on_click]() {
+                f();
+            });
         update_status();
     }
 
@@ -122,6 +126,16 @@ namespace p3
         Node::synchronize_with(synchronizable);
         if (_texture)
             _texture->synchronize_with(synchronizable);
+    }
+
+    void Image::set_on_click(OnClick on_click)
+    {
+        _on_click = on_click;
+    }
+
+    Image::OnClick Image::on_click() const
+    {
+        return _on_click;
     }
 
 }

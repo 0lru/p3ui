@@ -37,6 +37,7 @@ namespace p3
     {
     public:
         using Callback = std::function<void()>;
+        using OnClick = std::function<void()>;
 
         Image();
         ~Image();
@@ -51,6 +52,9 @@ namespace p3
         void set_scale(double);
         double scale() const;
 
+        void set_on_click(OnClick);
+        OnClick on_click() const;
+
         void on_texture_resized() override;
 
         virtual void synchronize_with(Synchronizable&) override;
@@ -58,6 +62,7 @@ namespace p3
     private:
         std::shared_ptr<Texture> _texture = nullptr;
         double _scale = 1.;
+        OnClick _on_click;
     };
 
 }

@@ -41,6 +41,8 @@ namespace p3::python
         : public p3::Node
     {
     public:
+        using OnClick = std::function<void()>;
+
         Surface(std::uint32_t width = 640, std::uint32_t height = 480);
 
         StyleStrategy& style_strategy() const override;
@@ -62,6 +64,9 @@ namespace p3::python
         py::object enter();
         void exit(py::args);
 
+        void set_on_click(OnClick);
+        OnClick on_click() const;
+
     private:
         std::uint32_t _width;
         std::uint32_t _height;
@@ -73,6 +78,7 @@ namespace p3::python
         std::optional<py::object> _skia_target;
         std::optional<py::object> _skia_picture;
         std::optional<py::object> _skia_surface;
+        OnClick _on_click;
     };
 
     namespace
@@ -183,6 +189,11 @@ namespace p3::python
         }
         ImVec2 size(width, height);
         ImGui::Image(_render_target->texture_id(), size);
+        if (ImGui::IsItemClicked() && _on_click && !disabled())
+            postpone([f=_on_click]() {
+                f();
+            });
+
         update_status();
     }
 
@@ -212,6 +223,16 @@ namespace p3::python
         recording.reset();
     }
 
+    void Surface::set_on_click(OnClick on_click)
+    {
+        _on_click = on_click;
+    }
+
+    Surface::OnClick Surface::on_click() const
+    {
+        return _on_click;
+    }
+
     void Definition<Surface>::apply(py::module& module)
     {
         py::class_<Surface, p3::Node, std::shared_ptr<Surface>> surface(module, "Surface");
@@ -219,11 +240,13 @@ namespace p3::python
         surface.def(py::init<>([](std::uint32_t width, std::uint32_t height, py::kwargs kwargs) {
             auto surface = std::make_shared<Surface>(width, height);
             ArgumentParser<p3::Node>()(kwargs, *surface);
+            assign(kwargs, "on_click", *surface, &Surface::set_on_click);
             return surface;
         }), py::arg("width") = 640, py::arg("height") = 480);
 
         def_property(surface, "width", &Surface::width, &Surface::set_width);
         def_property(surface, "height", &Surface::width, &Surface::set_height);
+        def_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
         surface.def("__enter__", &Surface::enter);
         surface.def("__exit__", &Surface::exit);
         surface.def_property_readonly("picture", &Surface::picture);
