@@ -49,7 +49,6 @@ namespace p3
         virtual void set_attribute(std::string const&, std::string const&) override;
 
     private:
-
         OnClick _on_click;
     };
 
