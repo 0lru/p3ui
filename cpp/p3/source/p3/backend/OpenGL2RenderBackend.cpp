@@ -37,6 +37,10 @@ namespace p3
     void OpenGL2RenderBackend::new_frame()
     {
         ImGui_ImplOpenGL2_NewFrame();
+        for(auto id : _disposed_textures)
+            glDeleteTextures(1, &reinterpret_cast<GLuint&>(id));
+        _disposed_textures.clear();
+        _disposed_render_targets.clear();
     }
 
     void OpenGL2RenderBackend::render(UserInterface const&)
@@ -59,7 +63,7 @@ namespace p3
 
     void OpenGL2RenderBackend::delete_texture(TextureId id)
     {
-        glDeleteTextures(1, &reinterpret_cast<GLuint&>(id));
+        _disposed_textures.push_back(id);
     }
 
     void OpenGL2RenderBackend::update_texture(
@@ -84,9 +88,9 @@ namespace p3
         return std::make_shared<OpenGLRenderTarget>(width, height);
     }
 
-    void OpenGL2RenderBackend::delete_render_target(std::shared_ptr<RenderTarget>)
+    void OpenGL2RenderBackend::delete_render_target(std::shared_ptr<RenderTarget> render_target)
     {
-        // ...
+        _disposed_render_targets.push_back(render_target);
     }
 
 }

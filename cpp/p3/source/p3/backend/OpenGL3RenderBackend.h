@@ -20,6 +20,7 @@
   SOFTWARE.
 /******************************************************************************/
 #pragma once
+#include <vector>
 #include <p3/RenderBackend.h>
 
 namespace p3
@@ -44,6 +45,9 @@ namespace p3
             std::uint32_t width, 
             std::uint32_t height) override;
         void delete_render_target(std::shared_ptr<RenderTarget>) override;
+    private:
+        std::vector<TextureId> _disposed_textures;
+        std::vector<std::shared_ptr<RenderTarget>> _disposed_render_targets;
     };
 
 }
