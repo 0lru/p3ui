@@ -58,10 +58,14 @@ namespace p3
     void CheckBox::render_impl(Context&,  float width, float height)
     {
         ImVec2 size(width, height);
-        if (ImGui::Checkbox(imgui_label().c_str(), &_value) && _on_change)
-            postpone([f = _on_change, value = _value]() {
+        bool value=_value;
+        if (ImGui::Checkbox(imgui_label().c_str(), &value) && !disabled() && _on_change)
+        {
+            _value = value;
+            postpone([f = _on_change, value = value]() {
                 f(value);
             });
+        }
         update_status();
     }
 
