@@ -43,6 +43,7 @@ namespace p3
         int hz() const;
 
         GLFWmonitor* glfw_monitor() const;
+        bool operator==(const VideoMode&) const;
 
     private:
         std::weak_ptr<Window> _window;

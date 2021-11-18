@@ -56,4 +56,12 @@ namespace p3
         return _monitor;
     }
 
+    bool VideoMode::operator==(const VideoMode& mode) const
+    {
+        return _monitor == mode._monitor
+                && _width == mode._width
+                && _height == mode._height
+                && _hz == mode._hz;
+    }
+
 }

@@ -65,7 +65,10 @@ namespace p3::python
         py::class_<VideoMode>(module, "VideoMode")
             .def_property_readonly("width", &VideoMode::width)
             .def_property_readonly("height", &VideoMode::height)
-            .def_property_readonly("hz", &VideoMode::hz);
+            .def_property_readonly("hz", &VideoMode::hz)
+            .def("__eq__", [](VideoMode& self, VideoMode& other) {
+                return self == other;
+            });
 
         py::class_<Monitor>(module, "Monitor")
             .def_property_readonly("name", &Monitor::name)
