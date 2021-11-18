@@ -151,35 +151,6 @@ namespace p3
         return _content;
     }
 
-    void UserInterface::add(std::shared_ptr<ChildWindow> child_window)
-    {
-        _child_windows.push_back(child_window);
-        Node::add(child_window);
-    }
-
-    void UserInterface::add(std::shared_ptr<Popup> popup)
-    {
-        _popups.push_back(popup);
-        Node::add(popup);
-    }
-
-    void UserInterface::remove(std::shared_ptr<ChildWindow> const& child_window)
-    {
-        _child_windows.erase(std::remove_if(_child_windows.begin(), _child_windows.end(), [&](auto& item) {
-            return item == child_window;
-        }), _child_windows.end());
-        Node::remove(child_window);
-    }
-
-    void UserInterface::remove(std::shared_ptr<Popup> const& popup)
-    {
-        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& item) {
-            return item == popup;
-        }), _popups.end());
-        _popups.push_back(popup);
-        Node::remove(popup);
-    }
-
     void UserInterface::set_menu_bar(std::shared_ptr<MenuBar> menu_bar)
     {
         if (_menu_bar)
@@ -322,18 +293,20 @@ namespace p3
 
         //
         // draw optional child windows
-        for (auto& child_window : _child_windows)
-            child_window->render(
-                context,
-                child_window->width(content_region.x),
-                child_window->height(content_region.y));
+        for (auto& child_window : children())
+            if(std::dynamic_pointer_cast<ChildWindow>(child_window))
+                child_window->render(
+                    context,
+                    child_window->width(content_region.x),
+                    child_window->height(content_region.y));
 
         //
         // draw optional popups
-        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& popup) {
+/*        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& popup) {
             popup->render(context, popup->width(content_region.x), popup->height(content_region.y));
             return !popup->opened();
         }), _popups.end());
+        */
 
         //
         // 

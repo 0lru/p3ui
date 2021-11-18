@@ -54,6 +54,9 @@ namespace p3
         std::string const& hint() const;
         void set_hint(std::string);
 
+    protected:
+        void dispose() override;
+
     private:
         int _selected_index = -1;
         std::string _hint;

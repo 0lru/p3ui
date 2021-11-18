@@ -46,6 +46,8 @@ namespace p3
 
         void set_on_close(OnClose);
         OnClose on_close() const;
+    protected:
+        void dispose() override;
 
     private:
         bool _opened = false;

@@ -36,7 +36,6 @@ namespace p3
         , public Texture::Observer
     {
     public:
-        using Callback = std::function<void()>;
         using OnClick = std::function<void()>;
 
         Image();
@@ -58,6 +57,9 @@ namespace p3
         void on_texture_resized() override;
 
         virtual void synchronize_with(Synchronizable&) override;
+
+    protected:
+        void dispose() override;
 
     private:
         std::shared_ptr<Texture> _texture = nullptr;

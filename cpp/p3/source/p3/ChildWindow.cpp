@@ -37,11 +37,17 @@ namespace p3
     {
     }
 
+    ChildWindow::~ChildWindow()
+    {
+        std::cout << "~ChildWindow" << std::endl;
+    }
+
     void ChildWindow::render_impl(Context& context, float width, float height)
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
         if (!_moveable)
+
             flags |= ImGuiWindowFlags_NoMove;
         if (!_resizeable)
             flags |= ImGuiWindowFlags_NoResize;
@@ -130,6 +136,12 @@ namespace p3
     ChildWindow::OnClose ChildWindow::on_close() const
     {
         return _on_close;
+    }
+
+    void ChildWindow::dispose()
+    {
+        _on_close = nullptr;
+        Node::dispose();
     }
 
 }

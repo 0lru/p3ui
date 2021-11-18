@@ -31,6 +31,8 @@ namespace p3
     class Synchronizable
     {
     public:
+        virtual ~Synchronizable() = default;
+
         virtual void synchronize_with(Synchronizable&);
         virtual void release();
 

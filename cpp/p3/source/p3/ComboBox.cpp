@@ -118,6 +118,12 @@ namespace p3
         _hint = std::move(hint);
     }
 
+    void ComboBox::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
+    }
+
     void ComboBox::update_content()
     {
         auto const context_ptr = ImGui::GetCurrentContext();

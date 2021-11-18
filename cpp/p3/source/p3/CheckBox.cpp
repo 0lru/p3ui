@@ -99,4 +99,10 @@ namespace p3
         }
     }
 
+    void CheckBox::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
+    }
+
 }

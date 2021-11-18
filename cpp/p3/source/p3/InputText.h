@@ -52,6 +52,9 @@ namespace p3
 
         void set_value(std::string);
         std::string const& value() const;
+    
+    protected:
+        void dispose() override;
 
     private:
         std::string _value;

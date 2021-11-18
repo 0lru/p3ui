@@ -34,7 +34,6 @@ namespace p3
     {
     public:
         class Item;
-        using Callback = std::function<void()>;
 
         Tab();
         void render_impl(Context&, float width, float height) override;

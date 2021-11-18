@@ -67,6 +67,9 @@ namespace p3::python
         void set_on_click(OnClick);
         OnClick on_click() const;
 
+    protected:
+        void dispose() override;
+
     private:
         std::uint32_t _width;
         std::uint32_t _height;
@@ -112,6 +115,12 @@ namespace p3::python
     {
         _skia = py::module::import("skia");
         _skia_recorder = _skia.attr("PictureRecorder")();
+    }
+
+    void Surface::dispose()
+    {
+        _on_click = nullptr;
+        Node::dispose();
     }
 
     void Surface::update_content()

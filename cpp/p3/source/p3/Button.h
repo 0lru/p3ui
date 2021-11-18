@@ -47,6 +47,8 @@ namespace p3
 
         // this is used by the loader to apply xml attributes
         virtual void set_attribute(std::string const&, std::string const&) override;
+    protected:
+        void dispose() override;
 
     private:
         OnClick _on_click;

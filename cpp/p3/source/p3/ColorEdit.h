@@ -47,6 +47,8 @@ namespace p3
 
         void set_value(Color);
         Color const& value() const;
+    protected:
+        void dispose() override;
 
     private:
         float _value[4];

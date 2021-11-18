@@ -128,6 +128,12 @@ namespace p3
             _texture->synchronize_with(synchronizable);
     }
 
+    void Image::dispose()
+    {
+        _on_click = nullptr;
+        Node::dispose();
+    }
+
     void Image::set_on_click(OnClick on_click)
     {
         _on_click = on_click;

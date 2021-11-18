@@ -47,6 +47,8 @@ namespace p3
         void set_value(bool);
 
         void update_content() override;
+    protected:
+        void dispose();
 
     private:
         OnChange _on_change;

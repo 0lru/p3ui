@@ -41,47 +41,62 @@ namespace p3
     // using default values..
     StyleStrategy Node::DefaultStyleStrategy;
 
-    namespace id_pool
+    class NodeRegistry
     {
-
-        namespace
+    public:
+        std::size_t count()
         {
-            // Note: use threadlocal instead?
-            std::mutex mutex;
-            std::vector<std::uint64_t> pool;
-            std::uint64_t max_id = 0;
-            std::unordered_map<std::uint64_t, Node*> nodes;
+            std::lock_guard<std::mutex> l(_mutex);
+            return _nodes.size();
         }
 
-        std::uint64_t make_id(Node* node)
+        std::uint64_t add(Node* node)
         {
-            std::lock_guard<std::mutex> l(mutex);
+            std::lock_guard<std::mutex> l(_mutex);
             std::uint64_t id;
-            if (pool.empty())
+            if (_pool.empty())
             {
-                id = max_id++;
+                id = _max_id++;
             }
             else
             {
-                auto id = pool.back();
-                pool.pop_back();
+                id = _pool.back();
+                _pool.pop_back();
             }
-            nodes[id] = node;
+            _nodes[id] = node;
             return id;
         }
 
-        void free(std::uint64_t id)
+        void release(std::uint64_t id)
         {
-            std::lock_guard<std::mutex> l(mutex);
-            pool.push_back(id);
-            nodes.erase(id);
+            std::lock_guard<std::mutex> l(_mutex);
+            _pool.push_back(id);
+            _nodes.erase(id);
         }
 
-    }
+        static NodeRegistry& instance() 
+        {
+            static NodeRegistry instance;
+            return instance;
+        }
+
+    private:
+        NodeRegistry() = default;
+        ~NodeRegistry() = default;
+        NodeRegistry(const NodeRegistry&) = delete;
+        NodeRegistry& operator=(const NodeRegistry&) = delete;
+        static std::shared_ptr<NodeRegistry> _instance;
+
+        std::mutex _mutex;
+        std::vector<std::uint64_t> _pool;
+        std::uint64_t _max_id = 0;
+        std::unordered_map<std::uint64_t, Node*> _nodes;
+    };
+
 
     Node::Node(std::string element_name)
         : _element_name(std::move(element_name))
-        , _imgui_id(id_pool::make_id(this))
+        , _imgui_id(NodeRegistry::instance().add(this))
         , _imgui_label("##" + std::to_string(_imgui_id))
         , _status_flag(ImGuiItemStatusFlags_None)
         , _style(std::make_shared<StyleBlock>())
@@ -90,6 +105,11 @@ namespace p3
         _style_guard = OnScopeExit([this, style = _style]() {
             style->remove_observer(this);
         });
+    }
+
+    Node::~Node()
+    {
+        NodeRegistry::instance().release(_imgui_id);
     }
 
     void Node::set_attribute(std::string const& name, std::string const& value)
@@ -312,6 +332,11 @@ namespace p3
             _parent->redraw();
     }
 
+    std::size_t Node::node_count()
+    {
+        return NodeRegistry::instance().count();
+    }
+
     void Node::set_needs_update()
     {
         _needs_update = true;
@@ -342,6 +367,8 @@ namespace p3
 
     void Node::add(std::shared_ptr<Node> node)
     {
+        if (node->_disposed)
+            throw std::invalid_argument("cannot reuse disposed node");
         node->synchronize_with(*this);
         if (node->parent())
             throw std::invalid_argument("node is already assigned");
@@ -352,6 +379,8 @@ namespace p3
 
     void Node::insert(std::size_t index, std::shared_ptr<Node> node)
     {
+        if (node->_disposed)
+            throw std::invalid_argument("cannot reuse disposed node");
         if (node->parent())
             throw std::invalid_argument("node is already assigned");
         node->synchronize_with(*this);
@@ -361,8 +390,9 @@ namespace p3
         (*_children.insert(it, std::move(node)))->set_needs_restyle();
     }
 
-    void Node::remove(std::shared_ptr<Node> const& node)
+    void Node::remove(std::shared_ptr<Node> node)
     {
+        node->dispose();
         node->set_parent(nullptr);
         node->release();
         _children.erase(std::remove_if(_children.begin(), _children.end(), [&](auto& item) {
@@ -374,11 +404,6 @@ namespace p3
     Node::Children const& Node::children() const
     {
         return _children;
-    }
-
-    Node::~Node()
-    {
-        id_pool::free(_imgui_id);
     }
 
     void Node::synchronize_with(Synchronizable& synchronized)
@@ -579,6 +604,16 @@ namespace p3
         };
         apply();
         return OnScopeExit(apply);
+    }
+
+    void Node::dispose()
+    {
+        _mouse.enter = nullptr;
+        _mouse.leave = nullptr;
+        _mouse.move = nullptr;
+        for (auto& child : _children)
+            child->dispose();
+        _disposed = true;
     }
 
 }

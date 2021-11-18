@@ -115,4 +115,10 @@ namespace p3
         return _color;
     }
 
+    void ColorEdit::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
+    }
+
 }

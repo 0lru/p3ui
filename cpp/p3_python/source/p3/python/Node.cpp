@@ -90,6 +90,7 @@ namespace p3::python
         //
         // Node, synced
         py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
+        node.def("node_count", &Node::node_count);
         def_property_readonly(node, "parent", &Node::shared_parent);
         def_property_readonly(node, "children", &Node::children);
         def_property_readonly(node, "style", &Node::style);
@@ -100,6 +101,8 @@ namespace p3::python
         def_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
         def_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
         def_method(node, "redraw", &Node::redraw);
+        def_method(node, "add", &Node::add);
+        def_method(node, "remove", &Node::remove);
         node.def_property_readonly("lock", [](Node& node) {
             return std::make_shared<NodeLocker>(&node);
         });

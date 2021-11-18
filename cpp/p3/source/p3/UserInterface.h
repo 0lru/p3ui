@@ -36,7 +36,6 @@ namespace p3
 {
 
     class Popup;
-    class ChildWindow;
     class MenuBar;
     class RenderBackend;
     class Window;
@@ -64,12 +63,6 @@ namespace p3
         // aggregation
         void set_content(std::shared_ptr<Node>);
         std::shared_ptr<Node> content() const;
-
-        void add(std::shared_ptr<ChildWindow>);
-        void remove(std::shared_ptr<ChildWindow> const&);
-
-        void add(std::shared_ptr<Popup>);
-        void remove(std::shared_ptr<Popup> const &);
 
         void set_menu_bar(std::shared_ptr<MenuBar>);
         std::shared_ptr<MenuBar> const& menu_bar() const;
@@ -124,8 +117,6 @@ namespace p3
 
         std::shared_ptr<Node> _content;
         std::shared_ptr<MenuBar> _menu_bar;
-        std::vector<std::shared_ptr<Popup>> _popups;
-        std::vector<std::shared_ptr<ChildWindow>> _child_windows;
 
         std::shared_ptr<ImGuiContext> _im_gui_context;
         std::shared_ptr<ImPlotContext> _im_plot_context;

@@ -83,4 +83,11 @@ namespace p3
         return _on_close;
     }
 
+    void Menu::dispose()
+    {
+        _on_open = nullptr;
+        _on_close = nullptr;
+        Node::dispose();
+    }
+
 }

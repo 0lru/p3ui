@@ -53,6 +53,8 @@ namespace p3
 
         void set_format(std::optional<std::string>);
         std::optional<std::string> const& format() const;
+    protected:
+        void dispose() override;
 
     private:
         DataType _value = std::numeric_limits<DataType>::lowest();
@@ -77,6 +79,13 @@ namespace p3
     inline void InputScalar<DataType>::set_value(DataType value)
     {
         _value = value;
+    }
+
+    template<typename DataType>
+    inline void InputScalar<DataType>::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
     }
 
     template<typename DataType>

@@ -57,6 +57,8 @@ namespace p3
 
         void set_format(std::optional<std::string>);
         std::optional<std::string> const& format() const;
+    protected:
+        void dispose() override;
 
     private:
         DataType _value = std::numeric_limits<DataType>::lowest();
@@ -124,6 +126,13 @@ namespace p3
     inline std::optional<std::string> const& Slider<DataType>::format() const
     {
         return _format;
+    }
+
+    template<typename DataType>
+    inline void Slider<DataType>::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
     }
 
 }

@@ -91,7 +91,7 @@ namespace p3
 
         void add(std::shared_ptr<Node>);
         void insert(std::size_t, std::shared_ptr<Node>);
-        void remove(std::shared_ptr<Node> const&);
+        void remove(std::shared_ptr<Node>);
 
         // #### style ##########################################################
 
@@ -149,6 +149,8 @@ namespace p3
         /// force redraw of the tree
         virtual void redraw();
 
+        static std::size_t node_count();
+
     protected:
         Node(std::string element_name);
 
@@ -173,6 +175,8 @@ namespace p3
 
         [[nodiscard]] OnScopeExit _apply_style_compiled();
 
+        virtual void dispose();
+
     private:
         std::string _element_name;
         std::optional<std::string> _class_name;
@@ -185,6 +189,9 @@ namespace p3
 
         bool _visible = true; // NOTE: style..
         bool _disabled = false;
+
+        // nodes can't be reused a.t.m. once node is removed, it's marked "disposed"
+        bool _disposed = false;
 
         // needed for det. of the node specific imgui state
         int _status_flag;

@@ -57,6 +57,8 @@ namespace p3
 
         void set_on_change(OnChange);
         OnChange on_change() const;
+    protected:
+        void dispose() override;
 
     private:
         bool _enabled = true;

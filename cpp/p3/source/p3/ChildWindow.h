@@ -36,6 +36,7 @@ namespace p3
         using OnClose = std::function<void()>;
 
         ChildWindow();
+        ~ChildWindow();
 
         void render_impl(Context&, float width, float height) override;
 
@@ -52,6 +53,8 @@ namespace p3
 
         void set_on_close(OnClose);
         OnClose on_close() const;
+    protected:
+        void dispose();
 
     private:
         std::shared_ptr<Node> _content;

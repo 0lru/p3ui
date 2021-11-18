@@ -133,4 +133,10 @@ namespace p3
         return 0;
     }
 
+    void InputText::dispose()
+    {
+        _on_change = nullptr;
+        Node::dispose();
+    }
+
 }

@@ -116,4 +116,11 @@ namespace p3
         return _on_change;
     }
 
+    void MenuItem::dispose()
+    {
+        _on_click = nullptr;
+        _on_change = nullptr;
+        Node::dispose();
+    }
+
 }
