@@ -46,6 +46,9 @@ namespace p3
         template<typename T>
         using Item = std::optional<Cascadable<T>>;
 
+        Item<Position> const& position() const;
+        void set_position(Item<Position>);
+
         Item<Color> const& color() const;
         void set_color(Item<Color>);
 
@@ -85,6 +88,7 @@ namespace p3
         void set_align_items(Item<Alignment>);
 
     private:
+        Item<Position> _position = std::nullopt;
         Item<Color> _color = std::nullopt;
         Item<Length> _border_width = std::nullopt;
         Item<Length> _border_radius = std::nullopt;

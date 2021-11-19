@@ -28,6 +28,7 @@ namespace p3::python
 
     void ArgumentParser<StyleBlock>::operator()(py::kwargs const& kwargs, StyleBlock& style_block)
     {
+        assign(kwargs, "position", style_block, &StyleBlock::set_position);
         assign(kwargs, "color", style_block, &StyleBlock::set_color);
         assign(kwargs, "spacing", style_block, &StyleBlock::set_spacing);
         assign(kwargs, "padding", style_block, &StyleBlock::set_padding);
@@ -53,6 +54,7 @@ namespace p3::python
             return style;
         }));
 
+        def_property(style, "position", &StyleBlock::position, &StyleBlock::set_position);
         def_property(style, "color", &StyleBlock::color, &StyleBlock::set_color);
         def_property(style, "spacing", &StyleBlock::spacing, &StyleBlock::set_spacing);
         def_property(style, "padding", &StyleBlock::padding, &StyleBlock::set_padding);
@@ -68,6 +70,11 @@ namespace p3::python
         py::enum_<Direction>(module, "Direction")
             .value("Horizontal", Direction::Horizontal)
             .value("Vertical", Direction::Vertical)
+            .export_values();
+
+        py::enum_<Position>(module, "Position")
+            .value("Static", Position::Static)
+            .value("Absolute", Position::Absolute)
             .export_values();
 
         py::enum_<Alignment>(module, "Alignment")

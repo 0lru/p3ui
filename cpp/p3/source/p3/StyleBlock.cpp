@@ -42,6 +42,8 @@ namespace p3
             observer->on_style_changed();
     }
 
+    StyleBlock::Item<Position> const& StyleBlock::position() const { return _position; }
+    void StyleBlock::set_position(Item<Position> position) { _position = std::move(position);  _on_change(); }
     StyleBlock::Item<Color> const& StyleBlock::color() const { return _color; }
     void StyleBlock::set_color(Item<Color> color) { _color = std::move(color);  _on_change(); }
     StyleBlock::Item<Length> const& StyleBlock::border_width() const { return _border_width; };

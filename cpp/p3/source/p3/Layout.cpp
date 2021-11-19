@@ -49,7 +49,7 @@ namespace p3
                 auto first = true;
                 for (auto& child : children())
                 {
-                    if (!child->visible())
+                    if (!child->visible() || child->style_computation().position == Position::Absolute)
                         continue;
                     if (!first)
                         _automatic_height += ImGui::GetStyle().ItemSpacing.y;
@@ -63,7 +63,7 @@ namespace p3
                 _automatic_width = 0.0f;
                 for (auto& child : children())
                 {
-                    if (!child->visible())
+                    if (!child->visible() || child->style_computation().position == Position::Absolute)
                         continue;
                     _automatic_width = std::max(_automatic_width, child->width(0));
                 }
@@ -78,7 +78,7 @@ namespace p3
                 auto first = true;
                 for (auto& child : children())
                 {
-                    if (!child->visible())
+                    if (!child->visible() || child->style_computation().position == Position::Absolute)
                         continue;
                     if (!first)
                         _automatic_width += ImGui::GetStyle().ItemSpacing.y;
@@ -92,7 +92,7 @@ namespace p3
                 _automatic_height = 0.0f;
                 for (auto& child : children())
                 {
-                    if (!child->visible())
+                    if (!child->visible() || child->style_computation().position == Position::Absolute)
                         continue;
                     _automatic_height = std::max(_automatic_height, child->height(0));
                 }
@@ -121,7 +121,7 @@ namespace p3
             std::size_t visible_count = 0;
             for (auto const& child : children())
             {
-                if (!child->visible())
+                if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
                 ++visible_count;
                 if (!first)
@@ -136,7 +136,7 @@ namespace p3
             first = true;
             for (auto& child : children())
             {
-                if (!child->visible())
+                if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
                 //
                 // fallback to 0.0, although this should be the natively computed size
@@ -194,9 +194,7 @@ namespace p3
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
                 float backup = 0.f;
-                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 child->render(context, width, height, true);
-                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 cursor.x += width + ImGui::GetStyle().ItemSpacing.x;
                 cursor.y = initial_cursor.y;
                 first = false;
@@ -211,7 +209,7 @@ namespace p3
             std::size_t visible_count = 0;
             for (auto const& child : children())
             {
-                if (!child->visible())
+                if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
                 first = false;
                 ++visible_count;
@@ -224,7 +222,7 @@ namespace p3
             first = true;
             for (auto& child : children())
             {
-                if (!child->visible())
+                if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
                 float height = child->height(content);
                 float width = 0.f;
@@ -275,9 +273,7 @@ namespace p3
                 ImGui::SetCursorPos(cursor);
 
                 float backup = 0.f;
-                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 child->render(context, width, height, true);
-                std::swap(ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset, backup);
                 cursor.y += height + ImGui::GetStyle().ItemSpacing.y;
                 cursor.x = initial_cursor.x;
                 first = false;

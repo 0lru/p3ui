@@ -2,6 +2,7 @@ from p3ui import *
 import numpy as np
 from matplotlib.image import imread
 from material_icons import MaterialIcons
+
 icon_char = b'\xee\x8b\x88'.decode('utf-8')
 
 
@@ -27,9 +28,13 @@ class TabWidgets(ScrollArea):
                         label='Button',
                         on_click=lambda: user_interface.add(Popup(content=Text('button clicked!')))
                     ),
-                    Text(f'Text'),
-                    Text(f'Green Text', color='green'),
-                    Text(f'Red Text', color='#ff0000'),
+                    Layout(direction=Direction.Horizontal,
+                           align_items=Alignment.End,
+                           children=[
+                               Text(f'Text'),
+                               Text(f'Green Text', color='green'),
+                               Text(f'Red Text', color='#ff0000'),
+                           ]),
                     Button(
                         label=f"{icon_char} Icon Button",
                         on_click=lambda: print('icon button clicked')

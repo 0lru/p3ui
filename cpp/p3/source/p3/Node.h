@@ -154,6 +154,8 @@ namespace p3
     protected:
         Node(std::string element_name);
 
+        virtual void render_absolute(Context&);
+
         /// inform that this node needs to update it's actual values
         virtual void set_needs_update();
 
@@ -177,6 +179,9 @@ namespace p3
 
         virtual void dispose();
 
+        void set_tooltip(std::shared_ptr<Node>);
+        std::shared_ptr<Node>const &tooltip() const;
+
     private:
         std::string _element_name;
         std::optional<std::string> _class_name;
@@ -184,6 +189,7 @@ namespace p3
         std::uint64_t _imgui_id;
         std::string _imgui_label;
 
+        std::shared_ptr<Node> _tooltip;
         Node* _parent = nullptr;
         std::vector<std::shared_ptr<Node>> _children;
 

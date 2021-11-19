@@ -208,6 +208,7 @@ namespace p3
         _style_computation.border_radius = cascade(*this, combined.border_radius, &StyleComputation::border_radius, bw);
         _style_computation.padding = cascade(*this, combined.padding, &StyleComputation::padding, context.theme().frame_padding());
         _style_computation.spacing = cascade(*this, combined.spacing, &StyleComputation::spacing, context.theme().item_spacing());
+        _style_computation.position = cascade(*this, combined.position, &StyleComputation::position, Position::Static);
         //
         // flex..
         static LengthPercentage initial_position = 0 | px;
@@ -448,6 +449,16 @@ namespace p3
             std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
     }
 
+    void Node::render_absolute(Context& context)
+    {
+        for (auto& child : _children)
+            if (child->style_computation().position == Position::Absolute)
+            {
+                auto avail = ImGui::GetContentRegionAvail();
+                child->render(context, child->width(avail.x), child->height(avail.y));
+            }
+    }
+
     void Node::set_label(std::optional<std::string> label)
     {
         _label = std::move(label);
@@ -618,6 +629,16 @@ namespace p3
         for (auto& child : _children)
             child->dispose();
         _disposed = true;
+    }
+
+    void Node::set_tooltip(std::shared_ptr<Node> tooltip)
+    {
+        _tooltip = std::move(_tooltip);
+    }
+
+    std::shared_ptr<Node> const &Node::tooltip() const
+    {
+        return _tooltip;
     }
 
 }

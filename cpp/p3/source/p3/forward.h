@@ -48,6 +48,7 @@ namespace p3
     class Table;
     class Text;
     class Texture;
+    class ToolTip;
     class UserInterface;
     class Theme;
     class Window;

@@ -19,39 +19,30 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 /******************************************************************************/
+
 #pragma once
 
-#include "Cascadable.h"
+#include <string>
+#include <functional>
+
+#include "Node.h"
 
 namespace p3
 {
 
-    class StyleBlock;
-
-    struct StyleDerivation
+    class ToolTip : public Node
     {
-        Cascadable<Position> position = Cascade::Initial;
-        Cascadable<Color> color = Cascade::Inherit;
-        Cascadable<Length> border_width = Cascade::Initial;
-        Cascadable<Length> border_radius = Cascade::Initial;
-        Cascadable<Length2> item_spacing = Cascade::Initial;
-        Cascadable<Length2> spacing = Cascade::Initial;
-        Cascadable<Length2> padding = Cascade::Initial;
-        Cascadable<Color> border_color = Cascade::Initial;
-        Cascadable<Color> border_shadow_color = Cascade::Initial;
-        Cascadable<Color> background_color = Cascade::Initial;
+    public:
+        ToolTip();
 
-        Cascadable<bool> visible = Cascade::Initial;
-        Cascadable<LengthPercentage> x = Cascade::Initial;
-        Cascadable<LengthPercentage> y = Cascade::Initial;
-        Cascadable<LayoutLength> width = Cascade::Initial;
-        Cascadable<LayoutLength> height = Cascade::Initial;
+        void set_content(std::shared_ptr<Node>);
+        std::shared_ptr<Node> content() const;
 
-        Cascadable<Direction> direction = Cascade::Initial;
-        Cascadable<Justification> justify_content = Cascade::Initial;
-        Cascadable<Alignment> align_items = Cascade::Initial;
+        void render(Context&, float width, float height, bool) override;
+        void update_content();
 
-        void merge(StyleBlock&);
+    private:
+        std::shared_ptr<Node> _content;
     };
 
 }

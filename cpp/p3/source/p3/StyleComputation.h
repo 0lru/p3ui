@@ -28,6 +28,8 @@ namespace p3
 
     struct StyleComputation
     {
+        Position position;
+
         Color color;
         Length border_width;
         Length border_radius;

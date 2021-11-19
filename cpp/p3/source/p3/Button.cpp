@@ -69,7 +69,7 @@ namespace p3
         Node::dispose();
     }
 
-    void Button::render_impl(Context&, float width, float height)
+    void Button::render_impl(Context& context, float width, float height)
     {
         
         ImVec2 size(width, height);
@@ -78,6 +78,7 @@ namespace p3
                 f();
             });
         update_status();
+        render_absolute(context);
     }
 
     void Button::set_on_click(OnClick on_click)
@@ -96,11 +97,11 @@ namespace p3
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;
-        _automatic_width = _automatic_height = font_size + 2 * frame_padding.y;
+        _automatic_width = _automatic_height = font_size + 2 * frame_padding.y + context_ptr->Style.FrameBorderSize;
         if (label())
         {
             const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);
-            _automatic_width = label_size.x + frame_padding.x * 2.0f;
+            _automatic_width = label_size.x + frame_padding.x * 2.0f + context_ptr->Style.FrameBorderSize;
         }
     }
 

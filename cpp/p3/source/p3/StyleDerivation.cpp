@@ -27,6 +27,7 @@ namespace p3
 
     void StyleDerivation::merge(StyleBlock& block)
     {
+        if (block.position()) position = block.position().value();
         if (block.color()) color = block.color().value();
         if (block.border_width()) border_width = block.border_width().value();
         if (block.border_radius()) border_radius = block.border_radius().value();

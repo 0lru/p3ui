@@ -19,39 +19,23 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 /******************************************************************************/
-#pragma once
 
-#include "Cascadable.h"
+#include "p3ui.h"
+#include <p3/ToolTip.h>
 
-namespace p3
+namespace p3::python
 {
 
-    class StyleBlock;
-
-    struct StyleDerivation
+    void Definition<ToolTip>::apply(py::module& module)
     {
-        Cascadable<Position> position = Cascade::Initial;
-        Cascadable<Color> color = Cascade::Inherit;
-        Cascadable<Length> border_width = Cascade::Initial;
-        Cascadable<Length> border_radius = Cascade::Initial;
-        Cascadable<Length2> item_spacing = Cascade::Initial;
-        Cascadable<Length2> spacing = Cascade::Initial;
-        Cascadable<Length2> padding = Cascade::Initial;
-        Cascadable<Color> border_color = Cascade::Initial;
-        Cascadable<Color> border_shadow_color = Cascade::Initial;
-        Cascadable<Color> background_color = Cascade::Initial;
-
-        Cascadable<bool> visible = Cascade::Initial;
-        Cascadable<LengthPercentage> x = Cascade::Initial;
-        Cascadable<LengthPercentage> y = Cascade::Initial;
-        Cascadable<LayoutLength> width = Cascade::Initial;
-        Cascadable<LayoutLength> height = Cascade::Initial;
-
-        Cascadable<Direction> direction = Cascade::Initial;
-        Cascadable<Justification> justify_content = Cascade::Initial;
-        Cascadable<Alignment> align_items = Cascade::Initial;
-
-        void merge(StyleBlock&);
-    };
+        py::class_<ToolTip, Node, std::shared_ptr<ToolTip>> tooltip(module, "ToolTip");
+        tooltip.def(py::init<>([](std::shared_ptr<Node> content, py::kwargs kwargs) {
+            auto tooltip = std::make_shared<ToolTip>();
+            ArgumentParser<Node>()(kwargs, *tooltip);
+            tooltip->set_content(std::move(content));
+            return tooltip;
+        }), py::kw_only(), py::arg("content")=py::none());
+        def_property(tooltip, "content", &ToolTip::content, &ToolTip::set_content);
+    }
 
 }

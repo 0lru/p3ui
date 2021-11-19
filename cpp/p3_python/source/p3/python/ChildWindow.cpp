@@ -39,6 +39,7 @@ namespace p3::python
             window->set_moveable(moveable);
             return window;
         }), py::kw_only(), py::arg("content")=py::none(), py::arg("resizeable")=true, py::arg("moveable")=true);
+        def_property(window, "content", &ChildWindow::content, &ChildWindow::set_content);
         def_property(window, "resizeable", &ChildWindow::resizeable, &ChildWindow::set_resizeable);
         def_property(window, "moveable", &ChildWindow::moveable, &ChildWindow::set_moveable);
         def_property(window, "on_close", &ChildWindow::on_close, &ChildWindow::set_on_close);

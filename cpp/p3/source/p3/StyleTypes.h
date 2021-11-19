@@ -26,6 +26,7 @@
 namespace p3
 {
 
+    using Position = p3::parser::Position;
     using Px = p3::parser::Px;
     using Percentage = p3::parser::Percentage;
     using Em = p3::parser::Em;

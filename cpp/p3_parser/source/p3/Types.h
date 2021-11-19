@@ -39,6 +39,7 @@ namespace p3::parser
     using OptionalLengthPercentage = std::optional<LengthPercentage>;
     using LayoutLength = std::tuple<OptionalLengthPercentage, float, float>;
     enum class Cascade { inherit, initial };
+    enum class Position { Static, Absolute };
     template<typename T>
     using Cascaded = std::variant<Cascade, T>;
 
