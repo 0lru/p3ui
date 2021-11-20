@@ -37,7 +37,7 @@ namespace p3
         public:
             LayoutLength const& initial_height() override
             {
-                static auto initial = LayoutLength{std::nullopt, 0.f, 1.f};
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 1.f };
                 return initial;
             }
         };
@@ -55,10 +55,10 @@ namespace p3
         set_label(std::move(label));
     }
 
-    void CheckBox::render_impl(Context&,  float width, float height)
+    void CheckBox::render_impl(Context& context, float width, float height)
     {
         ImVec2 size(width, height);
-        bool value=_value;
+        bool value = _value;
         if (ImGui::Checkbox(imgui_label().c_str(), &value) && !disabled() && _on_change)
         {
             _value = value;
@@ -67,6 +67,7 @@ namespace p3
             });
         }
         update_status();
+        render_absolute(context);
     }
 
     void CheckBox::set_on_change(OnChange on_change)
@@ -91,7 +92,7 @@ namespace p3
 
     void CheckBox::update_content()
     {
-        
+
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;

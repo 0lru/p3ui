@@ -282,6 +282,8 @@ namespace p3
         cursor.x = initial_cursor.x + w + frame_padding.x;
         cursor.y = initial_cursor.y + h + frame_padding.y;
         ImGui::SetCursorPos(cursor);
+        
+        render_absolute(context);
     }
 
 }

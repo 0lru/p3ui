@@ -38,12 +38,12 @@ namespace p3
         public:
             LayoutLength const& initial_height() override
             {
-                static auto initial = LayoutLength{std::nullopt, 0.f, 0.f};
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
             LayoutLength const& initial_width() override
             {
-                static auto initial = LayoutLength{std::nullopt, 0.f, 0.f};
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
         };
@@ -62,21 +62,18 @@ namespace p3
         set_label(std::move(label));
     }
 
-    void Text::render_impl(Context&, float width, float height)
+    void Text::render_impl(Context& context, float width, float height)
     {
         if (label())
         {
-        ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
+            ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
             ImGui::LabelText(label().value().c_str(), _value.c_str());
         }
         else
         {
-//            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
-//            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
             ImGui::Text(_value.c_str());
-//            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetCurrentContext()->Style.FramePadding.y);
-//            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetCurrentContext()->Style.FramePadding.x);
         }
+        render_absolute(context);
     }
 
     void Text::set_value(std::string value)
