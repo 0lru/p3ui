@@ -59,12 +59,20 @@ namespace p3
     {
         ImVec2 size(width, height);
         bool value = _value;
-        if (ImGui::Checkbox(imgui_label().c_str(), &value) && !disabled() && _on_change)
+        bool changed;
+        if (_radio)
+            changed = ImGui::RadioButton(imgui_label().c_str(), &value);
+        else
+            changed = ImGui::Checkbox(imgui_label().c_str(), &value);
+        if(changed && !disabled())
         {
             _value = value;
-            postpone([f = _on_change, value = value]() {
-                f(value);
-            });
+            if (_on_change)
+            {
+                postpone([f = _on_change, value = value]() {
+                    f(value);
+                });
+            }
         }
         update_status();
         render_absolute(context);
@@ -88,6 +96,17 @@ namespace p3
     void CheckBox::set_value(bool value)
     {
         _value = value;
+    }
+
+    void CheckBox::set_radio(bool radio)
+    {
+        _radio = radio;
+        set_needs_update();
+    }
+
+    bool CheckBox::radio() const
+    {
+        return _radio;
     }
 
     void CheckBox::update_content()

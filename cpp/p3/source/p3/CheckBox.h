@@ -46,11 +46,15 @@ namespace p3
         bool value() const;
         void set_value(bool);
 
+        void set_radio(bool);
+        bool radio() const;
+
         void update_content() override;
     protected:
         void dispose();
 
     private:
+        bool _radio = false;
         OnChange _on_change;
         bool _value = false;
     };
