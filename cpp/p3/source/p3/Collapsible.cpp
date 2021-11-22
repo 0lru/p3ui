@@ -26,6 +26,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <iostream>
+
 namespace p3
 {
 
@@ -90,11 +92,12 @@ namespace p3
     void Collapsible::set_collapsed(bool collapsed)
     {
         _force_open = !collapsed;
+        _collapsed = collapsed;
     }
 
     bool Collapsible::collapsed() const
     {
-        return _force_open ? !_force_open : _collapsed;
+        return _collapsed;
     }
 
     void Collapsible::update_content()
