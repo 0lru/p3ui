@@ -125,6 +125,8 @@ namespace p3::python
             return;
         auto width = std::uint32_t(fwidth + 0.5f);
         auto height = std::uint32_t(fwidth + 0.5f);
+        if (width == _render_target->width() && height == _render_target->height() && !_is_dirty)
+            return;
         {
             py::gil_scoped_acquire acquire;
             if (!_skia_context)
@@ -148,6 +150,8 @@ namespace p3::python
                 auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
                 auto make_surface = _skia.attr("Surface").attr("MakeFromBackendRenderTarget");
                 _skia_surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
+                // force render
+                _is_dirty = true;
             }
 
             //
