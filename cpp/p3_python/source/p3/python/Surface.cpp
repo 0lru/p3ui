@@ -65,6 +65,8 @@ namespace p3::python
         void dispose() override;
 
     private:
+        void _render_image(std::uint32_t width, std::uint32_t height);
+
         bool _is_dirty = false;
         std::shared_ptr<p3::RenderTarget> _render_target;
         py::object _skia;
@@ -119,14 +121,29 @@ namespace p3::python
         _automatic_width = 1.f;
     }
 
+    void Surface::_render_image(std::uint32_t width, std::uint32_t height)
+    {
+        ImVec2 size(static_cast<float>(width), static_cast<float>(height));
+        ImGui::Image(_render_target->texture_id(), size);
+        if (ImGui::IsItemClicked() && _on_click && !disabled())
+            postpone([f=_on_click]() {
+                f();
+            });
+
+        update_status();
+    }
+
     void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
         if (fwidth * fheight <= 0 || !_skia_picture)
             return;
         auto width = std::uint32_t(fwidth + 0.5f);
         auto height = std::uint32_t(fwidth + 0.5f);
-        if (width == _render_target->width() && height == _render_target->height() && !_is_dirty)
+        if (!_is_dirty && _render_target && width == _render_target->width() && height == _render_target->height())
+        {
+            _render_image(width, height);
             return;
+        }
         {
             py::gil_scoped_acquire acquire;
             if (!_skia_context)
@@ -170,14 +187,7 @@ namespace p3::python
                 _is_dirty = false;
             }
         }
-        ImVec2 size(static_cast<float>(width), static_cast<float>(height));
-        ImGui::Image(_render_target->texture_id(), size);
-        if (ImGui::IsItemClicked() && _on_click && !disabled())
-            postpone([f=_on_click]() {
-                f();
-            });
-
-        update_status();
+        _render_image(width, height);
     }
 
     py::object Surface::enter()
