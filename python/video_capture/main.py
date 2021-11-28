@@ -6,22 +6,18 @@ import cv2
 video = cv2.VideoCapture(0)
 
 
-class Viewer(ScrollArea):
+class Viewer(Surface):
 
     def __init__(self):
         super().__init__()
-        self.surface = Surface(1, 1)
-        self.content = self.surface
 
     async def update(self):
         rotation = 0
-        color = 0
         while True:
             _, frame = video.read()
             rgba = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             skia_rgba = skia.Image.fromarray(rgba, skia.ColorType.kRGBA_8888_ColorType)
-            self.surface.height, self.surface.width = rgba.shape[0:2]
-            with self.surface as canvas:
+            with self as canvas:
                 canvas.save()
                 canvas.rotate(rotation, rgba.shape[1] / 2, rgba.shape[0] / 2)
                 rotation += 5
