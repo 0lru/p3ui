@@ -43,15 +43,9 @@ namespace p3::python
     public:
         using OnClick = std::function<void()>;
 
-        Surface(std::uint32_t width = 640, std::uint32_t height = 480);
+        Surface();
 
         StyleStrategy& style_strategy() const override;
-
-        void set_width(std::uint32_t);
-        std::uint32_t width() const;
-
-        void set_height(std::uint32_t);
-        std::uint32_t height() const;
 
         // sets automatic width/height values
         void update_content() override;
@@ -71,8 +65,6 @@ namespace p3::python
         void dispose() override;
 
     private:
-        std::uint32_t _width;
-        std::uint32_t _height;
         bool _is_dirty = false;
         std::shared_ptr<p3::RenderTarget> _render_target;
         py::object _skia;
@@ -108,10 +100,8 @@ namespace p3::python
         return _style_strategy;
     }
 
-    Surface::Surface(std::uint32_t width, std::uint32_t height)
+    Surface::Surface()
         : Node("Surface")
-        , _width(width)
-        , _height(height)
     {
         _skia = py::module::import("skia");
         _skia_recorder = _skia.attr("PictureRecorder")();
@@ -125,36 +115,16 @@ namespace p3::python
 
     void Surface::update_content()
     {
-        _automatic_height = float(_height);
-        _automatic_width = float(_width);
+        _automatic_height = 1.f;
+        _automatic_width = 1.f;
     }
 
-    void Surface::set_width(std::uint32_t width)
+    void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
-        _width = width;
-        set_needs_update();
-    }
-
-    std::uint32_t Surface::width() const
-    {
-        return _width;
-    }
-
-    void Surface::set_height(std::uint32_t height)
-    {
-        _height = height;
-        set_needs_update();
-    }
-
-    std::uint32_t Surface::height() const
-    {
-        return _height;
-    }
-
-    void Surface::render_impl(Context& context, float width, float height)
-    {
-        if (width * height < 0 || !_skia_picture)
+        if (fwidth * fheight <= 0 || !_skia_picture)
             return;
+        auto width = std::uint32_t(fwidth + 0.5f);
+        auto height = std::uint32_t(fwidth + 0.5f);
         {
             py::gil_scoped_acquire acquire;
             if (!_skia_context)
@@ -164,15 +134,15 @@ namespace p3::python
             }
 
             if (!_render_target ||
-                _width != _render_target->width() ||
-                _height != _render_target->height())
+                width != _render_target->width() ||
+                height != _render_target->height())
             {
-                _render_target = context.render_backend().create_render_target(_width, _height);
+                _render_target = context.render_backend().create_render_target(width, height);
                 _render_target->bind();
                 auto framebuffer_info = _skia.attr("GrGLFramebufferInfo")(
                     _render_target->framebuffer_id(), GL_RGBA8);
                 _skia_target = _skia.attr("GrBackendRenderTarget")(
-                    _width, _height, 0, 0, framebuffer_info);
+                    width, height, 0, 0, framebuffer_info);
                 auto origin = _skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
                 auto color_type = _skia.attr("ColorType").attr("kRGBA_8888_ColorType");
                 auto color_space = _skia.attr("ColorSpace").attr("MakeSRGB")();
@@ -196,7 +166,7 @@ namespace p3::python
                 _is_dirty = false;
             }
         }
-        ImVec2 size(width, height);
+        ImVec2 size(static_cast<float>(width), static_cast<float>(height));
         ImGui::Image(_render_target->texture_id(), size);
         if (ImGui::IsItemClicked() && _on_click && !disabled())
             postpone([f=_on_click]() {
@@ -209,7 +179,9 @@ namespace p3::python
     py::object Surface::enter()
     {
         auto skia = py::module::import("skia");
-        return _skia_recorder.attr("beginRecording")(_width, _height);
+        // auto inf = skia.attr("SK_ScalarInfinity");
+        auto inf = std::numeric_limits<float>::max();
+        return _skia_recorder.attr("beginRecording")(inf, inf);
     }
 
     void Surface::exit(py::args)
@@ -246,15 +218,13 @@ namespace p3::python
     {
         py::class_<Surface, p3::Node, std::shared_ptr<Surface>> surface(module, "Surface");
 
-        surface.def(py::init<>([](std::uint32_t width, std::uint32_t height, py::kwargs kwargs) {
-            auto surface = std::make_shared<Surface>(width, height);
+        surface.def(py::init<>([](py::kwargs kwargs) {
+            auto surface = std::make_shared<Surface>();
             ArgumentParser<p3::Node>()(kwargs, *surface);
             assign(kwargs, "on_click", *surface, &Surface::set_on_click);
             return surface;
-        }), py::arg("width") = 640, py::arg("height") = 480);
+        }));
 
-        def_property(surface, "width", &Surface::width, &Surface::set_width);
-        def_property(surface, "height", &Surface::width, &Surface::set_height);
         def_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
         surface.def("__enter__", &Surface::enter);
         surface.def("__exit__", &Surface::exit);
