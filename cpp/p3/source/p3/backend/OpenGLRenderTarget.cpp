@@ -71,7 +71,7 @@ namespace p3
         return _framebuffer_id;
     }
 
-    TextureId OpenGLRenderTarget::texture_id() const
+    RenderBackend::TextureId OpenGLRenderTarget::texture_id() const
     {
         return _texture_id;
     }

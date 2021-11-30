@@ -57,22 +57,22 @@ namespace p3
         std::erase(_observer, &observer);
     }
 
-    TextureId Texture::use(Context& context)
+    RenderBackend::TextureId Texture::use(Context& context)
     {
         auto& backend = context.render_backend();
-        if (!_texture_id)
+        if (!_texture)
         {
-            _texture_id = context.render_backend().create_texture();
-            _on_exit = OnScopeExit([texture_id = _texture_id.value(), backend = context.render_backend().shared_from_this()](){
-                backend->delete_texture(texture_id);
+            _texture = context.render_backend().create_texture();
+            _on_exit = OnScopeExit([texture = _texture.value(), backend = context.render_backend().shared_from_this()](){
+                backend->delete_texture(texture);
             });
         }
         if (_updated)
         {
-            context.render_backend().update_texture(_texture_id.value(), _width, _height, _data.get());
+            _texture.value()->update(_width, _height, _data.get());
             _updated = false;
         }
-        return _texture_id.value();
+        return _texture.value()->id();
     }
 
     void Texture::resize(std::size_t width, std::size_t height)

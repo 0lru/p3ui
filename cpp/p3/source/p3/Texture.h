@@ -64,7 +64,7 @@ namespace p3
         // request update of the hardware memory
         void update();
 
-        TextureId use(Context&);
+        RenderBackend::TextureId use(Context&);
 
     private:
         std::vector<Observer *> _observer;
@@ -72,7 +72,7 @@ namespace p3
         std::size_t _height;
         std::unique_ptr<std::uint8_t[]> _data;
         bool _updated = true;
-        std::optional<TextureId> _texture_id = std::nullopt;
+        std::optional<RenderBackend::Texture *> _texture = std::nullopt;
         std::optional<OnScopeExit> _on_exit = std::nullopt;
     };
 
