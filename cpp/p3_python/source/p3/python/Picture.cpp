@@ -67,7 +67,6 @@ namespace p3::python
         void dispose() override;
 
     private:
-        void _render_image(std::uint32_t width, std::uint32_t height);
         void _prepare_render_target(p3::RenderBackend&, std::uint32_t width, std::uint32_t height);
         void _draw_textured_rectangle();
         bool _is_dirty = false;
@@ -151,18 +150,6 @@ namespace p3::python
     {
         _automatic_height = 1.f;
         _automatic_width = 1.f;
-    }
-
-    void Picture::_render_image(std::uint32_t width, std::uint32_t height)
-    {
-        ImVec2 size(static_cast<float>(width), static_cast<float>(height));
-        ImGui::Image(_render_target->texture_id(), size);
-        if (ImGui::IsItemClicked() && _on_click && !disabled())
-            postpone([f = _on_click]() {
-            f();
-        });
-
-        update_status();
     }
 
     void Picture::_draw_textured_rectangle()
