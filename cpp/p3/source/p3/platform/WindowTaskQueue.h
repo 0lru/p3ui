@@ -38,6 +38,8 @@ namespace p3
         {
             {
                 std::lock_guard<std::mutex> l(_mutex);
+                if (_closed)
+                    throw std::runtime_error("closed");
                 _tasks.push_back(std::move(task));
             }
             glfwPostEmptyEvent();
@@ -64,10 +66,20 @@ namespace p3
             }
         }
 
+        void close()
+        {
+            {
+                std::lock_guard<std::mutex> l(_mutex);
+                _closed = true;
+            }
+            process();
+        }
+
     private:
         Window* _window;
         std::mutex _mutex;
         std::vector<Task> _tasks;
+        bool _closed = false;
     };
 
 }
