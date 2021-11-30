@@ -61,7 +61,7 @@ namespace p3
     Window::~Window()
     {
         _thread.detach();
-//        _thread.join();
+        // _thread.join();
         _glfw_window.reset();
         glfwTerminate();
     }
@@ -102,9 +102,12 @@ namespace p3
                 frame();
             }
             _task_queue->close();
-            // 
-            // dispose _user_interface
-            dispose();
+            //
+            // release textures, targets..
+            log_debug("shutdown render backend");
+            _render_backend->shutdown(); 
+            //
+            // e. g. remove callbacks for preventing memory leaks
             if (_user_interface)
                 _serve_promise.set_value();
         }
@@ -209,6 +212,7 @@ namespace p3
             {
                 {
                     auto guard = _user_interface->lock();
+                    _render_backend->gc(); // needs to be locked/synchonized
                     Context context(*_user_interface, *_serve_queue, *_render_backend, mouse_move);
                     _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
                 }

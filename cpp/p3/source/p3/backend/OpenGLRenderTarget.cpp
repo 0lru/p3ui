@@ -32,6 +32,8 @@ namespace p3
         : _width(width)
         , _height(height)
     {
+        // only save texture state. framebuffer state is handled in a correct way
+        glPushAttrib(GL_TEXTURE_BIT);
         glGenFramebuffers(1, &_framebuffer_id);
         glGenTextures(1, &reinterpret_cast<GLuint&>(_texture_id));
         glGenRenderbuffers(1, &_depth_id);
@@ -57,6 +59,7 @@ namespace p3
             throw std::runtime_error("failed to create render target, framebuffer incomplete");
         
         log_debug("render target created ({}x{})", _width, _height);
+        glPopAttrib();
     }
 
     OpenGLRenderTarget::~OpenGLRenderTarget()

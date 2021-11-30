@@ -38,12 +38,6 @@ namespace p3
     void OpenGL3RenderBackend::new_frame()
     {
         ImGui_ImplOpenGL3_NewFrame();
-        for(auto texture : _deleted_textures)
-            std::erase(_deleted_textures, texture);
-        _deleted_textures.clear();
-        for(auto render_target : _deleted_render_targets)
-            std::erase(_deleted_render_targets, render_target);
-        _deleted_render_targets.clear();
     }
 
     void OpenGL3RenderBackend::render(UserInterface const&)
@@ -57,20 +51,10 @@ namespace p3
         return _textures.back().get();
     }
 
-    void OpenGL3RenderBackend::delete_texture(Texture *texture)
-    {
-        _deleted_textures.push_back(texture);
-    }
-
     RenderBackend::RenderTarget *OpenGL3RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
     {
         _render_targets.push_back(std::make_unique<OpenGLRenderTarget>(width, height));
         return _render_targets.back().get();
-    }
-
-    void OpenGL3RenderBackend::delete_render_target(RenderTarget *render_target)
-    {
-        _deleted_render_targets.push_back(render_target);
     }
 
 }
