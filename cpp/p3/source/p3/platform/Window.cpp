@@ -102,7 +102,7 @@ namespace p3
                 frame();
             }
             _task_queue->close();
-            _user_interface->dispose();
+            this->dispose();
             if (_user_interface)
                 _serve_promise.set_value();
         }
@@ -139,6 +139,7 @@ namespace p3
             queue{ std::move(queue) }
         ]() mutable {
             _user_interface = std::move(user_interface);
+            Node::add(_user_interface);
 
             _user_interface->synchronize_with(*this);
             _user_interface->set_parent(this);
