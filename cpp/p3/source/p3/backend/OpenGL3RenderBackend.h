@@ -32,19 +32,9 @@ namespace p3
         void init() override;
         void new_frame() override;
         void render(UserInterface const&) override;
-
+        
         Texture *create_texture() override;
-        void delete_texture(Texture *) override;
-
         RenderTarget *create_render_target(std::uint32_t width, std::uint32_t height) override;
-        void delete_render_target(RenderTarget *) override;
-
-    private:
-        std::vector<std::unique_ptr<Texture>> _textures;
-        std::vector<std::unique_ptr<RenderTarget>> _render_targets;
-
-        std::vector<Texture *> _deleted_textures;
-        std::vector<RenderTarget *> _deleted_render_targets;
     };
 
 }

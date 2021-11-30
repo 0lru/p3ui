@@ -38,12 +38,6 @@ namespace p3
     void OpenGL2RenderBackend::new_frame()
     {
         ImGui_ImplOpenGL2_NewFrame();
-        for(auto texture : _deleted_textures)
-            std::erase(_deleted_textures, texture);
-        _deleted_textures.clear();
-        for(auto render_target : _deleted_render_targets)
-            std::erase(_deleted_render_targets, render_target);
-        _deleted_render_targets.clear();
     }
 
     void OpenGL2RenderBackend::render(UserInterface const&)
@@ -51,27 +45,16 @@ namespace p3
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
     }
 
-    RenderBackend::Texture *OpenGL2RenderBackend::create_texture()
+    RenderBackend::Texture* OpenGL2RenderBackend::create_texture()
     {
         _textures.push_back(std::make_unique<OpenGLTexture>());
         return _textures.back().get();
     }
 
-    void OpenGL2RenderBackend::delete_texture(Texture *texture)
-    {
-        _deleted_textures.push_back(texture);
-    }
-
-    RenderBackend::RenderTarget *OpenGL2RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
+    RenderBackend::RenderTarget* OpenGL2RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
     {
         _render_targets.push_back(std::make_unique<OpenGLRenderTarget>(width, height));
         return _render_targets.back().get();
     }
 
-    void OpenGL2RenderBackend::delete_render_target(RenderTarget *render_target)
-    {
-        _deleted_render_targets.push_back(render_target);
-    }
-
 }
-

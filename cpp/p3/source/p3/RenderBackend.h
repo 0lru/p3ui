@@ -25,6 +25,8 @@
 #include <memory>
 #include <string>
 #include <cstdint>
+#include <functional>
+#include <vector>
 
 namespace p3
 {
@@ -60,21 +62,29 @@ namespace p3
         };
 
         virtual ~RenderBackend() = default;
-
-        // makes the right calls to the imgui backend implementation
+        
         virtual void init() = 0;
-
-        // this is called right before every frame made. e. g. it initializes imgui resources (font textures) lazily
         virtual void new_frame() = 0;
-
-        // uses the right imgui drawing calls
         virtual void render(UserInterface const&) = 0;
 
         virtual Texture* create_texture() = 0;
-        virtual void delete_texture(Texture*) = 0;
-
         virtual RenderTarget* create_render_target(std::uint32_t width, std::uint32_t height) = 0;
-        virtual void delete_render_target(RenderTarget*) = 0;
+
+        void gc();
+        void shutdown();
+
+        void exec(std::function<void()>&&);
+        void delete_texture(Texture*);
+        void delete_render_target(RenderTarget*);
+
+    protected:
+        std::vector<std::unique_ptr<Texture>> _textures;
+        std::vector<std::unique_ptr<RenderTarget>> _render_targets;
+
+    private:
+        std::vector<Texture*> _deleted_textures;
+        std::vector<RenderTarget*> _deleted_render_targets;
+        std::vector<std::function<void()>> _tasks;
     };
 
 }
