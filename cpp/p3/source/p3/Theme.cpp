@@ -160,8 +160,10 @@ namespace p3
         im_gui_style->AntiAliasedFill = false;
         auto apply = [im_gui_style{ std::move(im_gui_style) }, im_plot_style{ std::move(im_plot_style) }]() mutable
         {
-            std::swap(*im_gui_style, GImGui->Style);
-            std::swap(*im_plot_style, GImPlot->Style);
+            if(GImGui)
+                std::swap(*im_gui_style, GImGui->Style);
+            if(GImPlot)
+                std::swap(*im_plot_style, GImPlot->Style);
         };
 
         return [apply]() mutable {
