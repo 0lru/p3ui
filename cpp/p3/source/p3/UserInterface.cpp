@@ -49,6 +49,7 @@ namespace p3
 
     UserInterface::~UserInterface()
     {
+        _theme_guard.reset();
         _im_plot_context.reset();
         _im_gui_context.reset();
     }
