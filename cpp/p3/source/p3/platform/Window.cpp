@@ -102,7 +102,9 @@ namespace p3
                 frame();
             }
             _task_queue->close();
-            this->dispose();
+            // 
+            // dispose _user_interface
+            dispose();
             if (_user_interface)
                 _serve_promise.set_value();
         }

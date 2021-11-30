@@ -70,7 +70,7 @@ namespace p3::python
         void _prepare_render_target(p3::RenderBackend&, std::uint32_t width, std::uint32_t height);
         void _draw_textured_rectangle();
         bool _is_dirty = false;
-        std::shared_ptr<p3::RenderTarget> _render_target;
+        RenderBackend::RenderTarget *_render_target;
         py::object _skia;
         py::object _skia_recorder;
         std::optional<py::object> _skia_context;

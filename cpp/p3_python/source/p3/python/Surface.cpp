@@ -68,7 +68,7 @@ namespace p3::python
         void _render_image(std::uint32_t width, std::uint32_t height);
 
         bool _is_dirty = false;
-        std::shared_ptr<p3::RenderTarget> _render_target;
+        p3::RenderBackend::RenderTarget* _render_target;
         py::object _skia;
         py::object _skia_recorder;
         std::optional<py::object> _skia_context;
@@ -126,9 +126,9 @@ namespace p3::python
         ImVec2 size(static_cast<float>(width), static_cast<float>(height));
         ImGui::Image(_render_target->texture_id(), size);
         if (ImGui::IsItemClicked() && _on_click && !disabled())
-            postpone([f=_on_click]() {
-                f();
-            });
+            postpone([f = _on_click]() {
+            f();
+        });
 
         update_status();
     }
