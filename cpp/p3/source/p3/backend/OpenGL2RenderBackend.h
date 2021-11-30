@@ -33,22 +33,18 @@ namespace p3
         void new_frame() override;
         void render(UserInterface const&) override;
 
-        TextureId create_texture() override;
-        void delete_texture(TextureId) override;
-        void update_texture(
-            TextureId, 
-            std::size_t width, 
-            std::size_t height, 
-            const std::uint8_t *data) override;
+        Texture *create_texture() override;
+        void delete_texture(Texture *) override;
 
-        std::shared_ptr<RenderTarget> create_render_target(
-            std::uint32_t width, 
-            std::uint32_t height) override;
-        void delete_render_target(std::shared_ptr<RenderTarget>) override;
-    
+        RenderTarget *create_render_target(std::uint32_t width, std::uint32_t height) override;
+        void delete_render_target(RenderTarget *) override;
+
     private:
-        std::vector<TextureId> _disposed_textures;
-        std::vector<std::shared_ptr<RenderTarget>> _disposed_render_targets;
+        std::vector<std::unique_ptr<Texture>> _textures;
+        std::vector<std::unique_ptr<RenderTarget>> _render_targets;
+
+        std::vector<Texture *> _deleted_textures;
+        std::vector<RenderTarget *> _deleted_render_targets;
     };
 
 }

@@ -26,24 +26,21 @@
 namespace p3
 {
 
-    class OpenGLRenderTarget : public RenderBackend::RenderTarget
+    class OpenGLTexture : public RenderBackend::Texture
     {
     public:
-        OpenGLRenderTarget(std::uint32_t width, std::uint32_t height);
-        ~OpenGLRenderTarget();
+        OpenGLTexture();
+        ~OpenGLTexture();
 
-        unsigned int framebuffer_id() const override;
-        RenderBackend::TextureId texture_id() const override;
-        void bind() override;
-        void release() override;
-        std::uint32_t width() const override;
-        std::uint32_t height() const override;
+        RenderBackend::TextureId id() const override;
+
+        void update(
+            std::size_t width, 
+            std::size_t height, 
+            const std::uint8_t *rgba_data) override;
     
     private:
-        std::uint32_t _width;
-        std::uint32_t _height;
-        unsigned int _framebuffer_id;
-        RenderBackend::TextureId _texture_id;
+        RenderBackend::TextureId _id;
         unsigned int _depth_id;
     };
 
