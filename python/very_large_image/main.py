@@ -32,9 +32,30 @@ class ImageViewer(Layout):
             ]
         )
 
-        with self._picture as canvas:
-            canvas.save()
-            canvas.drawImage(image, 0, 0)
+#        with self._picture as canvas:
+#            canvas.save()
+#            canvas.drawImage(image, 0, 0)
+
+    async def update(self):
+        rotation = 0.
+        while True:
+            with self._picture as canvas:
+                canvas.drawImage(image, 0, 0)
+                rotation += 10.0
+                canvas.translate(400, 400)
+                canvas.rotate(rotation)
+                canvas.translate(-100, -100)
+                paint = skia.Paint(
+                    Style=skia.Paint.kStroke_Style,
+                    AntiAlias=True,
+                    StrokeWidth=4,
+                    Color=0xFF9900FF)
+                rect = skia.Rect.MakeXYWH(10, 10, 100, 160)
+                oval = skia.RRect()
+                oval.setOval(rect)
+                canvas.drawRRect(oval, paint)
+                canvas.drawRect(rect, paint)
+            await asyncio.sleep(0.01)
 
 
 async def main():
@@ -50,6 +71,7 @@ async def main():
     iw = ImageViewer()
     user_interface = UserInterface(content=ScrollArea(content=iw))
     user_interface.theme.make_light()
+    asyncio.create_task(iw.update())
     await window.serve(user_interface)
 
 
