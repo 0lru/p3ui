@@ -60,7 +60,8 @@ namespace p3
 
     Window::~Window()
     {
-        _thread.join();
+        _thread.detach();
+//        _thread.join();
         _glfw_window.reset();
         glfwTerminate();
     }
@@ -100,11 +101,8 @@ namespace p3
                 _task_queue->process();
                 frame();
             }
-            //
-            // render task could be pending. need
-            // to empty the queue, since it may blocks
-            // the ui thread
-            _task_queue->process();
+            _task_queue->close();
+            _user_interface->dispose();
             if (_user_interface)
                 _serve_promise.set_value();
         }
