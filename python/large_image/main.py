@@ -15,7 +15,7 @@ for x in range(repeat_x):
         rgba[y * minions.shape[0]:(y + 1) * minions.shape[0], x * minions.shape[1]:(x + 1) * minions.shape[1],
         :] = minions
 image = skia.Image.fromarray(rgba.astype(np.uint8), skia.ColorType.kRGBA_8888_ColorType)
-print(rgba.shape[1])
+print(f'width={rgba.shape[1]}px')
 
 
 class ImageViewer(Layout):
@@ -32,9 +32,9 @@ class ImageViewer(Layout):
             ]
         )
 
-#        with self._picture as canvas:
-#            canvas.save()
-#            canvas.drawImage(image, 0, 0)
+        with self._picture as canvas:
+            canvas.save()
+            canvas.drawImage(image, 0, 0)
 
     async def update(self):
         rotation = 0.
@@ -69,11 +69,12 @@ async def main():
     #
     # inject backend & window into the ui
     iw = ImageViewer()
-    user_interface = UserInterface(content=ScrollArea(content=iw))
+    scroll = ScrollArea(content=iw)
+    user_interface = UserInterface(content=scroll)
     user_interface.theme.make_light()
-    asyncio.create_task(iw.update())
+    t = asyncio.create_task(iw.update())
     await window.serve(user_interface)
-
+    t.cancel()
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,18 +1,17 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="canvas debug" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="large_image" type="PythonConfigurationType" factoryName="Python">
     <module name="p3ui" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="PYTHONPATH" value="..\..\\out\build\x64-Debug" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python/canvas" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python/large_image" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/canvas/main.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/large_image/main.py" />
     <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
