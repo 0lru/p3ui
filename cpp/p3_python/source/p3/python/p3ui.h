@@ -41,6 +41,7 @@ namespace p3::python
 {
     class Builder;
     class Surface;
+    class Picture;
 
     //
     // wrap parameters
@@ -123,32 +124,32 @@ namespace p3::python
     template<typename ...Args, typename Object>
     void assign(std::optional<py::function>& f, Object& object, void (Object::* setter)(std::function<void(Args...)>))
     {
-        if (f) (object.*setter)([f=f.value()](Args ... args) {
+        if (f) (object.*setter)([f = f.value()](Args ... args) {
             py::gil_scoped_acquire acquire;
             f(std::move(args)...);
         });
     }
 
     template<typename Target, typename F>
-    void def_method(Target& target, char const *name, F&& f)
+    void def_method(Target& target, char const* name, F&& f)
     {
         target.def(name, sync(std::forward<F>(f)));
     }
 
     template<typename Target, typename Getter, typename Setter>
-    void def_property(Target& target, char const *name, Getter&& getter, Setter setter)
+    void def_property(Target& target, char const* name, Getter&& getter, Setter setter)
     {
         target.def_property(name, sync(std::forward<Getter>(getter)), sync(std::forward<Setter>(setter)));
     }
 
     template<typename Target, typename Getter>
-    void def_property_readonly(Target& target, char const *name, Getter&& getter)
+    void def_property_readonly(Target& target, char const* name, Getter&& getter)
     {
         target.def_property_readonly(name, sync(std::forward<Getter>(getter)));
     }
 
     template<typename T>
-    struct ArgumentParser 
+    struct ArgumentParser
     {
         void operator()(py::kwargs const& kwargs, T& item);
     };
