@@ -30,10 +30,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-namespace
-{
-    bool _debug = false;
-}
+namespace { bool _debug = false; }
 
 namespace p3
 {
