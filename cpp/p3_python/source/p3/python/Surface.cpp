@@ -42,7 +42,9 @@ namespace p3::python
         : public p3::Node
     {
     public:
+        using ClipRect = std::array<double, 4>;
         using OnClick = std::function<void()>;
+        using OnClipRect = std::function<void(ClipRect)>;
 
         Surface();
         ~Surface();
@@ -60,6 +62,10 @@ namespace p3::python
 
         void set_on_click(OnClick);
         OnClick on_click() const;
+
+        ClipRect const& clip_rect() const;
+        void set_on_clip_rect(OnClipRect);
+        OnClipRect on_clip_rect() const;
 
     protected:
         void dispose() override;
@@ -89,6 +95,8 @@ namespace p3::python
         std::optional<py::object> _recorder;
 
         OnClick _on_click;
+        ClipRect _clip_rect;
+        OnClipRect _on_clip_rect;
     };
 
     namespace
@@ -128,6 +136,21 @@ namespace p3::python
             _skia_context.value().attr("abandonContext")();
             _skia_context.reset();
         }
+    }
+
+    Surface::ClipRect const& Surface::clip_rect() const
+    {
+        return _clip_rect;
+    }
+
+    void Surface::set_on_clip_rect(OnClipRect on_clip_rect)
+    {
+        _on_clip_rect = std::move(on_clip_rect);
+    }
+
+    Surface::OnClipRect Surface::on_clip_rect() const
+    {
+        return _on_clip_rect;
     }
 
     void Surface::dispose()
@@ -173,7 +196,7 @@ namespace p3::python
         auto const& padding = window.WindowPadding;
         auto const& spacing = ImGui::GetCurrentContext()->Style.ItemInnerSpacing;
 
-        ImVec2 p1(padding.x, padding.y);
+        ImVec2 p1(padding.x + window.Pos.x, padding.y + window.Pos.y);
 
         ImVec2 p2(
             p1.x + float(_render_target->width()),
@@ -187,9 +210,11 @@ namespace p3::python
 
     void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
+        ImGuiWindow& window = *ImGui::GetCurrentWindow();
+
         //
         // nothing todo.. leave
-        if (fwidth * fheight <= 0 || !_skia_picture)
+        if (fwidth * fheight <= 0 || !_skia_picture || window.SkipItems)
             return;
 
         //
@@ -211,6 +236,8 @@ namespace p3::python
 
         //
         // the content can overlap the item spacing if parent is scrolled..
+        auto vp_width = content_max.x - content_min.x;
+        auto vp_height = content_max.y - content_min.y;
         auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * item_spacing.x);
         auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * item_spacing.y);
 
@@ -226,20 +253,19 @@ namespace p3::python
 
         _is_dirty = _is_dirty || render_target_dirty;
 
-        //
-        // 3) was scrolled
-        auto scroll_x = ImGui::GetScrollX();
-        if (_last_scroll_x != scroll_x)
+        ClipRect clip_rect{
+            cursor.x + ImGui::GetScrollX() - window.WindowPadding.x,
+            cursor.y + ImGui::GetScrollY() - window.WindowPadding.y,
+            double(vp_width),
+            double(vp_height)
+        };
+        if (clip_rect != _clip_rect)
         {
             _is_dirty = true;
-            _last_scroll_x = scroll_x;
-        }
-
-        auto scroll_y = ImGui::GetScrollY();
-        if (_last_scroll_y != scroll_y)
-        {
-            _is_dirty = true;
-            _last_scroll_y = scroll_y;
+            _clip_rect = clip_rect;
+            if (_on_clip_rect) postpone([f = _on_clip_rect, rect = clip_rect]() {
+                f(rect);
+            });
         }
 
         //
@@ -253,7 +279,7 @@ namespace p3::python
             {
                 _skia_context = skia.attr("GrDirectContext").attr("MakeGL")();
                 _render_backend = context.render_backend().shared_from_this();
-                log_verbose("created skia context");
+                log_debug("created skia context");
             }
 
             if (render_target_dirty)
@@ -276,29 +302,22 @@ namespace p3::python
                 auto color_space = skia.attr("ColorSpace").attr("MakeSRGB")();
                 auto make_surface = skia.attr("Surface").attr("MakeFromBackendRenderTarget");
                 _skia_surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
-                log_verbose("created render target {}x{}", viewport_width, viewport_height);
+                log_debug("created render target {}x{}", viewport_width, viewport_height);
             }
 
             //
             // draw to fbo
             // log_info("draw {}x{} - {}x{}", width, height, fwidth, fheight);
             _render_target->bind();
-            ImGuiWindow* window = GImGui->CurrentWindow;
-            auto p1 = cursor;
-            p1.x -= scroll_x;
-            p1.x += window->WindowPadding.x - window->WindowBorderSize - item_spacing.x; // really?
-            p1.y -= scroll_y;
-            p1.y += window->WindowPadding.y - window->WindowBorderSize - item_spacing.y; // really?
-            ImVec2 p2{ p1.x + float(width), p1.y + float(height) };
-
             glClearColor(0.f, 0.f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto canvas = _skia_surface.value().attr("getCanvas")();
             canvas.attr("save")();
-            auto clip_rect = skia.attr("Rect").attr("MakeXYWH")(p1.x, p1.y,
-                width, height);
-            canvas.attr("clipRect")(clip_rect, false);
-            canvas.attr("translate")(p1.x, p1.y);
+            canvas.attr("translate")(-clip_rect[0], -clip_rect[1]);
+            auto cr = skia.attr("Rect").attr("MakeXYWH")(
+                clip_rect[0], clip_rect[1],
+                clip_rect[2], clip_rect[3]);
+            canvas.attr("clipRect")(cr, false);
             canvas.attr("drawPicture")(_skia_picture);
             canvas.attr("restore")();
             _skia_context.value().attr("flushAndSubmit")();
@@ -310,9 +329,19 @@ namespace p3::python
 
         //
         // advance cursor
-        cursor.x += float(width);
-        cursor.y += float(height);
-        ImGui::SetCursorPos(cursor);
+        auto const id = window.GetID(this->imgui_label().c_str());
+        ImVec2 pos(window.DC.CursorPos.x, window.DC.CursorPos.y + window.DC.CurrLineTextBaseOffset);
+        auto bb_bottom_right = ImVec2(window.DC.CursorPos.x + fwidth, window.DC.CursorPos.y + fheight);
+        ImRect bb(pos, bb_bottom_right);
+        ImGui::ItemSize(bb, 0.f/*baseline*/);
+        ImGui::ItemAdd(bb, id);
+        bool hovered, held;
+        bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 0);
+        if (pressed && _on_click && !disabled())
+            postpone([f = _on_click]() {
+            f();
+        });
+        update_status();
     }
 
     py::object Surface::enter()
@@ -363,10 +392,12 @@ namespace p3::python
             auto surface = std::make_shared<Surface>();
             ArgumentParser<p3::Node>()(kwargs, *surface);
             assign(kwargs, "on_click", *surface, &Surface::set_on_click);
+            assign(kwargs, "on_clip_rect", *surface, &Surface::set_on_clip_rect);
             return surface;
         }));
 
         def_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
+        def_property(surface, "on_clip_rect", &Surface::on_clip_rect, &Surface::set_on_clip_rect);
         surface.def("__enter__", &Surface::enter);
         surface.def("__exit__", &Surface::exit);
         def_property_readonly(surface, "picture", &Surface::picture);
