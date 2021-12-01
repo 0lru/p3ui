@@ -42,9 +42,9 @@ namespace p3::python
         : public p3::Node
     {
     public:
-        using ClipRect = std::array<double, 4>;
+        using Viewport = std::array<double, 4>;
         using OnClick = std::function<void()>;
-        using OnClipRect = std::function<void(ClipRect)>;
+        using OnViewport = std::function<void(Viewport)>;
 
         Surface();
         ~Surface();
@@ -63,9 +63,9 @@ namespace p3::python
         void set_on_click(OnClick);
         OnClick on_click() const;
 
-        ClipRect const& clip_rect() const;
-        void set_on_clip_rect(OnClipRect);
-        OnClipRect on_clip_rect() const;
+        Viewport const& viewport() const;
+        void set_on_viewport(OnViewport);
+        OnViewport on_viewport() const;
 
     protected:
         void dispose() override;
@@ -95,8 +95,8 @@ namespace p3::python
         std::optional<py::object> _recorder;
 
         OnClick _on_click;
-        ClipRect _clip_rect;
-        OnClipRect _on_clip_rect;
+        Viewport _viewport;
+        OnViewport _on_viewport;
     };
 
     namespace
@@ -138,23 +138,24 @@ namespace p3::python
         }
     }
 
-    Surface::ClipRect const& Surface::clip_rect() const
+    Surface::Viewport const& Surface::viewport() const
     {
-        return _clip_rect;
+        return _viewport;
     }
 
-    void Surface::set_on_clip_rect(OnClipRect on_clip_rect)
+    void Surface::set_on_viewport(OnViewport on_viewport)
     {
-        _on_clip_rect = std::move(on_clip_rect);
+        _on_viewport = std::move(on_viewport);
     }
 
-    Surface::OnClipRect Surface::on_clip_rect() const
+    Surface::OnViewport Surface::on_viewport() const
     {
-        return _on_clip_rect;
+        return _on_viewport;
     }
 
     void Surface::dispose()
     {
+        log_info("dispose surface");
         //
         // dispose is always initiated with the gil held and (currently) with the mutex held
         // if the picture is deleted, we need to abandon the context instead
@@ -174,6 +175,7 @@ namespace p3::python
             _skia_context.reset();
         }
         _on_click = nullptr;
+        _on_viewport = nullptr;
         Node::dispose();
     }
 
@@ -196,8 +198,10 @@ namespace p3::python
         auto const& padding = window.WindowPadding;
         auto const& spacing = ImGui::GetCurrentContext()->Style.ItemInnerSpacing;
 
-        ImVec2 p1(padding.x + window.Pos.x, padding.y + window.Pos.y);
-
+        ImVec2 p1(
+            window.Pos.x, 
+            window.Pos.y
+        );
         ImVec2 p2(
             p1.x + float(_render_target->width()),
             p1.y + float(_render_target->height())
@@ -223,7 +227,7 @@ namespace p3::python
         auto height = std::uint32_t(fheight + 0.5f);
 
         //
-        // set virtual node width/height
+        // get pos in local coordinates
         auto cursor = ImGui::GetCursorPos();
 
         //
@@ -253,19 +257,28 @@ namespace p3::python
 
         _is_dirty = _is_dirty || render_target_dirty;
 
-        ClipRect clip_rect{
-            cursor.x + ImGui::GetScrollX() - window.WindowPadding.x,
-            cursor.y + ImGui::GetScrollY() - window.WindowPadding.y,
+        //
+        // define clip rect in surface-coordinate-space
+        // - positive cursor moves rect to negative
+        // - positive scroll moves clip rect positive
+        // - positive padding moves clip rect negative
+        Viewport viewport{
+            -cursor.x + ImGui::GetScrollX(),
+            -cursor.y + ImGui::GetScrollY(),
             double(vp_width),
             double(vp_height)
         };
-        if (clip_rect != _clip_rect)
+        if (viewport != _viewport)
         {
             _is_dirty = true;
-            _clip_rect = clip_rect;
-            if (_on_clip_rect) postpone([f = _on_clip_rect, rect = clip_rect]() {
+            _viewport = viewport;
+            if (_on_viewport) postpone([f = _on_viewport, rect = viewport]() {
                 f(rect);
             });
+            // log_info("clip rect changed: ({:.2f}, {:.2f}, {:.2f}, {:.2f})", viewport[0], viewport[1], viewport[2], viewport[3]);
+            // log_info("cursor pos: {:.2f} {:.2f}", cursor.x, cursor.y);
+            // log_info("window pos: {:.2f} {:.2f}", window.Pos.x, window.Pos.y);
+            // log_info("scroll pos: {:.2f} {:.2f}", window.Scroll.x, window.Scroll.y);
         }
 
         //
@@ -309,15 +322,13 @@ namespace p3::python
             // draw to fbo
             // log_info("draw {}x{} - {}x{}", width, height, fwidth, fheight);
             _render_target->bind();
-            glClearColor(0.f, 0.f, 0.0f, 0.0f);
+            glClearColor(0.f, 0.f, 0.f, 0.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto canvas = _skia_surface.value().attr("getCanvas")();
             canvas.attr("save")();
-            canvas.attr("translate")(-clip_rect[0], -clip_rect[1]);
-            auto cr = skia.attr("Rect").attr("MakeXYWH")(
-                clip_rect[0], clip_rect[1],
-                clip_rect[2], clip_rect[3]);
-            canvas.attr("clipRect")(cr, false);
+            canvas.attr("translate")(
+                cursor.x - ImGui::GetScrollX(), 
+                cursor.y - ImGui::GetScrollY());
             canvas.attr("drawPicture")(_skia_picture);
             canvas.attr("restore")();
             _skia_context.value().attr("flushAndSubmit")();
@@ -392,12 +403,13 @@ namespace p3::python
             auto surface = std::make_shared<Surface>();
             ArgumentParser<p3::Node>()(kwargs, *surface);
             assign(kwargs, "on_click", *surface, &Surface::set_on_click);
-            assign(kwargs, "on_clip_rect", *surface, &Surface::set_on_clip_rect);
+            assign(kwargs, "on_viewport", *surface, &Surface::set_on_viewport);
             return surface;
         }));
 
+        def_property_readonly(surface, "viewport", &Surface::viewport/*, &Surface::set_on_viewport*/);
         def_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
-        def_property(surface, "on_clip_rect", &Surface::on_clip_rect, &Surface::set_on_clip_rect);
+        def_property(surface, "on_viewport", &Surface::on_viewport, &Surface::set_on_viewport);
         surface.def("__enter__", &Surface::enter);
         surface.def("__exit__", &Surface::exit);
         def_property_readonly(surface, "picture", &Surface::picture);
