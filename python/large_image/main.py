@@ -21,7 +21,7 @@ print(f'image={rgba.shape[1]}x{rgba.shape[0]}x{rgba.shape[2]}')
 class ImageViewer(Layout):
 
     def __init__(self):
-        self._picture = Picture(
+        self._picture = Surface(
             width=(rgba.shape[1] | px, 1, 1),
             height=(rgba.shape[0] | px, 1, 0)
         )
