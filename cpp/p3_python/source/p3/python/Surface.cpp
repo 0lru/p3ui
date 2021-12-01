@@ -155,7 +155,7 @@ namespace p3::python
 
     void Surface::dispose()
     {
-        log_info("dispose surface");
+        log_debug("dispose surface");
         //
         // dispose is always initiated with the gil held and (currently) with the mutex held
         // if the picture is deleted, we need to abandon the context instead
