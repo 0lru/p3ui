@@ -67,19 +67,29 @@ namespace p3::python
         void dispose() override;
 
     private:
-        void _prepare_render_target(p3::RenderBackend&, std::uint32_t width, std::uint32_t height);
         void _draw_textured_rectangle();
+
+        //
+        // true whenever picture changed
         bool _is_dirty = false;
-        RenderBackend::RenderTarget *_render_target = nullptr;
-        
+
+        float _last_scroll_x = 0.f;
+        float _last_scroll_y = 0.f;
+
+        //
+        // remember backend where context was created
         std::shared_ptr<RenderBackend> _render_backend;
         std::optional<py::object> _skia_context;
 
+        RenderBackend::RenderTarget* _render_target = nullptr;
         std::optional<py::object> _skia_target;
         std::optional<py::object> _skia_picture;
         std::optional<py::object> _skia_surface;
 
+        //
+        // this is just set in between enter & leave (context manager)
         std::optional<py::object> _recorder;
+
         OnClick _on_click;
     };
 
@@ -148,8 +158,8 @@ namespace p3::python
 
     void Picture::update_content()
     {
-        _automatic_height = 1.f;
         _automatic_width = 1.f;
+        _automatic_height = 1.f;
     }
 
     void Picture::_draw_textured_rectangle()
@@ -183,93 +193,128 @@ namespace p3::python
         // nothing todo.. leave
         if (fwidth * fheight <= 0 || !_skia_picture)
             return;
+
+        //
+        // use rounded width/height for fbo
         auto width = std::uint32_t(fwidth + 0.5f);
         auto height = std::uint32_t(fheight + 0.5f);
-        //
-        // compute render target size & viewport rect
-        auto content_min = ImGui::GetWindowContentRegionMin();
-        auto content_max = ImGui::GetWindowContentRegionMax();
-        auto scroll_x = ImGui::GetScrollX();
-        auto scroll_y = ImGui::GetScrollY();
-        auto const& imgui_content = *ImGui::GetCurrentContext();
-        ImGuiWindow* window = GImGui->CurrentWindow;
 
+        //
+        // set virtual node width/height
         auto cursor = ImGui::GetCursorPos();
-        auto p1 = ImGui::GetCursorPos();
+
+        //
+        //
         auto const& imgui_context = *ImGui::GetCurrentContext();
         auto const& item_spacing = imgui_context.Style.ItemSpacing;
-        p1.x -= scroll_x;
-        p1.x += window->WindowPadding.x - window->WindowBorderSize - item_spacing.x; // really?
-        p1.y -= scroll_y;
-        p1.y += window->WindowPadding.y - window->WindowBorderSize - item_spacing.y; // really?
-        ImVec2 p2{ p1.x + float(width), p1.y + float(height) };
-        cursor.x += float(width);
-        cursor.y += float(height);
-        // set virtual width/height
-        ImGui::SetCursorPos(cursor);
 
-        _is_dirty = true;
+        auto content_min = ImGui::GetWindowContentRegionMin();
+        auto content_max = ImGui::GetWindowContentRegionMax();
+
+        //
+        // the content can overlap the item spacing if parent is scrolled..
+        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * item_spacing.x);
+        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * item_spacing.y);
+
+        //
+        // 1) no context
+        _is_dirty = _is_dirty || !_skia_context;
+
+        //
+        // 2) render target does not fit
+        bool render_target_dirty = !_render_target
+            || viewport_width != _render_target->width()
+            || viewport_height != _render_target->height();
+
+        _is_dirty = _is_dirty || render_target_dirty;
+
+        //
+        // 3) was scrolled
+        auto scroll_x = ImGui::GetScrollX();
+        if (_last_scroll_x != scroll_x)
+        {
+            _is_dirty = true;
+            _last_scroll_x = scroll_x;
+        }
+
+        auto scroll_y = ImGui::GetScrollY();
+        if (_last_scroll_y != scroll_y)
+        {
+            _is_dirty = true;
+            _last_scroll_y = scroll_y;
+        }
+
+        //
+        // only acquire gil if needed
+        if (_is_dirty)
         {
             py::gil_scoped_acquire acquire;
             auto skia = py::module::import("skia");
 
-            //
-            // assure that render target has same size, recreate whenever needed
-            auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * item_spacing.x);
-            auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * item_spacing.y);
-            _prepare_render_target(context.render_backend(), viewport_width, viewport_height);
-            _render_target->bind();
-            if (_is_dirty && _skia_picture)
+            if (!_skia_context)
             {
-                glClearColor(0.f, 0.f, 0.f, 0.2f);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                auto canvas = _skia_surface.value().attr("getCanvas")();
-                canvas.attr("save")();
-                auto clip_rect = skia.attr("Rect").attr("MakeXYWH")(p1.x, p1.y, 
-                    width, height);
-                canvas.attr("clipRect")(clip_rect, false);
-                canvas.attr("translate")(p1.x, p1.y);
-                canvas.attr("drawPicture")(_skia_picture);
-                canvas.attr("restore")();
-                _skia_context.value().attr("flushAndSubmit")();
+                _skia_context = skia.attr("GrDirectContext").attr("MakeGL")();
+                _render_backend = context.render_backend().shared_from_this();
+                log_verbose("created skia context");
             }
-        }
-        //
-        // bind default render target
-        _render_target->release();
-        _draw_textured_rectangle();
-    }
 
-    void Picture::_prepare_render_target(p3::RenderBackend& backend, std::uint32_t width, std::uint32_t height)
-    {
-        auto skia = py::module::import("skia");
+            if (render_target_dirty)
+            {
+                //
+                // free existing resources
+                if (_render_target)
+                    context.render_backend().delete_render_target(_render_target);
+                //
+                // create..
+                _render_target = nullptr;
+                _render_target = context.render_backend().create_render_target(viewport_width, viewport_height);
+                _render_target->bind();
+                auto framebuffer_info = skia.attr("GrGLFramebufferInfo")(
+                    _render_target->framebuffer_id(), GL_RGBA8);
+                _skia_target = skia.attr("GrBackendRenderTarget")(
+                    viewport_width, viewport_height, 0, 0, framebuffer_info);
+                auto origin = skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
+                auto color_type = skia.attr("ColorType").attr("kRGBA_8888_ColorType");
+                auto color_space = skia.attr("ColorSpace").attr("MakeSRGB")();
+                auto make_surface = skia.attr("Surface").attr("MakeFromBackendRenderTarget");
+                _skia_surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
+                log_verbose("created render target {}x{}", viewport_width, viewport_height);
+            }
 
-        if (!_skia_context)
-        {
-            _skia_context = skia.attr("GrDirectContext").attr("MakeGL")();
-            _render_backend = backend.shared_from_this();
-            log_debug("created skia context");
-        }
-        if (!_render_target || width != _render_target->width() || height != _render_target->height())
-        {
-            if (_render_target)
-                backend.delete_render_target(_render_target);
-            _render_target = nullptr;
-            _render_target = backend.create_render_target(width, height);
+            //
+            // draw to fbo
+            // log_info("draw {}x{} - {}x{}", width, height, fwidth, fheight);
             _render_target->bind();
-            auto framebuffer_info = skia.attr("GrGLFramebufferInfo")(
-                _render_target->framebuffer_id(), GL_RGBA8);
-            _skia_target = skia.attr("GrBackendRenderTarget")(
-                width, height, 0, 0, framebuffer_info);
-            auto origin = skia.attr("GrSurfaceOrigin").attr("kTopLeft_GrSurfaceOrigin");
-            auto color_type = skia.attr("ColorType").attr("kRGBA_8888_ColorType");
-            auto color_space = skia.attr("ColorSpace").attr("MakeSRGB")();
-            auto make_surface = skia.attr("Surface").attr("MakeFromBackendRenderTarget");
-            _skia_surface = make_surface(_skia_context, _skia_target, origin, color_type, color_space, nullptr);
+            ImGuiWindow* window = GImGui->CurrentWindow;
+            auto p1 = cursor;
+            p1.x -= scroll_x;
+            p1.x += window->WindowPadding.x - window->WindowBorderSize - item_spacing.x; // really?
+            p1.y -= scroll_y;
+            p1.y += window->WindowPadding.y - window->WindowBorderSize - item_spacing.y; // really?
+            ImVec2 p2{ p1.x + float(width), p1.y + float(height) };
 
-            // force render
-            _is_dirty = true;
+            glClearColor(0.f, 0.f, 0.5f, 0.2f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            auto canvas = _skia_surface.value().attr("getCanvas")();
+            canvas.attr("save")();
+            auto clip_rect = skia.attr("Rect").attr("MakeXYWH")(p1.x, p1.y,
+                width, height);
+            canvas.attr("clipRect")(clip_rect, false);
+            canvas.attr("translate")(p1.x, p1.y);
+            canvas.attr("drawPicture")(_skia_picture);
+            canvas.attr("restore")();
+            _skia_context.value().attr("flushAndSubmit")();
+            _is_dirty = false;
+            _render_target->release();
         }
+
+        _draw_textured_rectangle();
+
+        //
+        // advance cursor
+        cursor.x += float(width);
+        cursor.y += float(height);
+        ImGui::SetCursorPos(cursor);
     }
 
     py::object Picture::enter()
