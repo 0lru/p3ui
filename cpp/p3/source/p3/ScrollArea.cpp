@@ -78,8 +78,6 @@ namespace p3
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         _automatic_width = _automatic_height = DefaultItemWidthEm * font_size;
-        if (_content)
-            _content->update_content();
     }
 
     void ScrollArea::set_horizontal_scroll_enabled(bool value)
