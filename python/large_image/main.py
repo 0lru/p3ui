@@ -4,16 +4,16 @@ from imageio import imread
 import skia
 import numpy as np
 
-repeat_x = 20
-repeat_y = 2
+repeat_x = 100
+repeat_y = 10
 
-minions = imread('minions.png')
-minions = np.concatenate((minions, np.ones((minions.shape[0], minions.shape[1], 1)) * 255.), axis=2)
-rgba = np.zeros((minions.shape[0] * repeat_y, minions.shape[1] * repeat_x, 4))
+base = imread('image.png')
+# minions = np.concatenate((minions, np.ones((minions.shape[0], minions.shape[1], 1)) * 255.), axis=2)
+rgba = np.zeros((base.shape[0] * repeat_y, base.shape[1] * repeat_x, 4))
 for x in range(repeat_x):
     for y in range(repeat_y):
-        rgba[y * minions.shape[0]:(y + 1) * minions.shape[0], x * minions.shape[1]:(x + 1) * minions.shape[1],
-        :] = minions
+        rgba[y * base.shape[0]:(y + 1) * base.shape[0], x * base.shape[1]:(x + 1) * base.shape[1],
+        :] = base
 image = skia.Image.fromarray(rgba.astype(np.uint8), skia.ColorType.kRGBA_8888_ColorType)
 print(f'image={rgba.shape[1]}x{rgba.shape[0]}x{rgba.shape[2]}')
 
@@ -21,77 +21,76 @@ print(f'image={rgba.shape[1]}x{rgba.shape[0]}x{rgba.shape[2]}')
 class ImageViewer(Layout):
 
     def __init__(self):
-        self._picture = Surface(
+        self._surface = Surface(
             width=(rgba.shape[1] | px, 1, 1),
             height=(rgba.shape[0] | px, 1, 0)
         )
         super().__init__(
             direction=Direction.Vertical,
             justify_content=Justification.Center,
-            align_items=Alignment.Stretch,
-            children=[
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                self._picture,
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1'),
-                Button(label='b1')
-            ]
+            align_items=Alignment.Start,
+            children=[Button(label=f'button {i}') for i in range(10)] + [
+                self._surface,
+            ] + [Button(label=f'button {i}') for i in range(10)]
         )
 
-        with self._picture as canvas:
-            canvas.save()
-            canvas.drawImage(image, 0, 0)
+        #with self._picture as canvas:
+        #    canvas.save()
+        #    canvas.drawImage(image, 0, 0)
+
+    @staticmethod
+    def star():
+        """
+        @see https://github.com/kyamagu/skia-python/blob/main/notebooks/Showcase.ipynb
+        """
+        from math import cos, sin
+        radius = 256.0
+        center = 256.0
+        path = skia.Path()
+        path.moveTo(center + radius, center)
+        for i in range(1, 8):
+            a = 2.6927937 * i
+            path.lineTo(center + radius * cos(a), center + radius * sin(a))
+        return path
 
     async def update(self):
-        rotation = 0.
+        rotation = 0
+        distort = 5
         while True:
-            with self._picture as canvas:
-                canvas.drawImage(image, 0, 0)
-                rotation += 10.0
-                canvas.translate(400, 400)
-                canvas.rotate(rotation)
-                canvas.translate(-100, -100)
-                paint = skia.Paint(
-                    Style=skia.Paint.kStroke_Style,
-                    AntiAlias=True,
-                    StrokeWidth=4,
-                    Color=0xFF9900FF)
-                rect = skia.Rect.MakeXYWH(10, 10, 100, 160)
-                oval = skia.RRect()
-                oval.setOval(rect)
-                canvas.drawRRect(oval, paint)
-                canvas.drawRect(rect, paint)
             await asyncio.sleep(0.01)
+            with self._surface as canvas:
+                canvas.drawImage(image, 0, 0)
+                canvas.rotate(rotation, 256, 256)
+                paint = skia.Paint(
+                    PathEffect=skia.DiscretePathEffect.Make(distort, 4.0),
+                    Style=skia.Paint.kStroke_Style,
+                    StrokeWidth=10.0,
+                    AntiAlias=True,
+                    Color=0xFF4285F4)
+                path = ImageViewer.star()
+                canvas.drawPath(path, paint)
+            distort += 0.01
+            rotation += 1
+            if distort >= 10:
+                distort = 5
 
 
 async def main():
-    #
-    # setup window & user interface. the "user interface" is defined independently of
-    # the system window and defines the theme and the font.
-    window = Window(title='Playground')
+    window = Window(title='Large Image')
     window.size = (640, 480)
     window.position = (100, 100)
 
-    #
-    # inject backend & window into the ui
     iw = ImageViewer()
     scroll = ScrollArea(content=iw)
     user_interface = UserInterface(content=scroll)
-    user_interface.theme.make_light()
+    user_interface.theme.make_dark()
 
     t = asyncio.create_task(iw.update())
 
     await window.serve(user_interface)
 
     t.cancel()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
