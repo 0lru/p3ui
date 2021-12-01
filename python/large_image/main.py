@@ -4,8 +4,8 @@ from imageio import imread
 import skia
 import numpy as np
 
-repeat_x = 12
-repeat_y = 12
+repeat_x = 20
+repeat_y = 2
 
 minions = imread('minions.png')
 minions = np.concatenate((minions, np.ones((minions.shape[0], minions.shape[1], 1)) * 255.), axis=2)
@@ -15,19 +15,33 @@ for x in range(repeat_x):
         rgba[y * minions.shape[0]:(y + 1) * minions.shape[0], x * minions.shape[1]:(x + 1) * minions.shape[1],
         :] = minions
 image = skia.Image.fromarray(rgba.astype(np.uint8), skia.ColorType.kRGBA_8888_ColorType)
-print(f'width={rgba.shape[1]}px')
+print(f'image={rgba.shape[1]}x{rgba.shape[0]}x{rgba.shape[2]}')
 
 
 class ImageViewer(Layout):
 
     def __init__(self):
-        self._picture = Picture(width=(rgba.shape[1] | px, 1, 1), height=(rgba.shape[0] | px, 1, 1))
+        self._picture = Picture(
+            width=(rgba.shape[1] | px, 1, 1),
+            height=(rgba.shape[0] | px, 1, 0)
+        )
         super().__init__(
             direction=Direction.Vertical,
-            padding=(0 | px, 0 | px),
+            justify_content=Justification.Center,
+            align_items=Alignment.Stretch,
             children=[
                 Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
                 self._picture,
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
+                Button(label='b1'),
                 Button(label='b1')
             ]
         )
@@ -72,8 +86,11 @@ async def main():
     scroll = ScrollArea(content=iw)
     user_interface = UserInterface(content=scroll)
     user_interface.theme.make_light()
+
     t = asyncio.create_task(iw.update())
+
     await window.serve(user_interface)
+
     t.cancel()
 
 if __name__ == "__main__":
