@@ -7,7 +7,7 @@ class CanvasDemo(ScrollArea):
 
     def __init__(self):
         super().__init__()
-        self.surface = Surface(256, 256)
+        self.surface = Surface(width=(256 | px, 0, 0), height=(256 | px, 0, 0))
         self.content = self.surface
 
     @staticmethod
