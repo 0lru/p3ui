@@ -129,6 +129,7 @@ namespace p3::python
         parse_axis_kwargs(kwargs, *plot.y_axis(), "y");
         assign(kwargs, "legend_visible", static_cast<Node&>(*plot.legend()), &Node::set_visible);
         assign(kwargs, "legend_location", *plot.legend(), &Plot::Legend::set_location);
+        assign(kwargs, "legend_outside", *plot.legend(), &Plot::Legend::set_outside);
         assign(kwargs, "legend_direction", *plot.legend()->style(), &StyleBlock::set_direction);
     }
 
@@ -301,6 +302,7 @@ namespace p3::python
 
         auto legend = py::class_<Plot::Legend, Node, std::shared_ptr<Plot::Legend>>(plot, "Legend");
         def_property(legend, "location", &Plot::Legend::location, &Plot::Legend::set_location);
+        def_property(legend, "outside", &Plot::Legend::outside, &Plot::Legend::set_outside);
 
         auto plot_item = py::class_<Plot::Item, std::shared_ptr<Plot::Item>>(plot, "Item");
         def_method(plot_item, "add", &Plot::Item::add);

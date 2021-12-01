@@ -325,8 +325,12 @@ namespace p3
         void set_location(Location);
         Location location() const;
 
+        void set_outside(bool);
+        bool outside() const;
+
     private:
         Location _location = Location::NorthWest;
+        bool _outside = false;
     };
 
     class Plot::Axis : public Node

@@ -117,6 +117,10 @@ namespace p3
         else if(!_y_axis->fixed() && _y_axis->check_behavior() && _y_axis->limits())
             ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
 
+        ImPlotFlags plot_flags = ImPlotFlags_None;
+        if (!legend()->visible())
+            plot_flags |= ImPlotFlags_NoLegend;
+
         if (ImPlot::BeginPlot(
             imgui_label().c_str(),
             _x_axis->label() ? _x_axis->label().value().c_str() : 0,
@@ -153,12 +157,15 @@ namespace p3
             }
 
 
-            if (legend())
-                ImPlot::SetupLegend(
-                    static_cast<ImPlotLocation>(legend()->location()),
-                    legend()->style_computation().direction == Direction::Vertical
+            if (legend()->visible())
+            {
+                int legend_flags = legend()->style_computation().direction == Direction::Vertical
                     ? ImPlotLegendFlags_None
-                    : ImPlotLegendFlags_Horizontal);
+                    : ImPlotLegendFlags_Horizontal;
+                if (legend()->outside())
+                    legend_flags |= ImPlotLegendFlags_Outside;
+                ImPlot::SetupLegend(static_cast<ImPlotLocation>(legend()->location()), legend_flags);
+            }
             for (auto& item : _items)
             {
                 if (item->line_color())
@@ -481,6 +488,16 @@ namespace p3
     Plot::Legend::Legend()
         : Node("Legend")
     {
+    }
+
+    void Plot::Legend::set_outside(bool outside)
+    {
+        _outside = outside;
+    }
+
+    bool Plot::Legend::outside() const
+    {
+        return _outside;
     }
 
     void Plot::Legend::set_location(Location location)
