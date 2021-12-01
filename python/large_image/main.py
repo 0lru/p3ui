@@ -28,7 +28,7 @@ class ImageViewer(Layout):
         super().__init__(
             direction=Direction.Vertical,
             justify_content=Justification.Center,
-            align_items=Alignment.Start,
+            align_items=Alignment.Stretch,
             children=[Button(label=f'button {i}') for i in range(10)] + [
                 self._surface,
             ] + [Button(label=f'button {i}') for i in range(10)]
