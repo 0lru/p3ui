@@ -103,18 +103,23 @@ namespace p3
             }
         }
 
+        if (_x_axis->inverted())
+            x_flags |= ImPlotAxisFlags_Invert;
         if (_x_axis->auto_fit())
             x_flags |= ImPlotAxisFlags_AutoFit;
-        else if(_x_axis->fixed() && _x_axis->limits())
+        else if (_x_axis->fixed() && _x_axis->limits())
             ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
-        else if(!_x_axis->fixed() && _x_axis->check_behavior() && _x_axis->limits())
+        else if (!_x_axis->fixed() && _x_axis->check_behavior() && _x_axis->limits())
             ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
 
+
+        if (_y_axis->inverted())
+            y_flags |= ImPlotAxisFlags_Invert;
         if (_y_axis->auto_fit())
             y_flags |= ImPlotAxisFlags_AutoFit;
-        else if(_y_axis->fixed() && _y_axis->limits())
+        else if (_y_axis->fixed() && _y_axis->limits())
             ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
-        else if(!_y_axis->fixed() && _y_axis->check_behavior() && _y_axis->limits())
+        else if (!_y_axis->fixed() && _y_axis->check_behavior() && _y_axis->limits())
             ImPlot::SetNextAxisLimits(ImAxis_Y1, _y_axis->limits().value()[0], _y_axis->limits().value()[1], ImGuiCond_Always);
 
         ImPlotFlags plot_flags = ImPlotFlags_None;
@@ -126,7 +131,7 @@ namespace p3
             _x_axis->label() ? _x_axis->label().value().c_str() : 0,
             _y_axis->label() ? _y_axis->label().value().c_str() : 0,
             size,
-            legend()->visible() ? 0 : ImPlotFlags_NoLegend,
+            plot_flags,
             x_flags,
             y_flags))
         {
@@ -155,7 +160,6 @@ namespace p3
                     ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
                 }
             }
-
 
             if (legend()->visible())
             {
@@ -272,6 +276,16 @@ namespace p3
     void Plot::update_content()
     {
         _automatic_height = _automatic_width = 0.f;
+    }
+
+    void Plot::Axis::set_inverted(bool inverted)
+    {
+        _inverted = inverted;
+    }
+
+    bool Plot::Axis::inverted() const
+    {
+        return _inverted;
     }
 
     void Plot::Axis::set_auto_fit(bool auto_fit)

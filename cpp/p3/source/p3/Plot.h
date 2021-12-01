@@ -249,9 +249,13 @@ namespace p3
             void set_width(double width) { _width = width; }
             double width() const { return _width; }
 
+            void set_direction(Direction direction) { _direction = direction; }
+            Direction direction() const { return _direction; }
+
             void render() override;
 
         private:
+            Direction _direction = Direction::Vertical;
             double _shift = 0.;
             double _width = 1.;
         };
@@ -370,10 +374,14 @@ namespace p3
 
         bool check_behavior();
 
+        void set_inverted(bool);
+        bool inverted() const;
+
     private:
         Type _type = Type::Numeric;
         bool _auto_fit = true;
         bool _fixed = false;
+        bool _inverted = false;
         Label _label;
         Limits _limits;
         std::optional<Ticks> _ticks = std::nullopt;
@@ -381,11 +389,16 @@ namespace p3
         bool _check_behavior = true;
     };
 
+
+
     template<typename T>
     void Plot::BarSeries<T>::render()
     {
         auto sample_count = this->values().size();
-        ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
+        if (direction() == Direction::Horizontal)
+            ImPlot::PlotBarsH(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
+        else
+            ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
         for (auto& annotation : this->annotations())
             annotation->render_item_annotation();
     }

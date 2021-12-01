@@ -114,6 +114,7 @@ namespace p3::python
             assign(kwargs, (prefix + "_limits").c_str(), axis, &Plot::Axis::set_limits);
             assign(kwargs, (prefix + "_tick_labels").c_str(), axis, &Plot::Axis::set_tick_labels);
             assign(kwargs, (prefix + "_ticks").c_str(), axis, &Plot::Axis::set_ticks);
+            assign(kwargs, (prefix + "_inverted").c_str(), axis, &Plot::Axis::set_inverted);
             if (kwargs.contains(prefix + "_ticks"))
             {
                 auto x_ticks = kwargs[(prefix + "_ticks").c_str()].cast<std::optional<py::array_t<double>>>();
@@ -161,6 +162,7 @@ namespace p3::python
                 assign(kwargs, "values", static_cast<Plot::Series1D<Plot::Series, T>&>(*series), &Plot::Series1D<Plot::Series, T>::set_values);
                 assign(kwargs, "shift", *series, &Plot::BarSeries<T>::set_shift);
                 assign(kwargs, "width", *series, &Plot::BarSeries<T>::set_width);
+                assign(kwargs, "direction", *series, &Plot::BarSeries<T>::set_direction);
                 return series;
             }));
             def_property(series, "shift", &Plot::BarSeries<T>::shift, &Plot::BarSeries<T>::set_shift);
@@ -271,6 +273,7 @@ namespace p3::python
         def_property(axis, "label", &Plot::Axis::label, &Plot::Axis::set_label);
         def_property(axis, "limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
         def_property(axis, "fixed", &Plot::Axis::fixed, &Plot::Axis::set_fixed);
+        def_property(axis, "inverted", &Plot::Axis::inverted, &Plot::Axis::set_inverted);
         def_property(axis, "auto_fit", &Plot::Axis::auto_fit, &Plot::Axis::set_auto_fit);
 
         py::enum_<Plot::Axis::Type>(axis, "Type")
