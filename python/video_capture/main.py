@@ -20,9 +20,10 @@ class Viewer(Surface):
             with self as canvas:
                 canvas.save()
                 canvas.rotate(rotation, rgba.shape[1] / 2, rgba.shape[0] / 2)
-                rotation += 5
+                rotation += 0.1
                 canvas.drawImage(skia_rgba, 0, 0)
                 canvas.restore()
+                canvas.save()
                 canvas.translate(100, 100)
                 paint = skia.Paint(
                     Style=skia.Paint.kStroke_Style,
@@ -32,9 +33,11 @@ class Viewer(Surface):
                 rect = skia.Rect.MakeXYWH(10, 10, 100, 160)
                 oval = skia.RRect()
                 oval.setOval(rect)
-                oval.offset(40, 80)
+                #                oval.offset(40, 80)
+                canvas.scale(5, 5)
                 canvas.drawRRect(oval, paint)
                 canvas.drawRect(rect, paint)
+                canvas.restore()
 
 
 async def main():
@@ -42,8 +45,9 @@ async def main():
     window.position = (256, 256)
     window.size = (512, 512)
     viewer = Viewer()
-    asyncio.create_task(viewer.update())
+    t = asyncio.create_task(viewer.update())
     await window.serve(UserInterface(content=viewer))
+    t.cancel()
 
 
 asyncio.run(main())

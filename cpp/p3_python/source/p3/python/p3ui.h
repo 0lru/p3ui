@@ -41,7 +41,6 @@ namespace p3::python
 {
     class Builder;
     class Surface;
-    class Picture;
 
     //
     // wrap parameters
