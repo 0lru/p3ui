@@ -30,6 +30,11 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+namespace
+{
+    bool _debug = false;
+}
+
 namespace p3
 {
 
@@ -104,6 +109,8 @@ namespace p3
     void Layout::render_impl(Context& context, float w, float h)
     {
         auto initial_cursor = ImGui::GetCursorPos();
+        auto p1 = initial_cursor;
+        
         auto const& frame_padding = ImGui::GetStyle().FramePadding;
         initial_cursor.x += frame_padding.x;
         w -= frame_padding.x * 2.f;
@@ -203,6 +210,7 @@ namespace p3
         else
         {
             auto content = h;
+
             auto occupied = 0.f;
             auto grow_total = 0.f;
             auto first = true;
@@ -283,6 +291,20 @@ namespace p3
         cursor.y = initial_cursor.y + h + frame_padding.y;
         ImGui::SetCursorPos(cursor);
         
+
+        if(_debug)
+        {
+            static auto redf= ImVec4(1, 0, 0, 1);
+            static auto redu = ImGui::GetColorU32(redf);
+            auto& window = *ImGui::GetCurrentWindow();
+            p1.x += window.Pos.x - window.Scroll.x;
+            p1.y += window.Pos.y - window.Scroll.y;
+            ImVec2 p2{
+                cursor.x + window.Pos.x - window.Scroll.x, 
+                cursor.y + window.Pos.y - window.Scroll.y
+            };
+            ImGui::GetWindowDrawList()->AddRect(p1, p2, redu);
+        }
         render_absolute(context);
     }
 
