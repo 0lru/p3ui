@@ -109,6 +109,7 @@ namespace p3
 
     Node::~Node()
     {
+        log_verbose("~Node: {} {}", this->imgui_label(), element_name());
         NodeRegistry::instance().release(_imgui_id);
     }
 
