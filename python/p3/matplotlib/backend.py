@@ -1,20 +1,9 @@
 """
-A fully functional, do-nothing backend intended as a template for backend
-writers.  It is fully functional in that you can select it as a backend e.g.
-with ::
-    import matplotlib
-    matplotlib.use("template")
-and your program will (should!) run without error, though no output is
-produced.  This provides a starting point for backend writers; you can
+This provides a starting point for backend writers; you can
 selectively implement drawing methods (`~.RendererTemplate.draw_path`,
 `~.RendererTemplate.draw_image`, etc.) and slowly see your figure come to life
 instead having to have a full blown implementation before getting any results.
-Copy this file to a directory outside of the Matplotlib source tree, somewhere
-where Python can import it (by adding the directory to your ``sys.path`` or by
-packaging it as a normal Python package); if the backend is importable as
-``import my.backend`` you can then select it using ::
-    import matplotlib
-    matplotlib.use("module://my.backend")
+
 If your backend implements support for saving figures (i.e. has a `print_xyz`
 method), you can register it as the default handler for a given file type::
     from matplotlib.backend_bases import register_backend
@@ -22,6 +11,8 @@ method), you can register it as the default handler for a given file type::
     ...
     plt.savefig("figure.xyz")
 """
+import skia
+from matplotlib.path import Path
 
 from matplotlib import _api
 from matplotlib._pylab_helpers import Gcf
@@ -30,7 +21,7 @@ from matplotlib.backend_bases import (
 from matplotlib.figure import Figure
 
 
-class RendererTemplate(RendererBase):
+class Renderer(RendererBase):
     """
     The renderer handles drawing/rendering operations.
     This is a minimal do-nothing class that can be used to get started when
@@ -41,9 +32,32 @@ class RendererTemplate(RendererBase):
     def __init__(self, dpi):
         super().__init__()
         self.dpi = dpi
+        self.canvas = None
 
     def draw_path(self, gc, path, transform, rgbFace=None):
-        pass
+        skia_path = skia.Path()
+        for points, code in path.iter_segments(transform, remove_nans=True, clip=None):  # TODO clip=clip
+            if code == Path.MOVETO:
+                skia_path.moveTo(*points)
+            elif code == Path.CLOSEPOLY:
+                skia_path.close()
+            elif code == Path.LINETO:
+                skia_path.lineTo(*points)
+            elif code == Path.CURVE3:
+                pass
+                #cur = np.asarray(ctx.get_current_point())
+                #a = points[:2]
+                #b = points[-2:]
+                #ctx.curve_to(*(cur / 3 + a * 2 / 3), *(a * 2 / 3 + b / 3), *b)
+            elif code == Path.CURVE4:
+                pass
+                #ctx.curve_to(*points)
+#        path.cubicTo(768, 0, -512, 256, 256, 256)
+        paint = skia.Paint()
+        paint.setStyle(skia.Paint.kStroke_Style)
+        paint.setStrokeWidth(4)
+        paint.setColor(skia.ColorRED)
+        self.canvas.drawPath(skia_path, paint)
 
     # draw_markers is optional, and we get more correct relative
     # timings by leaving it out.  backend implementers concerned with
@@ -88,7 +102,7 @@ class RendererTemplate(RendererBase):
 
     def new_gc(self):
         # docstring inherited
-        return GraphicsContextTemplate()
+        return GraphicsContext()
 
     def points_to_pixels(self, points):
         # if backend doesn't have dpi, e.g., postscript or svg
@@ -99,7 +113,7 @@ class RendererTemplate(RendererBase):
         # return points/72.0 * self.dpi.get()
 
 
-class GraphicsContextTemplate(GraphicsContextBase):
+class GraphicsContext(GraphicsContextBase):
     """
     The graphics context provides the color, line styles, etc...  See the cairo
     and postscript backends for examples of mapping the graphics context
@@ -136,6 +150,7 @@ def draw_if_interactive():
 
 
 def show(*, block=None):
+    print('called show')
     """
     For image backends - is not required.
     For GUI backends - show() is usually the last line of a pyplot script and
@@ -154,6 +169,7 @@ def new_figure_manager(num, *args, FigureClass=Figure, **kwargs):
     # backend_wx, backend_wxagg and backend_tkagg for examples.  Not all GUIs
     # require explicit instantiation of a main-level app (e.g., backend_gtk3)
     # for pylab.
+    print('new_figure_manager')
     thisFig = FigureClass(*args, **kwargs)
     return new_figure_manager_given_figure(num, thisFig)
 
@@ -180,6 +196,10 @@ class FigureCanvas(FigureCanvasBase):
         A high-level Figure instance
     """
 
+    def __init__(self, *args, **kwargs):
+        print('creating FigureCanvas')
+        super(FigureCanvas, self).__init__(*args, **kwargs)
+
     def draw(self):
         """
         Draw the figure using the renderer.
@@ -188,7 +208,8 @@ class FigureCanvas(FigureCanvasBase):
         deferred work (like computing limits auto-limits and tick
         values) that users may want access to before saving to disk.
         """
-        renderer = RendererTemplate(self.figure.dpi)
+        print('draw')
+        renderer = Renderer(self.figure.dpi)
         self.figure.draw(renderer)
 
     # You should provide a print_xxx function for every file format
