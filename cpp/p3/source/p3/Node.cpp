@@ -74,7 +74,7 @@ namespace p3
             _nodes.erase(id);
         }
 
-        static NodeRegistry& instance() 
+        static NodeRegistry& instance()
         {
             static NodeRegistry instance;
             return instance;
@@ -98,7 +98,7 @@ namespace p3
         : _element_name(std::move(element_name))
         , _imgui_id(NodeRegistry::instance().add(this))
         , _imgui_label("##" + std::to_string(_imgui_id))
-        , _status_flag(ImGuiItemStatusFlags_None)
+        , _status_flags(ImGuiItemStatusFlags_None)
         , _style(std::make_shared<StyleBlock>())
     {
         _style->add_observer(this);
@@ -141,36 +141,26 @@ namespace p3
 
     void Node::update_status()
     {
-        ImGuiWindow* window = GImGui->CurrentWindow;
-        auto const status_flag = GImGui->LastItemData.StatusFlags;
-        if (status_flag == _status_flag)
+        ImGuiWindow& const window = *GImGui->CurrentWindow;
+        auto const status_flags = GImGui->LastItemData.StatusFlags;
+        if (status_flags == _status_flags)
         {
-            if (_mouse.hovered && _mouse.move && Context::current().mouse_move()) postpone([f = _mouse.move, e = MouseEvent(this)]() {
-                f(std::move(e));
-            });
-            return;
+            if (_mouse.hovered && _mouse.move && Context::current().mouse_move())
+                postpone([f = _mouse.move, e = MouseEvent(this)]() mutable { f(std::move(e)); });
         }
-        if (status_flag & ImGuiItemStatusFlags_HoveredRect)
+        else if ((status_flags & ImGuiItemStatusFlags_HoveredRect) && !(_status_flags & ImGuiItemStatusFlags_HoveredRect))
         {
-            if (!(_status_flag & ImGuiItemStatusFlags_HoveredRect))
-            {
-                _mouse.hovered = true;
-                if (_mouse.enter) postpone([f = _mouse.enter, e = MouseEvent(this)]() {
-                    f(std::move(e));
-                });
-            }
+            _mouse.hovered = true;
+            if (_mouse.enter)
+                postpone([f = _mouse.enter, e = MouseEvent(this)]() mutable {f(std::move(e)); });
         }
-        else
+        else if (_status_flags & ImGuiItemStatusFlags_HoveredRect)
         {
-            if (_status_flag & ImGuiItemStatusFlags_HoveredRect)
-            {
-                _mouse.hovered = false;
-                if (_mouse.leave) postpone([f = _mouse.leave, e = MouseEvent(this)]() {
-                    f(std::move(e));
-                });
-            }
+            _mouse.hovered = false;
+            if (_mouse.leave)
+                postpone([f = _mouse.leave, e = MouseEvent(this)]() mutable { f(std::move(e)); });
         }
-        _status_flag = status_flag;
+        _status_flags = status_flags;
     }
 
     void Node::postpone(std::function<void()> f)
@@ -391,7 +381,7 @@ namespace p3
         std::advance(it, index);
         (*_children.insert(it, std::move(node)))->set_needs_restyle();
     }
-    
+
     void Node::remove(std::shared_ptr<Node> node)
     {
         node->dispose();
@@ -637,7 +627,7 @@ namespace p3
         _tooltip = std::move(_tooltip);
     }
 
-    std::shared_ptr<Node> const &Node::tooltip() const
+    std::shared_ptr<Node> const& Node::tooltip() const
     {
         return _tooltip;
     }

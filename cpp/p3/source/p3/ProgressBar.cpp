@@ -69,7 +69,6 @@ namespace p3
 
     void ProgressBar::update_content()
     {
-        
         auto const context_ptr = ImGui::GetCurrentContext();
         auto const font_size = context_ptr->FontSize;
         auto const frame_padding = context_ptr->Style.FramePadding;

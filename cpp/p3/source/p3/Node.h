@@ -200,7 +200,7 @@ namespace p3
         bool _disposed = false;
 
         // needed for det. of the node specific imgui state
-        int _status_flag;
+        int _status_flags;
         struct
         {
             bool tracking_enabled = false;

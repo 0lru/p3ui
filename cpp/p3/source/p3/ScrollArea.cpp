@@ -46,9 +46,6 @@ namespace p3
             flags |= ImGuiWindowFlags_AlwaysHorizontalScrollbar;
         if (!_vertical_scroll_autohide)
             flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
-        // auto content_width = _content->width(state);
-        // auto content_height = _content->height(state);
-        // ImGui::SetNextWindowContentSize(ImVec2(content_width, content_height));
         ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
         if (_content)
         {

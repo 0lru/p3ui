@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <implot.h>
 
 
@@ -126,7 +127,7 @@ namespace p3
         if (!legend()->visible())
             plot_flags |= ImPlotFlags_NoLegend;
 
-        if (ImPlot::BeginPlot(
+        if (!ImPlot::BeginPlot(
             imgui_label().c_str(),
             _x_axis->label() ? _x_axis->label().value().c_str() : 0,
             _y_axis->label() ? _y_axis->label().value().c_str() : 0,
@@ -134,65 +135,62 @@ namespace p3
             plot_flags,
             x_flags,
             y_flags))
+            return;
+        if (_x_axis->ticks())
         {
-            if (_x_axis->ticks())
+            if (_x_axis->tick_labels())
             {
-                if (_x_axis->tick_labels())
-                {
-                    auto references = reference_tick_labels(_x_axis->tick_labels().value());
-                    auto count = int(std::min(_x_axis->ticks().value().size(), _x_axis->tick_labels().value().size()));
-                    ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), count, references.data(), false);
-                }
-                else
-                    ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), int(_x_axis->ticks().value().size()), 0, false);
+                auto references = reference_tick_labels(_x_axis->tick_labels().value());
+                auto count = int(std::min(_x_axis->ticks().value().size(), _x_axis->tick_labels().value().size()));
+                ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), count, references.data(), false);
             }
-
-            if (_y_axis->ticks())
-            {
-                if (_y_axis->tick_labels())
-                {
-                    auto references = reference_tick_labels(_y_axis->tick_labels().value());
-                    auto count = int(std::min(_y_axis->ticks().value().size(), _y_axis->tick_labels().value().size()));
-                    ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), count, references.data(), false);
-                }
-                else
-                {
-                    ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
-                }
-            }
-
-            if (legend()->visible())
-            {
-                int legend_flags = legend()->style_computation().direction == Direction::Vertical
-                    ? ImPlotLegendFlags_None
-                    : ImPlotLegendFlags_Horizontal;
-                if (legend()->outside())
-                    legend_flags |= ImPlotLegendFlags_Outside;
-                ImPlot::SetupLegend(static_cast<ImPlotLocation>(legend()->location()), legend_flags);
-            }
-            for (auto& item : _items)
-            {
-                if (item->line_color())
-                    ImPlot::SetNextLineStyle(item->native_line_color());
-                if (item->fill_color())
-                    ImPlot::SetNextFillStyle(item->native_fill_color());
-                //                if (item->opacity())
-                //                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, item->opacity().value());
-                item->apply_style();
-                item->render();
-                //               if (item->opacity())
-                //                   ImGui::PopStyleVar(ImGuiStyleVar_Alpha);
-                               //for (auto& annotation : item->annotations())
-                               //    annotation->render_item_annotation();
-            }
-            ImPlot::EndPlot();
+            else
+                ImPlot::SetupAxisTicks(ImAxis_X1, _x_axis->ticks().value().data(), int(_x_axis->ticks().value().size()), 0, false);
         }
+        if (_y_axis->ticks())
+        {
+            if (_y_axis->tick_labels())
+            {
+                auto references = reference_tick_labels(_y_axis->tick_labels().value());
+                auto count = int(std::min(_y_axis->ticks().value().size(), _y_axis->tick_labels().value().size()));
+                ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), count, references.data(), false);
+            }
+            else
+            {
+                ImPlot::SetupAxisTicks(ImAxis_Y1, _y_axis->ticks().value().data(), int(_y_axis->ticks().value().size()), 0, false);
+            }
+        }
+        if (legend()->visible())
+        {
+            ImPlotLegendFlags legend_flags = legend()->style_computation().direction == Direction::Vertical
+                ? ImPlotLegendFlags_None
+                : ImPlotLegendFlags_Horizontal;
+            if (legend()->outside())
+                legend_flags |= ImPlotLegendFlags_Outside;
+            ImPlot::SetupLegend(static_cast<ImPlotLocation>(legend()->location()), legend_flags);
+        }
+        for (auto& item : _items)
+        {
+            if (item->line_color())
+                ImPlot::SetNextLineStyle(item->native_line_color());
+            if (item->fill_color())
+                ImPlot::SetNextFillStyle(item->native_fill_color());
+            auto& imgui_context = *ImGui::GetCurrentContext();
+            float alpha = item->opacity()
+                ? item->opacity().value()
+                : imgui_context.Style.Alpha;
+            std::swap(alpha, imgui_context.Style.Alpha);
+            item->apply_style();
+            item->render();
+            std::swap(alpha, imgui_context.Style.Alpha);
+            // for (auto& annotation : item->annotations())
+            //     annotation->render_item_annotation();
+        }
+        ImPlot::EndPlot();
     }
 
     void Plot::Item::apply_style()
     {
-        //if (opacity())
-        //    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity().value());
         auto& context = Context::current();
         ImPlotMarker style = marker_style()
             ? static_cast<ImPlotMarker>(marker_style().value())
@@ -214,8 +212,7 @@ namespace p3
 
     void Plot::Item::redraw()
     {
-        if (_plot)
-            _plot->redraw();
+        if (_plot) _plot->redraw();
     }
 
     void Plot::add(std::shared_ptr<Item> item)
@@ -227,18 +224,13 @@ namespace p3
 
     void Plot::remove(std::shared_ptr<Item> item)
     {
-        _items.erase(std::remove_if(_items.begin(), _items.end(), [&](auto iterated) {
-            if (iterated == item)
-            {
-                item->release();
-                item->set_plot(nullptr);
-                return true;
-            }
-            else
-            {
+        std::erase_if(_items, [&](auto iterated) {
+            if (iterated != item)
                 return false;
-            }
-        }), _items.end());
+            item->release();
+            item->set_plot(nullptr);
+            return true;
+        });
     }
 
     void Plot::clear()

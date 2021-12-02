@@ -77,9 +77,6 @@ namespace p3::python
         // true whenever picture changed
         bool _is_dirty = false;
 
-        float _last_scroll_x = 0.f;
-        float _last_scroll_y = 0.f;
-
         //
         // remember backend where context was created
         std::shared_ptr<RenderBackend> _render_backend;
@@ -187,19 +184,18 @@ namespace p3::python
 
     void Surface::_draw_textured_rectangle()
     {
-        static auto zero2D = ImVec2(0.f, 0.f);
-        static auto ones2D = ImVec2(1.f, 1.f);
-        static auto whitef = ImVec4(1, 1, 1, 1);
-        static auto whiteu = ImGui::GetColorU32(whitef);
+        static auto const zero2D = ImVec2(0.f, 0.f);
+        static auto const ones2D = ImVec2(1.f, 1.f);
+        static auto const whitef = ImVec4(1, 1, 1, 1);
+        static auto const whiteu = ImGui::GetColorU32(whitef);
 
         if (!_render_target)
             return;
         auto& window = *ImGui::GetCurrentWindow();
         auto const& padding = window.WindowPadding;
-        auto const& spacing = ImGui::GetCurrentContext()->Style.ItemInnerSpacing;
 
         ImVec2 p1(
-            window.Pos.x, 
+            window.Pos.x,
             window.Pos.y
         );
         ImVec2 p2(
@@ -233,17 +229,17 @@ namespace p3::python
         //
         //
         auto const& imgui_context = *ImGui::GetCurrentContext();
-        auto const& item_spacing = imgui_context.Style.ItemSpacing;
+        auto const& frame_padding = imgui_context.Style.FramePadding;
 
         auto content_min = ImGui::GetWindowContentRegionMin();
         auto content_max = ImGui::GetWindowContentRegionMax();
 
         //
-        // the content can overlap the item spacing if parent is scrolled..
+        // the content can overlap the item spacing if parent is scrolled
         auto vp_width = content_max.x - content_min.x;
         auto vp_height = content_max.y - content_min.y;
-        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * item_spacing.x);
-        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * item_spacing.y);
+        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * frame_padding.x);
+        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * frame_padding.y);
 
         //
         // 1) no context
@@ -258,10 +254,8 @@ namespace p3::python
         _is_dirty = _is_dirty || render_target_dirty;
 
         //
-        // define clip rect in surface-coordinate-space
-        // - positive cursor moves rect to negative
-        // - positive scroll moves clip rect positive
-        // - positive padding moves clip rect negative
+        // define viewport rect (the viewport is the containing window)
+        // of this surface in the coordinate-spface of the surface
         Viewport viewport{
             -cursor.x + ImGui::GetScrollX(),
             -cursor.y + ImGui::GetScrollY(),
@@ -275,10 +269,6 @@ namespace p3::python
             if (_on_viewport) postpone([f = _on_viewport, rect = viewport]() {
                 f(rect);
             });
-            // log_info("clip rect changed: ({:.2f}, {:.2f}, {:.2f}, {:.2f})", viewport[0], viewport[1], viewport[2], viewport[3]);
-            // log_info("cursor pos: {:.2f} {:.2f}", cursor.x, cursor.y);
-            // log_info("window pos: {:.2f} {:.2f}", window.Pos.x, window.Pos.y);
-            // log_info("scroll pos: {:.2f} {:.2f}", window.Scroll.x, window.Scroll.y);
         }
 
         //
@@ -320,14 +310,13 @@ namespace p3::python
 
             //
             // draw to fbo
-            // log_info("draw {}x{} - {}x{}", width, height, fwidth, fheight);
             _render_target->bind();
             glClearColor(0.f, 0.f, 0.f, 0.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto canvas = _skia_surface.value().attr("getCanvas")();
             canvas.attr("save")();
             canvas.attr("translate")(
-                cursor.x - ImGui::GetScrollX(), 
+                cursor.x - ImGui::GetScrollX(),
                 cursor.y - ImGui::GetScrollY());
             canvas.attr("drawPicture")(_skia_picture);
             canvas.attr("restore")();

@@ -35,7 +35,7 @@ namespace p3
         public:
             LayoutLength const& initial_height() override
             {
-                static auto initial = LayoutLength{std::nullopt, 0.f, 0.f};
+                static auto initial = LayoutLength{ std::nullopt, 0.f, 0.f };
                 return initial;
             }
         };
@@ -55,8 +55,7 @@ namespace p3
 
     void Button::set_attribute(std::string const& name, std::string const& value)
     {
-        static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{
-        };
+        static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>>{};
         auto it = setter.find(name);
         if (it != setter.end())
             it->second(*this, value);
@@ -71,12 +70,12 @@ namespace p3
 
     void Button::render_impl(Context& context, float width, float height)
     {
-        
+
         ImVec2 size(width, height);
-        if (ImGui::Button(imgui_label().c_str(), size) && _on_click && !disabled())
-            postpone([f=_on_click]() {
-                f();
-            });
+        if (ImGui::Button(imgui_label().c_str(), size)
+            && _on_click
+            && !disabled())
+            postpone([f = _on_click]() { f(); });
         update_status();
         render_absolute(context);
     }
@@ -93,15 +92,17 @@ namespace p3
 
     void Button::update_content()
     {
-        
-        auto const context_ptr = ImGui::GetCurrentContext();
-        auto const font_size = context_ptr->FontSize;
-        auto const frame_padding = context_ptr->Style.FramePadding;
-        _automatic_width = _automatic_height = font_size + 2 * frame_padding.y + context_ptr->Style.FrameBorderSize;
+        auto& const context = *ImGui::GetCurrentContext();
+        auto const padding = context.Style.FramePadding;
+        _automatic_width = _automatic_height = context.FontSize
+            + 2 * padding.y
+            + context.Style.FrameBorderSize;
         if (label())
         {
             const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);
-            _automatic_width = label_size.x + frame_padding.x * 2.0f + context_ptr->Style.FrameBorderSize;
+            _automatic_width = label_size.x
+                + padding.x * 2.0f
+                + context.Style.FrameBorderSize;
         }
     }
 
