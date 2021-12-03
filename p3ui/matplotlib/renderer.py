@@ -38,9 +38,10 @@ class Renderer(RendererBase):
             paint.setColor(skia.Color4f(*rgbFace))
             paint.setStyle(skia.Paint.kFill_Style)
             self.canvas.drawPath(skia_path, paint)
-        paint.setColor(skia.Color4f(gc.get_rgb()))
-        paint.setStyle(skia.Paint.kStroke_Style)
-        self.canvas.drawPath(skia_path, paint)
+        if gc.get_linewidth() > 0:
+            paint.setColor(skia.Color4f(gc.get_rgb()))
+            paint.setStyle(skia.Paint.kStroke_Style)
+            self.canvas.drawPath(skia_path, paint)
         self.canvas.restore()
 
     # draw_markers is optional, and we get more correct relative
