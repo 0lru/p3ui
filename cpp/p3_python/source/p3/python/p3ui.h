@@ -35,8 +35,6 @@ namespace py = pybind11;
 
 #include "Promise.h"
 
-
-
 namespace p3::python
 {
     class Builder;

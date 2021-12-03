@@ -22,6 +22,8 @@
 
 #include "p3ui.h"
 
+namespace p3::python::skia { void cleanup(); }
+
 
 PYBIND11_MODULE(p3ui, module)
 {
@@ -31,6 +33,10 @@ PYBIND11_MODULE(p3ui, module)
         R"docstring(
         Object Oriented ImGUI (https://github.com/0lru/p3)
     )docstring";
+
+    py::module_::import("atexit").attr("register")(py::cpp_function([&]() {
+        python::skia::cleanup();
+    }));
 
     python::Definition<Node>::apply(module);
     python::Definition<Button>::apply(module);
