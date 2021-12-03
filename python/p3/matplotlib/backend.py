@@ -74,13 +74,15 @@ def _make_font_from_properties(properties):
 
 class Renderer(RendererBase):
 
-    def __init__(self, dpi):
-        super().__init__()
+    def __init__(self, width, height, dpi, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.dpi = dpi
         self.canvas = None
-        self.height = 480
+        self.width = width
+        self.height = height
 
     def draw_path(self, gc, path, transform, rgbFace=None):
+        self.canvas.save()
         transform = (transform + Affine2D().scale(1, -1).translate(0, self.height))
         skia_path = skia.Path()
         for points, code in path.iter_segments(transform, remove_nans=True, clip=None):  # TODO clip=clip
@@ -103,6 +105,7 @@ class Renderer(RendererBase):
         paint.setColor(skia.Color4f(gc.get_rgb()))
         paint.setStyle(skia.Paint.kStroke_Style)
         self.canvas.drawPath(skia_path, paint)
+        self.canvas.restore()
 
     # draw_markers is optional, and we get more correct relative
     # timings by leaving it out.  backend implementers concerned with
@@ -129,12 +132,15 @@ class Renderer(RendererBase):
     #         pass
 
     def draw_image(self, gc, x, y, im):
-        pass
+        # docstring inherited
+        image = skia.Image.fromarray(im, skia.ColorType.kRGBA_8888_ColorType)
+        self.canvas.drawImage(image, x, y)
 
     def draw_text(self, gc, x, y, s, properties, angle, ismath=False, mtext=None):
+        # docstring inherited
+        self.canvas.save()
         paint = skia.Paint(AntiAlias=True, Color=skia.Color4f(gc.get_rgb()))
         font = _make_font_from_properties(properties)
-        self.canvas.save()
         self.canvas.translate(x, self.height - y)
         if angle:
             self.canvas.rotate(-angle)
@@ -147,7 +153,7 @@ class Renderer(RendererBase):
 
     def get_canvas_width_height(self):
         # docstring inherited
-        return 100, 100
+        return self.width, self.height
 
     def get_text_width_height_descent(self, s, prop, ismath):
         font = _make_font_from_properties(prop)
@@ -166,6 +172,7 @@ class GraphicsContext(GraphicsContextBase):
 
     def __init__(self):
         super().__init__()
+
 
 ########################################################################
 #
