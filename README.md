@@ -13,13 +13,17 @@ Installation with pip:
 > pip install p3ui
 
 ## Widgets 
-([source code](python/demos/gallery))
+([source code](demos/gallery))
 
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/widgets.png)
 
 ![plots](https://raw.githubusercontent.com/0lru/p3ui/main/doc/plots.png)
 
 ## Canvas with Skia 
-([source code](python/demos/canvas))
+([source code](demos/canvas))
 
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/canvas.gif)
+
+## Matplotlib (Skia)
+([source code](demos/plot))
+![matplotlib](https://raw.githubusercontent.com/0lru/p3ui/main/doc/matplotlib.png)
