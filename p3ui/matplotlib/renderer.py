@@ -6,11 +6,12 @@ from matplotlib.transforms import Affine2D
 
 from .make_font import _make_font_from_properties
 from .graphics_context import GraphicsContext
+from ._units import dpi as default_dpi
 
 
 class Renderer(RendererBase):
 
-    def __init__(self, width, height, dpi, *args, **kwargs):
+    def __init__(self, width, height, dpi=default_dpi, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dpi = dpi
         self.canvas = None
@@ -78,7 +79,7 @@ class Renderer(RendererBase):
         # docstring inherited
         self.canvas.save()
         paint = skia.Paint(AntiAlias=True, Color=skia.Color4f(gc.get_rgb()))
-        font = _make_font_from_properties(properties)
+        font = _make_font_from_properties(properties, self.points_to_pixels(properties.get_size_in_points()))
         self.canvas.translate(x, self.height - y)
         if angle:
             self.canvas.rotate(-angle)
@@ -93,14 +94,16 @@ class Renderer(RendererBase):
         # docstring inherited
         return self.width, self.height
 
-    def get_text_width_height_descent(self, s, prop, ismath):
-        font = _make_font_from_properties(prop)
-        # TODO how to get h, b?
-        return font.measureText(s), prop.get_size(), 1
+    def get_text_width_height_descent(self, s, properties, ismath):
+        height_pixels = self.points_to_pixels(properties.get_size_in_points())
+        font = _make_font_from_properties(properties, height_pixels)
+        #
+        # in reality, the font may be a few pixels smaller in height
+        return font.measureText(s), height_pixels, font.getMetrics().fDescent
 
     def new_gc(self):
         # docstring inherited
         return GraphicsContext()
 
     def points_to_pixels(self, points):
-        return points / 72.0 * self.dpi
+        return points * self.dpi / 72

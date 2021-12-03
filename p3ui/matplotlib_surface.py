@@ -1,11 +1,12 @@
 from p3ui import *
 import matplotlib.pyplot as plt
 from p3ui.matplotlib.renderer import Renderer
+from .matplotlib import dpi as default_dpi
 
 
 class MatplotlibSurface(Surface):
 
-    def __init__(self, *, dpi, **kwargs):
+    def __init__(self, *, dpi=default_dpi, **kwargs):
         super().__init__(**kwargs, on_resize=self._on_resize)
         self.dpi = dpi
         self._figure = plt.figure(dpi=dpi)

@@ -47,9 +47,8 @@ def _make_font(name, weight, slant, point_size):
     return font
 
 
-def _make_font_from_properties(properties):
-    return _make_font(properties.get_name(), properties.get_weight(), properties.get_style(),
-                      properties.get_size_in_points())
+def _make_font_from_properties(properties, size):
+    return _make_font(properties.get_name(), properties.get_weight(), properties.get_style(), size)
 
 
 def draw_if_interactive():

@@ -4,8 +4,8 @@ import numpy as np
 
 class FilledChart(MatplotlibSurface):
 
-    def __init__(self, dpi):
-        super().__init__(dpi=dpi, width=(auto, 1, 1), height=(auto, 1, 1))
+    def __init__(self):
+        super().__init__(width=(auto, 1, 1), height=(auto, 1, 1))
         self._update()
 
     def _update(self):

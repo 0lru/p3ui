@@ -5,6 +5,7 @@ from .figure_canvas import FigureCanvas
 from matplotlib.figure import Figure
 
 import matplotlib
+
 matplotlib.use("module://p3ui.matplotlib")
 
 
@@ -24,3 +25,6 @@ def new_figure_manager_given_figure(num, figure):
     canvas = FigureCanvas(figure)
     manager = FigureManager(canvas, num)
     return manager
+
+
+from ._units import *

@@ -25,8 +25,8 @@ def gradient_bar(ax, x, y, width=0.5, bottom=0):
 class GradientChart(MatplotlibSurface):
     # https://matplotlib.org/stable/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py
 
-    def __init__(self, dpi):
-        super().__init__(dpi=dpi, width=(auto, 1, 1), height=(auto, 1, 1))
+    def __init__(self):
+        super().__init__(width=(auto, 1, 1), height=(auto, 1, 1))
         self._update()
 
     def _update(self):
