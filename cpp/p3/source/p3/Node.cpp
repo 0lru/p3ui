@@ -141,7 +141,7 @@ namespace p3
 
     void Node::update_status()
     {
-        ImGuiWindow& const window = *GImGui->CurrentWindow;
+        ImGuiWindow const& window = *GImGui->CurrentWindow;
         auto const status_flags = GImGui->LastItemData.StatusFlags;
         if (status_flags == _status_flags)
         {

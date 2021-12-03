@@ -1,4 +1,4 @@
-from p3ui import Layout, ComboBox, Direction, Justification, Alignment, px, Button, Style, ScrollArea
+from p3ui import Layout, ComboBox, Direction, Justification, Alignment, px, Button
 
 
 class TabLayout(Layout):

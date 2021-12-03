@@ -1,6 +1,3 @@
-import asyncio
-import threading
-
 from p3ui import *
 from material_icons import MaterialIcons
 

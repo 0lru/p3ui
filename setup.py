@@ -127,12 +127,14 @@ setup(
     version="0.0.14",
     author="Martin Rudoff",
     url='https://github.com/0lru/p3ui',
-#    author_email="dean0x7d@gmail.com",
+    #    author_email="dean0x7d@gmail.com",
     description="Async Python User Interface Library",
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    ext_modules=[CMakeExtension("cmake_example")],
+    ext_modules=[CMakeExtension("p3ui._p3ui")],
     cmdclass={"build_ext": CMakeBuild},
+# https://stackoverflow.com/questions/37031456/include-pyd-files-in-python-packages
+    packages=['p3ui', 'p3ui.matplotlib'],
     zip_safe=False,
-#    extras_require={"test": ["pytest"]},
+    #    extras_require={"test": ["pytest"]},
 )

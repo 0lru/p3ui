@@ -25,13 +25,13 @@
 namespace p3::python::skia { void cleanup(); }
 
 
-PYBIND11_MODULE(p3ui_core, module)
+PYBIND11_MODULE(_p3ui, module)
 {
     using namespace ::p3;
 
     module.doc() =
         R"docstring(
-        Object Oriented ImGUI (https://github.com/0lru/p3)
+        Object Oriented ImGUI (https://github.com/0lru/p3ui)
     )docstring";
 
     py::module_::import("atexit").attr("register")(py::cpp_function([&]() {

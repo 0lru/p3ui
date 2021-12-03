@@ -92,7 +92,7 @@ namespace p3
 
     void Button::update_content()
     {
-        auto& const context = *ImGui::GetCurrentContext();
+        auto const& context = *ImGui::GetCurrentContext();
         auto const padding = context.Style.FramePadding;
         _automatic_width = _automatic_height = context.FontSize
             + 2 * padding.y
