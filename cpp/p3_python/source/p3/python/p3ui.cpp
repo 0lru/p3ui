@@ -25,7 +25,7 @@
 namespace p3::python::skia { void cleanup(); }
 
 
-PYBIND11_MODULE(p3ui, module)
+PYBIND11_MODULE(p3ui_core, module)
 {
     using namespace ::p3;
 
