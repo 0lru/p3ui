@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="canvas" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="demo: canvas" type="PythonConfigurationType" factoryName="Python">
     <module name="p3ui" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
