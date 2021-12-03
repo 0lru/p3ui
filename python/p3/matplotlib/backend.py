@@ -133,8 +133,9 @@ class Renderer(RendererBase):
 
     def draw_image(self, gc, x, y, im):
         # docstring inherited
-        image = skia.Image.fromarray(im, skia.ColorType.kRGBA_8888_ColorType)
-        self.canvas.drawImage(image, x, y)
+        temp = np.flip(im, axis=0).copy()
+        image = skia.Image.fromarray(temp, skia.ColorType.kRGBA_8888_ColorType)
+        self.canvas.drawImage(image, x, self.height - y - temp.shape[0])
 
     def draw_text(self, gc, x, y, s, properties, angle, ismath=False, mtext=None):
         # docstring inherited
