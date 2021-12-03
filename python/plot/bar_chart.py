@@ -1,8 +1,8 @@
 from p3ui import *
-from p3.matplotlib.matplotlib_surface import MatplotlibSurface
+from p3ui.matplotlib.surface import Surface
 
 
-class BarChart(MatplotlibSurface):
+class BarChart(Surface):
     # https://matplotlib.org/stable/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py
 
     def __init__(self, dpi):
