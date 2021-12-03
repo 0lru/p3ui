@@ -2,7 +2,7 @@ from p3ui import *
 from p3.matplotlib.matplotlib_surface import MatplotlibSurface
 import numpy as np
 
-class FilledPlot(MatplotlibSurface):
+class FilledChart(MatplotlibSurface):
 
     def __init__(self, dpi):
         super().__init__(dpi=dpi, width=(auto, 1, 1), height=(auto, 1, 1))

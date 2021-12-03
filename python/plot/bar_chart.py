@@ -2,7 +2,7 @@ from p3ui import *
 from p3.matplotlib.matplotlib_surface import MatplotlibSurface
 
 
-class BarPlot(MatplotlibSurface):
+class BarChart(MatplotlibSurface):
     # https://matplotlib.org/stable/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py
 
     def __init__(self, dpi):
