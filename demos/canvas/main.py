@@ -95,7 +95,7 @@ class CanvasDemo(ScrollArea):
 
 
 async def main():
-    window = Window(title='Canvas Demo')
+    window = Window(title='Skia Surface')
     window.position = (50, 50)
     window.size = (1024, 768)
     surface_demo = CanvasDemo()
