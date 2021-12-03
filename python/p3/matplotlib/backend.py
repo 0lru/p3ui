@@ -12,6 +12,7 @@ method), you can register it as the default handler for a given file type::
     plt.savefig("figure.xyz")
 """
 import skia
+import numpy as np
 from matplotlib.path import Path
 
 from matplotlib import _api
@@ -19,22 +20,68 @@ from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import (
     FigureCanvasBase, FigureManagerBase, GraphicsContextBase, RendererBase)
 from matplotlib.figure import Figure
+from matplotlib.transforms import Affine2D
+
+_weight_dict = {
+    #    0: skia.FontStyle.kInvisible_Weight,
+    #    100: skia.FontStyle.kThin_Weight,
+    #    200: skia.FontStyle.kExtraLight_Weight,
+    #    300: skia.FontStyle.kLight_Weight,
+    #    400: skia.FontStyle.kNormal_Weight,
+    #    500: skia.FontStyle.kMedium_Weight,
+    #    600: skia.FontStyle.kSemiBold_Weight,
+    #    700: skia.FontStyle.kBold_Weight,
+    #    800: skia.FontStyle.kExtraBold_Weight,
+    #    900: skia.FontStyle.kBlack_Weight,
+    #    1000: skia.FontStyle.kExtraBlack_Weight,
+    'thin': skia.FontStyle.kExtraLight_Weight,  # 100
+    'ultralight': skia.FontStyle.kExtraLight_Weight,  # 200
+    'light': skia.FontStyle.kLight_Weight,  # 300
+    'regular': skia.FontStyle.kNormal_Weight,  # 400
+    'normal': skia.FontStyle.kNormal_Weight,  # 400
+    'medium': skia.FontStyle.kMedium_Weight,  # 500
+    'semibold': skia.FontStyle.kSemiBold_Weight,  # 600
+    'bold': skia.FontStyle.kBold_Weight,  # 700
+    'ultrabold': skia.FontStyle.kExtraBold_Weight,  # 800
+    'black': skia.FontStyle.kBlack_Weight,  # 900
+    'heavy': skia.FontStyle.kExtraBlack_Weight,  # 1000
+}
+
+_slant_dict = {
+    'italic': skia.FontStyle.kItalic_Slant,
+    'normal': skia.FontStyle.kUpright_Slant,
+    'oblique': skia.FontStyle.kOblique_Slant,
+}
+
+
+# kUltraCondensed_Width = 1, kExtraCondensed_Width = 2, kCondensed_Width = 3, kSemiCondensed_Width = 4,
+# kNormal_Width = 5, kSemiExpanded_Width = 6, kExpanded_Width = 7, kExtraExpanded_Width = 8,
+# kUltraExpanded_Width = 9
+
+
+def _make_font(name, weight, slant, point_size):
+    if weight in _weight_dict:
+        weight = _weight_dict[weight]
+    style = skia.FontStyle(weight, 5, _slant_dict[slant])
+    font = skia.Font(skia.Typeface(name, style), point_size)
+    return font
+
+
+def _make_font_from_properties(properties):
+    return _make_font(properties.get_name(), properties.get_weight(), properties.get_style(),
+                      properties.get_size_in_points())
 
 
 class Renderer(RendererBase):
-    """
-    The renderer handles drawing/rendering operations.
-    This is a minimal do-nothing class that can be used to get started when
-    writing a new backend.  Refer to `backend_bases.RendererBase` for
-    documentation of the methods.
-    """
 
     def __init__(self, dpi):
         super().__init__()
         self.dpi = dpi
         self.canvas = None
+        self.height = 480
 
     def draw_path(self, gc, path, transform, rgbFace=None):
+        transform = (transform + Affine2D().scale(1, -1).translate(0, self.height))
         skia_path = skia.Path()
         for points, code in path.iter_segments(transform, remove_nans=True, clip=None):  # TODO clip=clip
             if code == Path.MOVETO:
@@ -44,19 +91,17 @@ class Renderer(RendererBase):
             elif code == Path.LINETO:
                 skia_path.lineTo(*points)
             elif code == Path.CURVE3:
-                pass
-                #cur = np.asarray(ctx.get_current_point())
-                #a = points[:2]
-                #b = points[-2:]
-                #ctx.curve_to(*(cur / 3 + a * 2 / 3), *(a * 2 / 3 + b / 3), *b)
+                skia_path.quadTo(*points)
             elif code == Path.CURVE4:
-                pass
-                #ctx.curve_to(*points)
-#        path.cubicTo(768, 0, -512, 256, 256, 256)
-        paint = skia.Paint()
+                skia_path.cubicTo(*points)
+        paint = skia.Paint(Alpha=int(gc.get_alpha() * 255.), StrokeWidth=gc.get_linewidth())
+        paint.setAntiAlias(True)
+        if rgbFace is not None:
+            paint.setColor(skia.Color4f(*rgbFace))
+            paint.setStyle(skia.Paint.kFill_Style)
+            self.canvas.drawPath(skia_path, paint)
+        paint.setColor(skia.Color4f(gc.get_rgb()))
         paint.setStyle(skia.Paint.kStroke_Style)
-        paint.setStrokeWidth(4)
-        paint.setColor(skia.ColorRED)
         self.canvas.drawPath(skia_path, paint)
 
     # draw_markers is optional, and we get more correct relative
@@ -86,52 +131,41 @@ class Renderer(RendererBase):
     def draw_image(self, gc, x, y, im):
         pass
 
-    def draw_text(self, gc, x, y, s, prop, angle, ismath=False, mtext=None):
-        pass
+    def draw_text(self, gc, x, y, s, properties, angle, ismath=False, mtext=None):
+        paint = skia.Paint(AntiAlias=True, Color=skia.Color4f(gc.get_rgb()))
+        font = _make_font_from_properties(properties)
+        self.canvas.save()
+        self.canvas.translate(x, self.height - y)
+        if angle:
+            self.canvas.rotate(-angle)
+        self.canvas.drawString(s, 0, 0, font, paint)
+        self.canvas.restore()
 
     def flipy(self):
         # docstring inherited
-        return True
+        return False
 
     def get_canvas_width_height(self):
         # docstring inherited
         return 100, 100
 
     def get_text_width_height_descent(self, s, prop, ismath):
-        return 1, 1, 1
+        font = _make_font_from_properties(prop)
+        # TODO how to get h, b?
+        return font.measureText(s), prop.get_size(), 1
 
     def new_gc(self):
         # docstring inherited
         return GraphicsContext()
 
     def points_to_pixels(self, points):
-        # if backend doesn't have dpi, e.g., postscript or svg
-        return points
-        # elif backend assumes a value for pixels_per_inch
-        # return points/72.0 * self.dpi.get() * pixels_per_inch/72.0
-        # else
-        # return points/72.0 * self.dpi.get()
+        return points / 72.0 * self.dpi
 
 
 class GraphicsContext(GraphicsContextBase):
-    """
-    The graphics context provides the color, line styles, etc...  See the cairo
-    and postscript backends for examples of mapping the graphics context
-    attributes (cap styles, join styles, line widths, colors) to a particular
-    backend.  In cairo this is done by wrapping a cairo.Context object and
-    forwarding the appropriate calls to it using a dictionary mapping styles
-    to gdk constants.  In Postscript, all the work is done by the renderer,
-    mapping line styles to postscript calls.
-    If it's more appropriate to do the mapping at the renderer level (as in
-    the postscript backend), you don't need to override any of the GC methods.
-    If it's more appropriate to wrap an instance (as in the cairo backend) and
-    do the mapping here, you'll need to override several of the setter
-    methods.
-    The base GraphicsContext stores colors as a RGB tuple on the unit
-    interval, e.g., (0.5, 0.0, 1.0). You may need to map this to colors
-    appropriate for your backend.
-    """
 
+    def __init__(self):
+        super().__init__()
 
 ########################################################################
 #
@@ -169,7 +203,6 @@ def new_figure_manager(num, *args, FigureClass=Figure, **kwargs):
     # backend_wx, backend_wxagg and backend_tkagg for examples.  Not all GUIs
     # require explicit instantiation of a main-level app (e.g., backend_gtk3)
     # for pylab.
-    print('new_figure_manager')
     thisFig = FigureClass(*args, **kwargs)
     return new_figure_manager_given_figure(num, thisFig)
 
@@ -197,7 +230,6 @@ class FigureCanvas(FigureCanvasBase):
     """
 
     def __init__(self, *args, **kwargs):
-        print('creating FigureCanvas')
         super(FigureCanvas, self).__init__(*args, **kwargs)
 
     def draw(self):
