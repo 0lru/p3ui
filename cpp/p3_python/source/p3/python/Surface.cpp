@@ -38,7 +38,31 @@
 namespace p3::python
 {
 
-    std::optional<py::object> _skia_context;
+    namespace skia
+    {
+
+        std::mutex mutex;
+        std::unordered_map<RenderBackend const*, py::object> context_map;
+
+        py::object make_context(RenderBackend const& render_backend)
+        {
+            std::lock_guard<std::mutex> l(mutex);
+            if (auto it = context_map.find(&render_backend); it != context_map.end())
+                return it->second;
+            auto context = py::module::import("skia").attr("GrDirectContext").attr("MakeGL")();
+            log_debug("created skia context");
+            skia::context_map[&render_backend] = context;
+            return context;
+        }
+
+        void cleanup()
+        {
+            for (auto& [k, v] : context_map)
+                v.attr("abandonContext")();
+            context_map.clear();
+        }
+
+    }
 
     class Surface
         : public p3::Node
@@ -87,6 +111,7 @@ namespace p3::python
         std::optional<py::object> _skia_target;
         std::optional<py::object> _skia_picture;
         std::optional<py::object> _skia_surface;
+        std::optional<py::object> _skia_context;
 
         //
         // this is just set in between enter & leave (context manager)
@@ -128,12 +153,6 @@ namespace p3::python
 
     Surface::~Surface()
     {
-        if (_skia_context)
-        {
-            log_debug("abandon skia context");
-            _skia_context.value().attr("abandonContext")();
-            _skia_context.reset();
-        }
     }
 
     Surface::Viewport const& Surface::viewport() const
@@ -160,18 +179,7 @@ namespace p3::python
         _skia_picture.reset();
         _skia_surface.reset();
         _skia_target.reset();
-        if (_skia_context)
-        {
-            _render_backend->exec([context = std::move(_skia_context)]() mutable {
-                log_verbose("free picture");
-                py::gil_scoped_acquire acquire;
-                // -> releaseResourcesAndAbandonContext ??
-                context.value().attr("freeGpuResources")();
-                context.reset();
-                log_verbose("picture freed");
-            });
-            _skia_context.reset();
-        }
+        _skia_context.reset();
         _on_click = nullptr;
         _on_viewport = nullptr;
         Node::dispose();
@@ -280,11 +288,7 @@ namespace p3::python
             auto skia = py::module::import("skia");
 
             if (!_skia_context)
-            {
-                _skia_context = skia.attr("GrDirectContext").attr("MakeGL")();
-                _render_backend = context.render_backend().shared_from_this();
-                log_debug("created skia context");
-            }
+                _skia_context = python::skia::make_context(context.render_backend());
 
             if (render_target_dirty)
             {
