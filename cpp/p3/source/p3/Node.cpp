@@ -416,6 +416,13 @@ namespace p3
 
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
+        auto size = Size{ width, height };
+        if (size != _size)
+        {
+            if (_on_resize)
+                postpone([on_resize = _on_resize, size]() { on_resize(std::move(size)); });
+            std::swap(size, _size);
+        }
         float disabled_alpha = 0.2f;
         if (_disabled)
             std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
@@ -617,6 +624,7 @@ namespace p3
         _mouse.enter = nullptr;
         _mouse.leave = nullptr;
         _mouse.move = nullptr;
+        _on_resize = nullptr;
         for (auto& child : _children)
             child->dispose();
         _disposed = true;
@@ -630,6 +638,21 @@ namespace p3
     std::shared_ptr<Node> const& Node::tooltip() const
     {
         return _tooltip;
+    }
+
+    Node::Size Node::size() const
+    {
+        return _size;
+    }
+
+    void Node::set_on_resize(OnResize on_resize)
+    {
+        _on_resize = on_resize;
+    }
+
+    Node::OnResize Node::on_resize() const
+    {
+        return _on_resize;
     }
 
 }
