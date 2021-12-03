@@ -1,8 +1,8 @@
 from p3ui import *
-from p3.matplotlib.matplotlib_surface import MatplotlibSurface
+from p3ui.matplotlib.surface import Surface
 import numpy as np
 
-class FilledChart(MatplotlibSurface):
+class FilledChart(Surface):
 
     def __init__(self, dpi):
         super().__init__(dpi=dpi, width=(auto, 1, 1), height=(auto, 1, 1))

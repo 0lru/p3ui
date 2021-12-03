@@ -1,13 +1,13 @@
 from p3ui import *
 import matplotlib
 import matplotlib.pyplot as plt
-from p3.matplotlib.backend import Renderer
+from p3ui.matplotlib.renderer import Renderer
 import skia
 
 matplotlib.use("module://p3.matplotlib.backend")
 
 
-class MatplotlibSurface(Surface):
+class Surface(Surface):
 
     def __init__(self, *, dpi, **kwargs):
         super().__init__(**kwargs, on_resize=self._on_resize)
