@@ -416,6 +416,8 @@ namespace p3
 
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
+        if (width * height < 0)
+            return;
         auto size = Size{ width, height };
         if (size != _size)
         {
