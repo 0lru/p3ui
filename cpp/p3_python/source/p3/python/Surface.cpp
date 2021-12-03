@@ -38,6 +38,8 @@
 namespace p3::python
 {
 
+    std::optional<py::object> _skia_context;
+
     class Surface
         : public p3::Node
     {
@@ -80,7 +82,6 @@ namespace p3::python
         //
         // remember backend where context was created
         std::shared_ptr<RenderBackend> _render_backend;
-        std::optional<py::object> _skia_context;
 
         RenderBackend::RenderTarget* _render_target = nullptr;
         std::optional<py::object> _skia_target;
