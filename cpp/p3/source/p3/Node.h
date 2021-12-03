@@ -116,6 +116,12 @@ namespace p3
         void set_visible(bool);
         bool visible() const;
 
+        using Size = std::array<float, 2>;
+        using OnResize = std::function<void(Size)>;
+
+        Size size() const;
+        void set_on_resize(OnResize);
+        OnResize on_resize() const;
         // ##### mouse #########################################################
 
         class MouseEvent;
@@ -168,6 +174,9 @@ namespace p3
         // TODO: make private
         float _automatic_width = 0.f;
         float _automatic_height = 0.f;
+        Size _size = Size{ 0, 0 };
+        OnResize _on_resize;
+
         void update_status();
         // TODO: remove this
         void postpone(std::function<void()>);

@@ -55,6 +55,7 @@ namespace p3::python
         assign(kwargs, "label", node, &Node::set_label);
         assign(kwargs, "visible", node, &Node::set_visible);
         assign(kwargs, "disabled", node, &Node::set_disabled);
+        assign(kwargs, "on_resize", node, &Node::set_on_resize);
         assign(kwargs, "on_mouse_enter", node, &Node::set_on_mouse_enter);
         assign(kwargs, "on_mouse_move", node, &Node::set_on_mouse_move);
         assign(kwargs, "on_mouse_leave", node, &Node::set_on_mouse_leave);
@@ -97,6 +98,7 @@ namespace p3::python
         def_property(node, "visible", &Node::visible, &Node::set_visible);
         def_property(node, "disabled", &Node::disabled, &Node::set_disabled);
         def_property(node, "label", &Node::label, &Node::set_label);
+        def_property(node, "on_resize", &Node::on_resize, &Node::set_on_resize);
         def_property(node, "on_mouse_enter", &Node::on_mouse_enter, &Node::set_on_mouse_enter);
         def_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
         def_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
