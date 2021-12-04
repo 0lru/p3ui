@@ -20,7 +20,8 @@ class Renderer(RendererBase):
 
     def draw_path(self, gc, path, transform, rgbFace=None):
         self.canvas.save()
-        transform = (transform + Affine2D().scale(1, -1).translate(0, self.height))
+        self.canvas.translate(0, self.height)
+        self.canvas.scale(1, -1)
         skia_path = skia.Path()
         for points, code in path.iter_segments(transform, remove_nans=True, clip=None):  # TODO clip=clip
             if code == Path.MOVETO:
