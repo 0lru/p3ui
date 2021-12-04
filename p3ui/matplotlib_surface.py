@@ -10,7 +10,6 @@ class MatplotlibSurface(Surface):
         super().__init__(**kwargs, on_resize=self._on_resize)
         self.dpi = dpi
         self._figure = plt.figure(dpi=dpi)
-        self._ax = self._figure.add_subplot()
         self._renderer = Renderer(1, 1, dpi)
 
     def _on_resize(self, size):
@@ -28,8 +27,7 @@ class MatplotlibSurface(Surface):
 
     def __enter__(self):
         self._renderer.canvas = Surface.__enter__(self)
-        self._ax.clear()
-        return self._ax
+        return self._figure
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._canvas = None

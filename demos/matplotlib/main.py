@@ -16,8 +16,7 @@ async def main():
     window.position = (50, 50)
     window.size = (800, 800)
 
-    await window.serve(UserInterface(
-        content=ScrollArea(content=Column(
+    await window.serve(UserInterface(content=Column(
             width=(90 | em, 0, 0),
             height=(80 | em, 0, 0),
             children=[
@@ -26,7 +25,7 @@ async def main():
                 Row(padding=(0 | px, 0 | px), children=[FilledChart(), BarChart()]),
                 Row(padding=(0 | px, 0 | px), children=[GradientChart()])
             ]
-        ))))
+        )))
 
 
 asyncio.run(main())

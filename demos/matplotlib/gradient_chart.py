@@ -30,8 +30,10 @@ class GradientChart(MatplotlibSurface):
         self._update()
 
     def _update(self):
-        with self as ax:
+        with self as figure:
             np.random.seed(19680801)
+            figure.clear()
+            ax = figure.add_subplot()
             ax.set(xlim=(0, 10), ylim=(0, 1), autoscale_on=False)
             gradient_image(ax, direction=1, extent=(0, 1, 0, 1), transform=ax.transAxes,
                            cmap=plt.cm.RdYlGn, cmap_range=(0.2, 0.8), alpha=0.5)

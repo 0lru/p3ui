@@ -9,7 +9,9 @@ class FilledChart(MatplotlibSurface):
         self._update()
 
     def _update(self):
-        with self as ax:
+        with self as figure:
+            figure.clear()
+            ax = figure.add_subplot()
             x = np.arange(0.0, 2, 0.01)
             y1 = np.sin(2 * np.pi * x)
             ax.fill_between(x, y1)
