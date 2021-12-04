@@ -1,6 +1,7 @@
+# https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
+
 from p3ui import *
 import numpy as np
-import matplotlib.pyplot as plt
 
 linestyle_str = [
     ('solid', 'solid'),  # Same as (0, ()) or '-'
@@ -65,8 +66,6 @@ class LineStyles(MatplotlibSurface):
             plot_linestyles(ax0, linestyle_str[::-1], title='Named linestyles')
             plot_linestyles(ax1, linestyle_tuple[::-1], title='Parametrized linestyles')
             gridspec.tight_layout(figure)
-#            plt.tight_layout()
-#            plt.show()
 
     async def update(self):
         self._update()
