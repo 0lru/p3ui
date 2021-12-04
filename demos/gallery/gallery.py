@@ -23,7 +23,7 @@ class Gallery(UserInterface):
         tab_plots = TabPlots()
         tab_system = TabSystem(window)
 
-        assets = pathlib.Path(__file__).parent.joinpath('assets').absolute()
+        assets = pathlib.Path(__file__).parents[1].joinpath('assets').absolute()
         self.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
         self.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
         self.content = Tab(
