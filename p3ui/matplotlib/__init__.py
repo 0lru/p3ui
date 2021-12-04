@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 
 import matplotlib
 
-matplotlib.use("module://p3ui.matplotlib")
+#matplotlib.use("module://p3ui.matplotlib")
 
 
 def new_figure_manager(num, *args, FigureClass=Figure, **kwargs):

@@ -1,9 +1,10 @@
 from p3ui import *
 import asyncio
+import matplotlib
 from bar_chart import BarChart
 from filled_chart import FilledChart
 from gradient_chart import GradientChart
-import matplotlib
+from line_styles import LineStyles
 
 imgui_font_size = 13
 #
@@ -16,16 +17,17 @@ async def main():
     window.position = (50, 50)
     window.size = (800, 800)
 
-    await window.serve(UserInterface(content=Column(
-            width=(90 | em, 0, 0),
-            height=(80 | em, 0, 0),
-            children=[
-                Text('ImGui-Text @ 13px'),
-                Row(padding=(0 | px, 0 | px), children=[BarChart(), FilledChart()]),
-                Row(padding=(0 | px, 0 | px), children=[FilledChart(), BarChart()]),
-                Row(padding=(0 | px, 0 | px), children=[GradientChart()])
-            ]
-        )))
+    await window.serve(UserInterface(content=ScrollArea(content=Column(
+        width=(100|em, 0, 0), height=(90 | em, 0, 0),
+        children=[
+            Text('ImGui-Text @ 13px'),
+            Row(padding=(0 | px, 0 | px),
+                height=(1 | px, 1, 1),
+                children=[BarChart(), FilledChart()]),
+            LineStyles(),
+            GradientChart()
+        ]
+    ))))
 
 
 asyncio.run(main())
