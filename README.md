@@ -2,7 +2,7 @@
 ![Build](https://github.com/0lru/p3ui/workflows/Build/badge.svg)
 [![PyPI version](https://badge.fury.io/py/p3ui.svg)](https://badge.fury.io/py/p3ui)
 
-This project aims at fast prototyping and development of performant applications in C++ or Python. It uses and combines [Dear ImGui](https://github.com/ocornut/imgui) and related projects like [ImPlot](https://github.com/epezent/implot) in a C++ wrapper. This wrapper is usable from within Python though [Pybind11](https://github.com/pybind/pybind11).
+This project aims at fast prototyping and development of graphical applications. It uses and combines [Dear ImGui](https://github.com/ocornut/imgui) and related projects like [ImPlot](https://github.com/epezent/implot) in a C++ wrapper. This wrapper is usable from within Python though [Pybind11](https://github.com/pybind/pybind11).
 Additionally, [Skia](skia.org) can be used for more advanced 2D graphics. For the integration of Skia, this project supports [Skia python binding](https://github.com/kyamagu/skia-python).
 
 ImGui Elements ([source](python/gallery)) |  Matplotlib Integration ([source](demos/gallery))
