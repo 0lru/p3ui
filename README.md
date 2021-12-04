@@ -16,10 +16,7 @@ Installation with pip:
 
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/widgets.png)
 
-## Canvas (Skia) ([source](demos/canvas))
-![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/skia_surface.png)
-
-## Matplotlib (Skia) ([source](demos/matplotlib))
+## Matplotlib (Skia Canvas) ([source](demos/matplotlib))
 ![matplotlib](https://raw.githubusercontent.com/0lru/p3ui/main/doc/matplotlib.png)
 
 ## ImPlot ([source](python/gallery))
