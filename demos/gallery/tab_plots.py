@@ -2,7 +2,7 @@ from p3ui import *
 import numpy as np
 import asyncio
 
-from shared import VerticalScrollArea
+from vertical_scroll_area import VerticalScrollArea
 
 
 class ColoredPlot(Plot):
