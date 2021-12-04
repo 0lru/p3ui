@@ -323,6 +323,8 @@ namespace p3::python
             canvas.attr("translate")(
                 cursor.x - ImGui::GetScrollX(),
                 cursor.y - ImGui::GetScrollY());
+            auto clipRect = skia.attr("Rect").attr("MakeWH")(width, height);
+            canvas.attr("clipRect")(clipRect, false);
             canvas.attr("drawPicture")(_skia_picture);
             canvas.attr("restore")();
             _skia_context.value().attr("flushAndSubmit")();
