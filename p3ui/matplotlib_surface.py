@@ -15,8 +15,8 @@ class MatplotlibSurface(Surface):
     def _on_resize(self, size):
         width, height = size
         self._figure.set(
-            figheight=max(height / self.dpi, 1),
             figwidth=max(width / self.dpi, 1),
+            figheight=max(height / self.dpi, 1),
             dpi=self.dpi
         )
         self._renderer = Renderer(width, height, self.dpi)
