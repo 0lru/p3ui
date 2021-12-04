@@ -34,16 +34,14 @@ class Renderer(RendererBase):
                 skia_path.quadTo(*points)
             elif code == Path.CURVE4:
                 skia_path.cubicTo(*points)
-        paint = skia.Paint(Alpha=int(gc.get_alpha() * 255.), StrokeWidth=gc.get_linewidth())
-        paint.setAntiAlias(True)
         if rgbFace is not None:
-            paint.setColor(skia.Color4f(*rgbFace))
-            paint.setStyle(skia.Paint.kFill_Style)
-            self.canvas.drawPath(skia_path, paint)
+            gc.paint.setColor(skia.Color4f(*rgbFace))
+            gc.paint.setStyle(skia.Paint.kFill_Style)
+            self.canvas.drawPath(skia_path, gc.paint)
         if gc.get_linewidth() > 0:
-            paint.setColor(skia.Color4f(gc.get_rgb()))
-            paint.setStyle(skia.Paint.kStroke_Style)
-            self.canvas.drawPath(skia_path, paint)
+            gc.paint.setColor(skia.Color4f(gc.get_rgb()))
+            gc.paint.setStyle(skia.Paint.kStroke_Style)
+            self.canvas.drawPath(skia_path, gc.paint)
         self.canvas.restore()
 
     # draw_markers is optional, and we get more correct relative
