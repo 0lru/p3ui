@@ -244,7 +244,7 @@ namespace p3::python
         auto content_max = ImGui::GetWindowContentRegionMax();
 
         //
-        // the content can overlap the item spacing if parent is scrolled
+        // the content can overlap the frame spacing if parent is scrolled
         auto vp_width = content_max.x - content_min.x;
         auto vp_height = content_max.y - content_min.y;
         auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * frame_padding.x);
