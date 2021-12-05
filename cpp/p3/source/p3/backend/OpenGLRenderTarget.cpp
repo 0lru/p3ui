@@ -36,7 +36,7 @@ namespace p3
         glPushAttrib(GL_TEXTURE_BIT);
         glGenFramebuffers(1, &_framebuffer_id);
         glGenTextures(1, &reinterpret_cast<GLuint&>(_texture_id));
-        glGenRenderbuffers(1, &_depth_id);
+        glGenRenderbuffers(1, &_stencil_id);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer_id);
         glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint const&>(_texture_id));
@@ -53,9 +53,9 @@ namespace p3
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 
             reinterpret_cast<GLuint const&>(_texture_id), 0);
 
-        glBindRenderbuffer(GL_RENDERBUFFER, _depth_id);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _width, _height);
-        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depth_id);
+        glBindRenderbuffer(GL_RENDERBUFFER, _stencil_id);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, _width, _height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencil_id);
         
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw std::runtime_error("failed to create render target, framebuffer incomplete");
@@ -68,7 +68,7 @@ namespace p3
     {
         glDeleteFramebuffers(1, &_framebuffer_id);
         glDeleteTextures(1, &reinterpret_cast<GLuint&>(_texture_id));
-        glDeleteRenderbuffers(1, &_depth_id);
+        glDeleteRenderbuffers(1, &_stencil_id);
     }
 
     unsigned int OpenGLRenderTarget::framebuffer_id() const

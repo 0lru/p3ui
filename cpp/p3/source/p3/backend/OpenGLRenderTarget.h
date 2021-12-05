@@ -44,7 +44,7 @@ namespace p3
         std::uint32_t _height;
         unsigned int _framebuffer_id;
         RenderBackend::TextureId _texture_id;
-        unsigned int _depth_id;
+        unsigned int _stencil_id;
     };
 
 }
