@@ -22,3 +22,6 @@
 [submodule "extern/fmtlib"]
 	path = extern/fmtlib
 	url = https://github.com/fmtlib/fmt.git
+[submodule "extern/python-skia"]
+	path = extern/python-skia
+	url = https://github.com/kyamagu/skia-python.git
