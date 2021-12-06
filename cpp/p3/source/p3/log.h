@@ -21,9 +21,8 @@
 /******************************************************************************/
 #pragma once
 
-// #define LOG_LEVEL 10
 #define NOMINMAX
-#include <source_location>
+// #include <source_location>
 #include <fmt/format.h>
 #include <cstdint>
 #include <iostream>
@@ -43,18 +42,18 @@ namespace logger
         constexpr std::uint32_t info = 4;
         constexpr std::uint32_t debug = 5;
         constexpr std::uint32_t verbose = 6;
-        constexpr std::uint32_t current = 4;
-/*#ifdef LOG_LEVEL
+
+        //        constexpr std::uint32_t current = 4;
+#ifdef LOG_LEVEL
         constexpr std::uint32_t current = LOG_LEVEL;
 #elif _DEBUG
         constexpr std::uint32_t current = 6;
 #else
         constexpr std::uint32_t current = info;
-#endif*/
+#endif
     }
 
-    /*
-    template<typename ... Args>
+    /*template<typename ... Args>
     void log(std::source_location location, std::uint32_t level, std::string_view const text, Args&& ... args)
     {
         if (current == nullptr)
@@ -62,20 +61,18 @@ namespace logger
         current->log(std::move(location), level, fmt::format(text, std::forward<Args>(args)...));
     }*/
 
-    inline std::string __log_format(std::source_location location)
+    inline std::string format(std::string_view filename, int line)
     {
-        std::string file_name = location.file_name();
-        std::transform(file_name.begin(), file_name.end(), file_name.begin(), [](auto c) { return std::tolower(c); });
-        return fmt::format(" ({}:{}:{})",
-            std::filesystem::path(file_name).stem().string(),
-            location.line(),
-            location.function_name());
+        std::string lower(filename.begin(), filename.end());
+        std::transform(lower.begin(), lower.end(), lower.begin(), [](auto c) { return std::tolower(c); });
+        return fmt::format(" ({}:{})", std::filesystem::path(filename).stem().string(), line);
     }
 
     template<typename ... Args>
     inline void fatal(
-        std::source_location const location, 
-        const std::string_view text, 
+        char const* filename,
+        int line,
+        const std::string_view text,
         Args&& ... args)
     {
         std::cout
@@ -84,15 +81,16 @@ namespace logger
             << rang::bg::black
             << "[fat!] "
             << fmt::format(text, std::forward<Args>(args)...)
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
         exit(-1);
     }
 
     template<typename ... Args>
     inline void error(
-        std::source_location const location, 
-        const std::string_view text, 
+        char const* filename,
+        int line,
+        const std::string_view text,
         Args&& ... args)
     {
         std::cout
@@ -101,15 +99,16 @@ namespace logger
             << rang::bg::black
             << "[err!] "
             << fmt::format(text, std::forward<Args>(args)...)
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
         exit(-1);
     }
 
     template<typename ... Args>
     inline void warn(
-        std::source_location const location, 
-        std::string_view const text, 
+        char const* filename,
+        int line,
+        std::string_view const text,
         Args&& ... args)
     {
         std::cout
@@ -118,14 +117,15 @@ namespace logger
             << rang::bg::black
             << "[warn] "
             << fmt::format(text, std::forward<Args>(args)...)
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
     }
 
     template<typename ... Args>
     inline void debug(
-        std::source_location const location, 
-        std::string_view const text, 
+        char const* filename,
+        int line,
+        std::string_view const text,
         Args&& ... args)
     {
         std::cout
@@ -140,14 +140,15 @@ namespace logger
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
     }
 
     template<typename ... Args>
     inline void verbose(
-        std::source_location const location, 
-        std::string_view const text, 
+        char const* filename,
+        int line,
+        std::string_view const text,
         Args&& ... args)
     {
         std::cout
@@ -162,14 +163,15 @@ namespace logger
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
     }
 
     template<typename ... Args>
     inline void info(
-        std::source_location const location, 
-        std::string_view const text, 
+        char const* filename,
+        int line,
+        std::string_view const text,
         Args&& ... args)
     {
         std::cout
@@ -184,15 +186,16 @@ namespace logger
             << rang::style::bold
             << rang::fg::gray
             << rang::bg::black
-            << __log_format(location)
+            << logger::format(filename, line)
             << std::endl; // flush..
     }
-}
 
-#define log_fatal(text, ...) if constexpr(::logger::level::current >= logger::level::fatal) ::logger::fatal(std::source_location::current(), text, __VA_ARGS__)
-#define log_error(text, ...) if constexpr(::logger::level::current >= logger::level::error) ::logger::error(std::source_location::current(), text, __VA_ARGS__)
-#define log_warn(text, ...) if constexpr(::logger::level::current >= logger::level::warn) ::logger::warn(std::source_location::current(), text, __VA_ARGS__)
-#define log_info(text, ...) if constexpr(::logger::level::current >= logger::level::info) ::logger::info(std::source_location::current(), text, __VA_ARGS__)
-#define log_debug(text, ...) if constexpr(::logger::level::current >= logger::level::debug) ::logger::debug(std::source_location::current(), text, __VA_ARGS__)
-#define log_verbose(text, ...) if constexpr(::logger::level::current >= logger::level::verbose) ::logger::verbose(std::source_location::current(), text, __VA_ARGS__)
-#define log_with_level(custom_level, text, ...) if constexpr(::logger::level::current >= custom_level) ::logger::info(std::source_location::current(), text, __VA_ARGS__)
+} // ~namespace logger
+
+#define log_fatal(text, ...) if constexpr(::logger::level::current >= logger::level::fatal) ::logger::fatal(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_error(text, ...) if constexpr(::logger::level::current >= logger::level::error) ::logger::error(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_warn(text, ...) if constexpr(::logger::level::current >= logger::level::warn) ::logger::warn(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_info(text, ...) if constexpr(::logger::level::current >= logger::level::info) ::logger::info(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_debug(text, ...) if constexpr(::logger::level::current >= logger::level::debug) ::logger::debug(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_verbose(text, ...) if constexpr(::logger::level::current >= logger::level::verbose) ::logger::verbose(__FILE__, __LINE__, text, __VA_ARGS__)
+#define log_with_level(custom_level, text, ...) if constexpr(::logger::level::current >= custom_level) ::logger::info(__FILE__, __LINE__, text, __VA_ARGS__)
