@@ -45,3 +45,40 @@ target_include_directories(rang INTERFACE rang/include)
 # xml parser
 add_library(pugixml "pugixml/src/pugixml.cpp")
 target_include_directories(pugixml PUBLIC pugixml/src/)
+
+#
+# prebuild skia
+add_library(libskia STATIC IMPORTED)
+if (WIN32)
+# TODO: USE "IMPORTED_LIBNAME"
+  set_target_properties(libskia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib")
+else()
+  set_target_properties(libskia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.a")
+endif()
+set_target_properties(libskia PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/skia")
+
+
+if(WIN32)
+  file(GLOB SKIA_SVG_OBJECTS skia/out/Release/obj/experimental/svg/model/*.obj)
+else()
+  file(GLOB SKIA_SVG_OBJECTS skia/out/Release/obj/experimental/svg/model/*.o)
+endif()
+set(SKIA_SVG_OBJECTS ${SKIA_SVG_OBJECTS})
+
+# skia python
+#
+# todo: zip skia.h
+file(GLOB SOURCES python-skia/src/skia/*.cpp)
+set(SOURCES ${SOURCES})
+pybind11_add_module(skia ${SOURCES})
+
+if(WIN32)
+
+  target_compile_features(skia PRIVATE cxx_std_17)
+  target_compile_definitions(skia PUBLIC SK_GL)
+  target_compile_options(skia PUBLIC /Zc:inline /wd4244 /wd4996 /wd4267 /wd4180 /MD)
+
+  target_link_libraries(skia PUBLIC libskia ${SKIA_SVG_OBJECTS} Gdi32 OpenGL32 Usp10 User32 OleAut32 Ole32 FontSub)
+  target_link_options(skia PUBLIC /OPT:ICF /OPT:REF)
+
+endif()
