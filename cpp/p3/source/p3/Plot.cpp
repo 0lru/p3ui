@@ -224,13 +224,13 @@ namespace p3
 
     void Plot::remove(std::shared_ptr<Item> item)
     {
-        std::erase_if(_items, [&](auto iterated) {
+        _items.erase(std::remove_if(_items.begin(), _items.end(), [&](auto iterated) {
             if (iterated != item)
                 return false;
             item->release();
             item->set_plot(nullptr);
             return true;
-        });
+        }), _items.end());
     }
 
     void Plot::clear()
@@ -478,7 +478,8 @@ namespace p3
         if (!annotation)
             return;
         annotation->release();
-        std::erase(_annotations, annotation);
+        // 20: std::erase(_annotations, annotation);
+        _annotations.erase(std::remove(_annotations.begin(), _annotations.end(), annotation), _annotations.end());
     }
 
     std::vector<std::shared_ptr<Plot::Annotation>> const& Plot::Item::annotations() const

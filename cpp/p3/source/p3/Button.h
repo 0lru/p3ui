@@ -37,7 +37,7 @@ namespace p3
 
         Button(std::optional<std::string> label = std::nullopt);
 
-        StyleStrategy& style_strategy() const override;        
+        StyleStrategy& style_strategy() const override;
         void render_impl(Context&, float width, float height) override;
 
         void set_on_click(OnClick);

@@ -51,7 +51,7 @@ namespace p3
         Color& operator=(Color const&) = default;
         Color& operator=(Color&&) = default;
 
-        bool operator==(Color const&) const = default;
+        bool operator==(Color const&) const;
 
         std::uint8_t red() const;
         std::uint8_t green() const;
@@ -138,6 +138,14 @@ namespace p3
             | static_cast<std::uint32_t>(_green) << 16
             | static_cast<std::uint32_t>(_blue) << 8
             | static_cast<std::uint32_t>(_alpha);
+    }
+
+    inline bool Color::operator==(Color const& color) const
+    {
+        return _red == color._red
+            && _green == color._green
+            && _blue == color._blue
+            && _alpha == color._alpha;
     }
 
     inline std::uint8_t Color::red() const

@@ -24,6 +24,7 @@
 #include "VideoMode.h"
 
 #include <memory>
+#include <vector>
 
 namespace p3
 {
@@ -39,7 +40,7 @@ namespace p3
         Monitor(std::shared_ptr<Window>, GLFWmonitor*);
 
         bool operator==(Monitor const&) const;
-        bool operator!=(Monitor const&) const = default;
+        bool operator!=(Monitor const& monitor) const { return !(*this == monitor); }
 
         VideoMode mode() const;
         void set_mode(VideoMode);

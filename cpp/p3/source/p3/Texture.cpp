@@ -54,7 +54,8 @@ namespace p3
 
     void Texture::remove_observer(Observer& observer)
     {
-        std::erase(_observer, &observer);
+        // 20 std::erase(_observer, &observer);
+        _observer.erase(std::remove(_observer.begin(), _observer.end(), &observer), _observer.end());
     }
 
     RenderBackend::TextureId Texture::use(Context& context)
