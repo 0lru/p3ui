@@ -49,7 +49,7 @@ namespace p3::python
             std::lock_guard<std::mutex> l(mutex);
             if (auto it = context_map.find(&render_backend); it != context_map.end())
                 return it->second;
-            auto context = py::module::import("skia").attr("GrDirectContext").attr("MakeGL")();
+            auto context = py::module::import("p3ui.skia").attr("GrDirectContext").attr("MakeGL")();
             log_debug("created skia context");
             skia::context_map[&render_backend] = context;
             return context;
@@ -64,6 +64,25 @@ namespace p3::python
 
     }
 
+    ///
+    /// each surface represents a render target. Thus it may has it's
+    /// own frambuffer object (fbo). the behavior is the following:
+    /// a surface is considered invisible, if it is not visible within
+    /// the parent content region or if it is styled to be invisible.
+    /// in consequence:
+    /// * the fbo will be released/destructed if the surface is invisible
+    /// * the fbo will (normally) be as big as the surface size 
+    ///
+    /// on hardware, we may experience limitations due to texture size
+    /// limits. this is why we introduce viewport/window-aligned surfaces.
+    /// * a surface will automatically be viewport-aligned, if it's size
+    ///   exceeds the size of the content region of the parent, or
+    /// * if it's declared to be viewport aligned
+    /// 
+    /// as an optimization: the maximum width/height of a non-viewport aligned
+    /// surface, which was automatically declared to be viewport aligned has
+    /// * width = min(width, content-width)
+    /// * height = min(height, height)
     class Surface
         : public p3::Node
     {
@@ -97,7 +116,10 @@ namespace p3::python
         void dispose() override;
 
     private:
+        // draws the result of the previously rendered fbo-attached texture
         void _draw_textured_rectangle();
+        // frees render target if surface is invisible or on destruction
+        void _dispose_render_target();
 
         //
         // true whenever picture changed
@@ -124,6 +146,8 @@ namespace p3::python
 
     namespace
     {
+        //
+        // declare the surface to a non-shrink nor growing rectangle per default.
         class LocalStyleStrategy : public StyleStrategy
         {
         public:
@@ -217,6 +241,10 @@ namespace p3::python
             whiteu);
     }
 
+    void Surface::_dispose_render_target()
+    {
+    }
+
     void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
         ImGuiWindow& window = *ImGui::GetCurrentWindow();
@@ -285,7 +313,7 @@ namespace p3::python
         if (_is_dirty)
         {
             py::gil_scoped_acquire acquire;
-            auto skia = py::module::import("skia");
+            auto skia = py::module::import("p3ui.skia");
 
             if (!_skia_context)
                 _skia_context = python::skia::make_context(context.render_backend());
@@ -353,7 +381,7 @@ namespace p3::python
 
     py::object Surface::enter()
     {
-        auto skia = py::module::import("skia");
+        auto skia = py::module::import("p3ui.skia");
         // auto inf = skia.attr("SK_ScalarInfinity");
         auto inf = std::numeric_limits<float>::max();
         _recorder = skia.attr("PictureRecorder")();
