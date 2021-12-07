@@ -59,27 +59,25 @@ target_include_directories(pugixml PUBLIC pugixml/src/)
 
 #
 # ----- skia (download) --------------------------------------------------------
+if(WIN32)
+  set(SKIA_LIB_FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib")
+else()
+  set(SKIA_LIB_FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.a")
+endif()
+
 # @see https://gitlab.kitware.com/cmake/cmake/-/issues/21444
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib"
+    OUTPUT "${SKIA_LIB_FILENAME}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/skia.py"
     COMMAND python skia.py
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
-if(WIN32)
-  add_custom_target(lib_skia_download DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib")
-else()
-  add_custom_target(lib_skia_download DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.a")
-endif()
+add_custom_target(lib_skia_download DEPENDS "${SKIA_LIB_FILENAME}")
 
 #
 # ----- skia -------------------------------------------------------------------
 add_library(lib_skia STATIC IMPORTED)
-if (WIN32)
-  set_target_properties(lib_skia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib")
-else()
-  set_target_properties(lib_skia PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.a")
-endif()
+set_target_properties(lib_skia PROPERTIES IMPORTED_LOCATION "${SKIA_LIB_FILENAME}")
 add_dependencies(lib_skia lib_skia_download)
 set_target_properties(lib_skia PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/skia")
 
