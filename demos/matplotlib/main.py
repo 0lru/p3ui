@@ -17,7 +17,7 @@ matplotlib.rcParams.update({'font.size': pixels_to_points(font_size_px)})
 async def main():
     window = Window(title='matplotlib')
     window.position = (50, 50)
-    window.size = (1000, 900)
+    window.size = (1400, 900)
 
     user_interface = UserInterface(content=Column(
         width=(font_size_px * 3 | em, 0, 0), height=(font_size_px * 4 | em, 0, 0),
