@@ -1,5 +1,4 @@
 import asyncio
-import skia
 from p3ui import *
 import cv2
 
