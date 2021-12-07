@@ -1,8 +1,7 @@
 import numpy as np
-import skia
+import p3ui.skia as skia
 from matplotlib.backend_bases import RendererBase
 from matplotlib.path import Path
-from matplotlib.transforms import Affine2D
 
 from .make_font import _make_font_from_properties
 from .graphics_context import GraphicsContext

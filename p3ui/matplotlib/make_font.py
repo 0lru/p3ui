@@ -1,4 +1,4 @@
-import skia
+import p3ui.skia as skia
 
 from matplotlib._pylab_helpers import Gcf
 

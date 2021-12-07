@@ -1,6 +1,6 @@
 import asyncio
 from p3ui import *
-import skia
+import p3ui.skia as skia
 
 
 def draw_text(canvas):

@@ -1,7 +1,7 @@
 from p3ui import *
 import asyncio
 from imageio import imread
-import skia
+import p3ui.skia as skia
 import numpy as np
 
 repeat_x = 100
