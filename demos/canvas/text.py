@@ -1,6 +1,5 @@
 from p3ui import *
 import asyncio
-import skia
 
 family_names = [skia.FontMgr.RefDefault().getFamilyName(i) for i in range(skia.FontMgr.RefDefault().countFamilies())]
 
