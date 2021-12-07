@@ -1,6 +1,5 @@
 import asyncio
 from p3ui import *
-import p3ui.skia as skia
 
 
 def draw_text(canvas):
@@ -37,7 +36,10 @@ class CanvasDemo(ScrollArea):
 
     def __init__(self):
         super().__init__()
-        self.surface = Surface()
+        self.surface = Surface(
+            width=(100 | em, 0, 0),
+            height=(100 | em, 0, 0)
+        )
         self.content = self.surface
 
     @staticmethod
