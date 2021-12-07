@@ -23,3 +23,8 @@ set_target_properties(_p3ui
     PROPERTIES 
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/p3ui"
 )
+
+set_target_properties(skia
+    PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/p3ui"
+)
