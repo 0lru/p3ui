@@ -76,13 +76,6 @@ add_custom_target(lib_skia_download DEPENDS "${SKIA_LIB_FILENAME}")
 
 #
 # ----- skia -------------------------------------------------------------------
-add_library(lib_skia STATIC IMPORTED)
-set_target_properties(lib_skia PROPERTIES IMPORTED_LOCATION "${SKIA_LIB_FILENAME}")
-add_dependencies(lib_skia lib_skia_download)
-set_target_properties(lib_skia PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/skia")
-
-#
-# ----- skia svg ---------------------------------------------------------------
 if(WIN32)
   file(GLOB SKIA_SVG_OBJECTS skia/out/Release/obj/experimental/svg/model/*.obj)
 else()
@@ -91,17 +84,25 @@ endif()
 set(SKIA_SVG_OBJECTS ${SKIA_SVG_OBJECTS})
 
 #
+# per default, scope is local, thus "global"
+add_library(lib_skia STATIC IMPORTED GLOBAL)
+add_dependencies(lib_skia lib_skia_download)
+set_property(TARGET lib_skia PROPERTY IMPORTED_LOCATION "${SKIA_LIB_FILENAME}")
+set_property(TARGET lib_skia PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/skia")
+set_property(TARGET lib_skia PROPERTY INTERFACE_COMPILE_DEFINITIONS SK_GL)
+if(WIN32)
+  set_property(TARGET lib_skia PROPERTY INTERFACE_LINK_LIBRARIES ${SKIA_SVG_OBJECTS} Gdi32 OpenGL32 Usp10 User32 OleAut32 Ole32 FontSub)
+  set_property(TARGET lib_skia PROPERTY INTERFACE_COMPILE_OPTIONS /Zc:inline /wd4244 /wd4996 /wd4267 /wd4180 /MD)
+endif()
+
+#
 # ----- python-skia ------------------------------------------------------------
 file(GLOB SOURCES python-skia/src/skia/*.cpp)
-set(SOURCES ${SOURCES})
 pybind11_add_module(skia ${SOURCES})
+target_link_libraries(skia PUBLIC lib_skia)
+# target_precompile_headers(skia PRIVATE "python-skia/src/skia/common.h")
 if(WIN32)
-  target_compile_features(skia PRIVATE cxx_std_17)
-  target_compile_definitions(skia PUBLIC SK_GL)
-  target_compile_options(skia PUBLIC /Zc:inline /wd4244 /wd4996 /wd4267 /wd4180 /MD)
-
-  target_link_libraries(skia PUBLIC lib_skia ${SKIA_SVG_OBJECTS} Gdi32 OpenGL32 Usp10 User32 OleAut32 Ole32 FontSub)
-  target_link_options(skia PUBLIC /OPT:ICF /OPT:REF)
+  target_link_options(skia PUBLIC /OPT:ICF /OPT:REF) # remove unreferenced symbols, one iteration
 else()
   #TODO
 endif()

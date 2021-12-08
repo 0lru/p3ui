@@ -12,6 +12,7 @@ namespace p3
     void OpenGL2RenderBackend::init()
     {
         ImGui_ImplOpenGL2_Init();
+        _skia_context = GrContext::MakeGL();
     }
 
     void OpenGL2RenderBackend::new_frame()
@@ -32,7 +33,7 @@ namespace p3
 
     RenderBackend::RenderTarget* OpenGL2RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
     {
-        _render_targets.push_back(std::make_unique<OpenGLRenderTarget>(width, height));
+        _render_targets.push_back(std::make_unique<OpenGLRenderTarget>(*this, width, height));
         return _render_targets.back().get();
     }
 

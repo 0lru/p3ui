@@ -7,6 +7,9 @@
 #include <functional>
 #include <vector>
 
+#include <include/gpu/GrContext.h>
+#include <include/core/SkSurface.h>
+
 namespace p3
 {
 
@@ -30,6 +33,8 @@ namespace p3
             virtual void release() = 0;
             virtual std::uint32_t width() const = 0;
             virtual std::uint32_t height() const = 0;
+
+            virtual sk_sp<SkSurface> const& skia_surface() const = 0;
         };
 
         class Texture
@@ -41,7 +46,7 @@ namespace p3
         };
 
         virtual ~RenderBackend() = default;
-        
+
         virtual void init() = 0;
         virtual void new_frame() = 0;
         virtual void render(UserInterface const&) = 0;
@@ -56,9 +61,12 @@ namespace p3
         void delete_texture(Texture*);
         void delete_render_target(RenderTarget*);
 
+        sk_sp<GrContext> const& skia_context() const { return _skia_context; }
+
     protected:
         std::vector<std::unique_ptr<Texture>> _textures;
         std::vector<std::unique_ptr<RenderTarget>> _render_targets;
+        sk_sp<GrContext> _skia_context;
 
     private:
         std::vector<Texture*> _deleted_textures;

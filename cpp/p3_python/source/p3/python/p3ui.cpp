@@ -13,10 +13,6 @@ PYBIND11_MODULE(_p3ui, module)
         Object Oriented ImGUI (https://github.com/0lru/p3ui)
     )docstring";
 
-    py::module_::import("atexit").attr("register")(py::cpp_function([&]() {
-        python::skia::cleanup();
-    }));
-
     python::Definition<Node>::apply(module);
     python::Definition<Button>::apply(module);
     python::Definition<CheckBox>::apply(module);

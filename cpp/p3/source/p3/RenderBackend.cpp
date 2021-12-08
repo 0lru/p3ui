@@ -26,6 +26,7 @@ namespace p3
 
     void RenderBackend::shutdown()
     {
+        _skia_context.reset();
         gc();
         _textures.clear();
         _render_targets.clear();
