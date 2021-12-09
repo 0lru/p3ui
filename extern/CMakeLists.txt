@@ -59,6 +59,13 @@ target_include_directories(pugixml PUBLIC pugixml/src/)
 
 #
 # ----- skia (download) --------------------------------------------------------
+execute_process(COMMAND ${PYTHON_EXECUTABLE} skia.py
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                RESULT_VARIABLE SKIA_DOWNLOAD_RESULT)
+if(NOT SKIA_DOWNLOAD_RESULT EQUAL "0")
+    message(FATAL_ERROR "failed to download skia zip")
+endif()
+
 if(WIN32)
   set(SKIA_LIB_FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/skia/out/Release/skia.lib")
 else()
@@ -66,13 +73,13 @@ else()
 endif()
 
 # @see https://gitlab.kitware.com/cmake/cmake/-/issues/21444
-add_custom_command(
-    OUTPUT "${SKIA_LIB_FILENAME}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/skia.py"
-    COMMAND python skia.py
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_custom_target(lib_skia_download DEPENDS "${SKIA_LIB_FILENAME}")
+# add_custom_command(
+#     OUTPUT "${SKIA_LIB_FILENAME}"
+#     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/skia.py"
+#     COMMAND python skia.py
+#     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+# )
+# add_custom_target(lib_skia_download DEPENDS "${SKIA_LIB_FILENAME}")
 
 #
 # ----- skia -------------------------------------------------------------------
@@ -86,7 +93,7 @@ set(SKIA_SVG_OBJECTS ${SKIA_SVG_OBJECTS})
 #
 # per default, scope is local, thus "global"
 add_library(lib_skia STATIC IMPORTED GLOBAL)
-add_dependencies(lib_skia lib_skia_download)
+# add_dependencies(lib_skia lib_skia_download)
 set_property(TARGET lib_skia PROPERTY IMPORTED_LOCATION "${SKIA_LIB_FILENAME}")
 set_property(TARGET lib_skia PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/skia")
 set_property(TARGET lib_skia PROPERTY INTERFACE_COMPILE_DEFINITIONS SK_GL)

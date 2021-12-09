@@ -11,6 +11,9 @@ output_path = 'skia/'
 
 output_path = Path(__file__).parent.joinpath(output_path)
 
+if output_path.is_dir():
+    print('skipping skia download')
+    exit(0)
 
 class ReleaseNotFoundError(Exception):
     pass
