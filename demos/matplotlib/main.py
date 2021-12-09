@@ -19,14 +19,30 @@ async def main():
     window.position = (50, 50)
     window.size = (1400, 900)
 
+    filled = FilledChart()
+    mark_every = MarkEvery()
+
+    async def update():
+        try:
+            while True:
+                filled.shift += 0.01
+                mark_every.shift += 0.01
+                await filled.update()
+#                await mark_every.update()
+                await asyncio.sleep(0.01)
+        except asyncio.CancelledError:
+            pass
+
+    asyncio.get_event_loop().create_task(update())
+
     user_interface = UserInterface(content=Column(
-        width=(font_size_px * 3 | em, 0, 0), height=(font_size_px * 4 | em, 0, 0),
+        width=(font_size_px * 40 | em, 0, 0), height=(font_size_px * 30 | em, 0, 0),
         children=[
             Text(f'ImGui-Text @ {font_size_px}px'),
             Row(
                 padding=(0 | px, 0 | px),
                 height=(1 | px, 1, 1),
-                children=[BarChart(), FilledChart()]),
+                children=[BarChart(), filled]),
             Row(
                 padding=(0 | px, 0 | px),
                 height=(1 | px, 2, 1),
@@ -36,7 +52,7 @@ async def main():
                         padding=(0 | px, 0 | px),
                         children=[
                             GradientChart(),
-                            MarkEvery()
+                            mark_every
                         ]
                     )
                 ]),

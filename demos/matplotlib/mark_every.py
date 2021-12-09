@@ -34,7 +34,6 @@ mpl.rcParams['axes.prop_cycle'] = cycler(markevery=cases, color=colors)
 # Create data points and offsets
 x = np.linspace(0, 2 * np.pi)
 offsets = np.linspace(0, 2 * np.pi, 11, endpoint=False)
-yy = np.transpose([np.sin(x + phi) for phi in offsets])
 
 
 class MarkEvery(MatplotlibSurface):
@@ -43,12 +42,17 @@ class MarkEvery(MatplotlibSurface):
         width = kwargs.pop('width', (auto, 1, 1))
         height = kwargs.pop('height', (auto, 1, 1))
         super().__init__(width=width, height=height, **kwargs)
+        self.shift = 0
         self._update()
 
     def _update(self):
         with self as figure:
             ax = figure.add_axes([0.1, 0.1, 0.6, 0.75])
+            yy = np.transpose([np.sin(x + phi + self.shift) for phi in offsets])
 
             for i in range(len(cases)):
                 ax.plot(yy[:, i], marker='o', label=str(cases[i]))
                 ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+
+    async def update(self):
+        self._update()
