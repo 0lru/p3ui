@@ -21,7 +21,7 @@ namespace p3
 
     private:
         void _make_skia_surface(RenderBackend&);
-
+        RenderBackend* _backend;
         std::uint32_t _width;
         std::uint32_t _height;
         unsigned int _framebuffer_id;

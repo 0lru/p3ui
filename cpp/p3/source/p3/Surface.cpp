@@ -2,7 +2,6 @@
 
 #include "log.h"
 
-#include <glad/gl.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -192,10 +191,9 @@ namespace p3
             //
             // draw to fbo
             _render_target->bind();
-            glClearColor(0.f, 0.f, 0.f, 0.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto& canvas = *_render_target->skia_surface()->getCanvas();
             canvas.save();
+            canvas.clear(0x0000000);
             canvas.translate(
                 cursor.x - ImGui::GetScrollX(),
                 cursor.y - ImGui::GetScrollY()
@@ -204,8 +202,8 @@ namespace p3
             canvas.clipRect(clip_rect, false);
             canvas.drawPicture(_skia_picture);
             canvas.restore();
-            canvas.flush();
             _is_dirty = false;
+            _render_target->skia_surface()->flushAndSubmit();
             _render_target->release();
         }
 

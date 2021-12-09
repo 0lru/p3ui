@@ -9,7 +9,8 @@ namespace p3
 {
 
     OpenGLRenderTarget::OpenGLRenderTarget(RenderBackend& backend, std::uint32_t width, std::uint32_t height)
-        : _width(width)
+        : _backend(&backend)
+        , _width(width)
         , _height(height)
     {
         // only save texture state. framebuffer state is handled in a correct way
