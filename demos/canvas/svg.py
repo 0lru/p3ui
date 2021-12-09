@@ -14,19 +14,17 @@ def make_paint_from_color(color):
 
 
 async def main():
-    window = Window(title='Skia Surface')
+    window = Window(title='SVG')
     window.position = (50, 50)
-    window.size = (512, 512)
+    window.size = (1000, 900)
 
     stream = skia.FILEStream.MakeFromFile(assets.joinpath('SVG_logo.svg').as_posix())
     dom = skia.SVGDOM.MakeFromStream(stream)
-    dom.setContainerSize(skia.Size(512, 512))
-    print(dom.containerSize())
-
+    dom.setContainerSize(skia.Size(900, 800))
     surface = Surface()
     with surface as canvas:
         canvas.clear(skia.ColorWHITE)
-#        canvas.scale(10, 10)
+        canvas.translate(50, 50)
         dom.render(canvas)
     await window.serve(UserInterface(content=surface))
 

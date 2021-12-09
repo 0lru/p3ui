@@ -5,11 +5,13 @@
 This project aims at fast prototyping and development of graphical applications. It uses and combines [Dear ImGui](https://github.com/ocornut/imgui) and related projects like [ImPlot](https://github.com/epezent/implot) in a C++ wrapper. This wrapper is usable from within Python though [Pybind11](https://github.com/pybind/pybind11).
 Additionally, [Skia](skia.org) can be used for more advanced 2D graphics. For the integration of Skia, this project supports [Skia python binding](https://github.com/kyamagu/skia-python).
 
-[ImGui Elements](python/gallery) |  [Matplotlib Integration](demos/gallery)
+[ImGui Elements](python/gallery) |  [Matplotlib Integration](demos/matplotlib)
 :-------------------------|:-------------------------
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/scr0.png)  |  ![matplotlib](https://raw.githubusercontent.com/0lru/p3ui/main/doc/scr1.png)|
-**[ImPlot Integration](python/gallery)** |  **[Layout System](demos/matplotlib)**|
+**[ImPlot Integration](demos/gallery)** |  **[Layout System](demos/gallery)**|
 ![widgets](https://raw.githubusercontent.com/0lru/p3ui/main/doc/scr2.png)  |  ![matplotlib](https://raw.githubusercontent.com/0lru/p3ui/main/doc/scr3.png)
+**[SVG](demos/canvas)** | |
+![svg](https://raw.githubusercontent.com/0lru/p3ui/main/doc/scr4.png) | |
 
 Key Features and Project Goals:
 * Fast prototyping and development
