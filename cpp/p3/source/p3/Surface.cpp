@@ -123,7 +123,6 @@ namespace p3
         // use rounded width/height for fbo
         auto width = std::uint32_t(fwidth + 0.5f);
         auto height = std::uint32_t(fheight + 0.5f);
-
         //
         // get pos in local coordinates
         auto cursor = ImGui::GetCursorPos();
@@ -140,8 +139,8 @@ namespace p3
         // the content can overlap the frame spacing if parent is scrolled
         auto vp_width = content_max.x - content_min.x;
         auto vp_height = content_max.y - content_min.y;
-        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * frame_padding.x);
-        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * frame_padding.y);
+        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * frame_padding.x + 0.5f);
+        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * frame_padding.y + 0.5f);
 
         //
         // 1) render target does not fit
