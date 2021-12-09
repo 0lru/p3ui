@@ -94,6 +94,8 @@ namespace p3::python
             assign(kwargs, (prefix + "_tick_labels").c_str(), axis, &Plot::Axis::set_tick_labels);
             assign(kwargs, (prefix + "_ticks").c_str(), axis, &Plot::Axis::set_ticks);
             assign(kwargs, (prefix + "_inverted").c_str(), axis, &Plot::Axis::set_inverted);
+            assign(kwargs, (prefix + "_fixed").c_str(), axis, &Plot::Axis::set_fixed);
+            assign(kwargs, (prefix + "_auto_fit").c_str(), axis, &Plot::Axis::set_auto_fit);
             if (kwargs.contains(prefix + "_ticks"))
             {
                 auto x_ticks = kwargs[(prefix + "_ticks").c_str()].cast<std::optional<py::array_t<double>>>();
