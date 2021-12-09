@@ -249,6 +249,7 @@ namespace p3
         //
         // begin window
         ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoDocking |
             ImGuiWindowFlags_NoBringToFrontOnFocus |
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
