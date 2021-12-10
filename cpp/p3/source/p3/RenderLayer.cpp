@@ -18,6 +18,12 @@ namespace p3
         auto const greenf = ImVec4(0, 1, 0, 1);
     }
 
+    RenderLayer::~RenderLayer()
+    {
+        if (_render_target)
+            _render_backend->delete_render_target(_render_target);
+    }
+
     void RenderLayer::init_frame(Context& context)
     {
         //
@@ -97,6 +103,7 @@ namespace p3
         {
             if (_render_target)
                 backend.delete_render_target(_render_target);
+            _render_target = nullptr;
             if (context.show_render_layers())
                 _draw_debug();
             return;

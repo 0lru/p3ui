@@ -28,6 +28,7 @@ namespace p3
     {
     public:
         using Viewport = std::array<double, 4>;
+        ~RenderLayer();
 
         void init_frame(Context&);
         void finish_frame(Node&, Context&);
