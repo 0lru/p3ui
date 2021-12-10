@@ -29,13 +29,13 @@ namespace p3
 
         ImVec2 size(width, height);
         ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
-        render_layer()->init_frame(context);
+        render_layer()->push_to(context);
         if (_content)
         {
             auto available = ImGui::GetContentRegionAvail();
             _content->render(context, _content->width(available.x), _content->height(available.y));
         }
-        render_layer()->finish_frame(*this, context);
+        render_layer()->pop_from_context_and_render(context, *this);
         ImGui::EndChild();
         update_status();
     }
