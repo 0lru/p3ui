@@ -55,6 +55,19 @@ namespace p3::python
         color.def("__repr__", [](Color const& color) {
             return fmt::format("[{}, {}, {}, {}]", color.red(), color.green(), color.blue(), color.alpha());
         });
+        color.def_property("red", &Color::red, &Color::set_red);
+        color.def_property("green", &Color::green, &Color::set_green);
+        color.def_property("blue", &Color::blue, &Color::set_blue);
+        color.def_property("alpha", &Color::alpha, &Color::set_alpha);
+        color.def_property_readonly("rgb", [](Color const& color) {
+            return std::array<std::uint8_t, 3>{color.red(), color.green(), color.blue()};
+        });
+        color.def_property_readonly("rgba", [](Color const& color) {
+            return std::array<std::uint8_t, 4>{color.red(), color.green(), color.blue(), color.alpha()};
+        });
+        color.def("__int__", [](Color const& color) {
+            return color.operator uint32_t();
+        });
 
         // tuple -> color
         py::implicitly_convertible<py::tuple, Color>();

@@ -33,9 +33,13 @@ namespace p3
         bool operator==(Color const&) const;
 
         std::uint8_t red() const;
+        void set_red(std::uint8_t red) { _red = red; }
         std::uint8_t green() const;
+        void set_green(std::uint8_t green) { _green = green; }
         std::uint8_t blue() const;
+        void set_blue(std::uint8_t blue) { _blue = blue; }
         std::uint8_t alpha() const;
+        void set_alpha(std::uint8_t alpha) { _alpha = alpha; }
 
         struct named;
 
