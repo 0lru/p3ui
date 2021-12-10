@@ -1,5 +1,5 @@
-
 #include "constant.h"
+#include "log.h"
 #include "ScrollArea.h"
 #include "Context.h"
 
@@ -19,7 +19,6 @@ namespace p3
 
     void ScrollArea::render_impl(Context& context, float width, float height)
     {
-        ImVec2 size(width, height);
         ImGuiWindowFlags flags = 0;
         if (_horizontal_scroll_enabled)
             flags |= ImGuiWindowFlags_HorizontalScrollbar;
@@ -27,16 +26,18 @@ namespace p3
             flags |= ImGuiWindowFlags_AlwaysHorizontalScrollbar;
         if (!_vertical_scroll_autohide)
             flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
+
+        ImVec2 size(width, height);
         ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
+        render_layer()->init_frame(context);
         if (_content)
         {
             auto available = ImGui::GetContentRegionAvail();
-            render_layer()->init_frame(context);
             _content->render(context, _content->width(available.x), _content->height(available.y));
-            render_layer()->finish_frame(context);
         }
         ImGui::EndChild();
         update_status();
+        render_layer()->finish_frame(*this, context);
     }
 
     void ScrollArea::set_content(std::shared_ptr<Node> content)

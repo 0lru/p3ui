@@ -1,12 +1,12 @@
 #include "Surface.h"
+#include "Context.h"
+#include "RenderBackend.h"
 
 #include "log.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <p3/Context.h>
-#include <p3/RenderBackend.h>
 
 #include <include/core/SkCanvas.h>
 
@@ -45,10 +45,6 @@ namespace p3
     {
     }
 
-    Surface::~Surface()
-    {
-    }
-
     Surface::Viewport const& Surface::viewport() const
     {
         return _viewport;
@@ -68,8 +64,8 @@ namespace p3
     {
         log_debug("dispose surface");
         _skia_picture.reset();
-//        _skia_surface.reset();
-//        _skia_target.reset();
+        //        _skia_surface.reset();
+        //        _skia_target.reset();
         _on_click = nullptr;
         _on_viewport_change = nullptr;
         Node::dispose();
@@ -89,37 +85,19 @@ namespace p3
         if (fwidth * fheight <= 0 || !_skia_picture)
             return;
 
+        context.render_layer().register_object();
+
         //
-        // set_needs_update dirties the active render_layer
-        if (context.render_layer().dirty())
+        // make viewport in local coordinates
+        auto cursor = ImGui::GetCursorPos();
+        auto viewport = context.render_layer().viewport();
+        viewport[0] -= cursor.x; viewport[1] -= cursor.y;
+        if (viewport != _viewport)
         {
-            //
-            // get pos in local coordinates
-            auto cursor = ImGui::GetCursorPos();
-
-            //
-            // check if viewport was scrolled or resized
-            auto viewport = context.render_layer().viewport();
-            // move viewport to local coordinates
-            viewport[0] -= cursor.x; viewport[1] -= cursor.y;
-            if (viewport != _viewport)
-            {
-                _viewport = viewport;
-                if (_on_viewport_change) postpone([f = _on_viewport_change, rect = viewport]() {
-                    f(rect);
-                });
-            }
-
-            auto& canvas = context.render_layer().use(context.render_backend());
-            canvas.save();
-            canvas.translate(cursor.x - ImGui::GetScrollX(), cursor.y - ImGui::GetScrollY());
-            auto clip_rect = SkRect::MakeWH(
-                std::uint32_t(fwidth + 0.5f), 
-                std::uint32_t(fheight + 0.5f)
-            );
-            canvas.clipRect(clip_rect, false);
-            canvas.drawPicture(_skia_picture);
-            canvas.restore();
+            _viewport = viewport;
+            if (_on_viewport_change) postpone([f = _on_viewport_change, rect = viewport]() {
+                f(rect);
+            });
         }
 
         //
@@ -129,7 +107,7 @@ namespace p3
         ImVec2 pos(window.DC.CursorPos.x, window.DC.CursorPos.y + window.DC.CurrLineTextBaseOffset);
         auto bb_bottom_right = ImVec2(window.DC.CursorPos.x + fwidth, window.DC.CursorPos.y + fheight);
         ImRect bb(pos, bb_bottom_right);
-        ImGui::ItemSize(bb, 0.f/*baseline*/);
+        ImGui::ItemSize(bb, 0.f /*baseline*/);
         ImGui::ItemAdd(bb, id);
         bool hovered, held;
         bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 0);
@@ -138,6 +116,20 @@ namespace p3
             f();
         });
         update_status();
+    }
+
+    void Surface::render(RenderBackend::RenderTarget& render_target)
+    {
+        auto& canvas = *render_target.skia_surface()->getCanvas();
+        canvas.save();
+        canvas.translate(_viewport[0], _viewport[1]);
+        auto clip_rect = SkRect::MakeWH(
+            std::uint32_t(_viewport[2] + 0.5f),
+            std::uint32_t(_viewport[3] + 0.5f)
+        );
+        canvas.clipRect(clip_rect, false);
+        canvas.drawPicture(_skia_picture);
+        canvas.restore();
     }
 
     void Surface::set_picture(sk_sp<SkPicture> picture)

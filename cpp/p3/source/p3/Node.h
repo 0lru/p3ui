@@ -8,6 +8,7 @@
 #include "StyleComputation.h"
 #include "Synchronizable.h"
 #include "TaskQueue.h"
+#include "RenderBackend.h"
 
 
 #include <optional>
@@ -121,6 +122,7 @@ namespace p3
         // ##### render ########################################################
 
         virtual void render(Context&, float width, float height, bool adjust_worksrect=false);
+        virtual void render(RenderBackend::RenderTarget&);
         virtual void update_content() {};
 
         void set_label(std::optional<std::string>);
