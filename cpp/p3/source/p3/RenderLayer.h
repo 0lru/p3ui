@@ -5,6 +5,7 @@ class SkCanvas;
 namespace p3
 {
 
+    class Node;
     class Context;
 
     //
@@ -29,9 +30,10 @@ namespace p3
         using Viewport = std::array<double, 4>;
 
         void init_frame(Context&);
-        void finish_frame(Context&);
+        void finish_frame(Node&, Context&);
 
-        SkCanvas& use(RenderBackend&);
+        /// increases _object_count internally
+        void register_object();
 
         bool dirty() const { return _dirty; }
         void set_dirty();

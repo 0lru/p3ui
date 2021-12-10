@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Node.h"
-#include "RenderBackend.h"
 #include "RenderLayer.h"
 
 #include <include/core/SkPicture.h>
@@ -17,12 +16,12 @@ namespace p3
         using OnViewportChange = std::function<void(Viewport)>;
 
         Surface();
-        ~Surface();
 
         StyleStrategy& style_strategy() const override;
 
         void update_content() override;
-        void render_impl(Context& context, float width, float height) final override;
+        void render_impl(Context&, float width, float height) final override;
+        void render(RenderBackend::RenderTarget&) override;
 
         sk_sp<SkPicture> const& picture() const { return _skia_picture; }
         void set_picture(sk_sp<SkPicture>);

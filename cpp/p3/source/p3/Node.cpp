@@ -416,6 +416,13 @@ namespace p3
     {
         return _render_layer;
     }
+    
+    void Node::render(RenderBackend::RenderTarget& render_target)
+    {
+        for (auto& child : _children)
+            if (!child->_render_layer)
+                child->render(render_target);
+    }
 
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
