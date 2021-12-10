@@ -420,7 +420,7 @@ namespace p3
     void Node::render(RenderBackend::RenderTarget& render_target)
     {
         for (auto& child : _children)
-            if (!child->_render_layer)
+            if (!child->is_layered())
                 child->render(render_target);
     }
 
