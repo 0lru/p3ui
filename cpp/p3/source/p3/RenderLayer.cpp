@@ -45,8 +45,8 @@ namespace p3
 
         //
         // the rt is 2 * padding larger than the content region
-        _requested_width = std::uint32_t(content_width + 2 * frame_padding.x + 0.5f);
-        _requested_height = std::uint32_t(content_height + 2 * frame_padding.y + 0.5f);
+        _requested_width = std::uint32_t(std::max(1.f, content_width + 2 * frame_padding.x + 0.5f));
+        _requested_height = std::uint32_t(std::max(1.f, content_height + 2 * frame_padding.y + 0.5f));
 
         //
         // no render target -> needs redraw, mark dirty
