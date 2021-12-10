@@ -1,6 +1,6 @@
 from p3ui import *
 import matplotlib.pyplot as plt
-from p3ui.matplotlib.renderer import Renderer
+from .matplotlib import Renderer
 from .matplotlib import dpi as default_dpi
 
 
