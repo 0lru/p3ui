@@ -1,7 +1,6 @@
 from icon_provider import IconProvider
 import asyncio
 from p3ui import *
-from pathlib import Path
 
 
 def make_paint_from_color(color):
