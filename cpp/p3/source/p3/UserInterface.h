@@ -29,10 +29,14 @@ namespace p3
 
         bool is_layered() const final override { return true; }
 
-        void frame();
         using MousePosition = std::array<float, 2>;
         MousePosition mouse_position() const;
+
+        // root em
         float rem() const;
+
+        // do one frame?
+        void frame();
 
         //
         // theme / styling
@@ -47,7 +51,6 @@ namespace p3
 
         void set_menu_bar(std::shared_ptr<MenuBar>);
         std::shared_ptr<MenuBar> const& menu_bar() const;
-
 
         //
         // fonts
