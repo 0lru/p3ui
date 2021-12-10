@@ -1,5 +1,5 @@
 from matplotlib.backend_bases import GraphicsContextBase
-import p3ui.skia as skia
+from .. import skia as skia
 
 
 class GraphicsContext(GraphicsContextBase):
