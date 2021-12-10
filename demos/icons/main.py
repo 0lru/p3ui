@@ -24,23 +24,31 @@ paint = skia.Paint(AntiAlias=True, Color=skia.ColorBLACK)
 
 class Icon(Surface):
 
-    def __init__(self, dom, base_size=24, pixel_size=32, *, color=Color('yellow')):
+    def __init__(self, name, dom, base_size=24, pixel_size=32, *, color=Color('yellow')):
         self.color = skia.Color(*color.rgba)
-        backbuffer = skia.Surface(pixel_size, pixel_size)
+        self.name = name
+        buff1 = skia.Surface(pixel_size, pixel_size)
+        buff2 = skia.Surface(pixel_size, pixel_size)
         super().__init__(
+            on_mouse_enter=self._on_mouse_enter,
             width=(pixel_size | px, 0, 0),
             height=(pixel_size | px, 0, 0)
         )
-        with backbuffer as canvas:
+        with buff1 as canvas:
             canvas.scale(pixel_size / base_size, pixel_size / base_size)
             dom.setContainerSize(skia.Size(pixel_size, pixel_size))
             dom.render(canvas)
-        image = backbuffer.makeImageSnapshot()
-        with self as canvas:
-            # filter = skia.ColorFilters.Blend(0x00FFFFFF, skia.BlendMode.kDstIn)
+        image = buff1.makeImageSnapshot()
+        with buff2 as canvas:
             filter = skia.ColorMatrixFilter.MakeLightingFilter(skia.ColorWHITE, self.color)
             paint = skia.Paint(ColorFilter=filter)
             canvas.drawImage(image, 0, 0, paint)
+        image = buff2.makeImageSnapshot()
+        with self as canvas:
+            canvas.drawImage(image, 0, 0, skia.Paint())
+
+    def _on_mouse_enter(self, _):
+        print(self.name)
 
 
 class IconBrowser(Column):
@@ -72,9 +80,9 @@ class IconBrowser(Column):
             self._content_column.add(Row(children=[Text(category)]))
             icons = self._provider.icons(style, category)
             for slice in sliced(icons, 20):
-                doms = [self._provider.load_icon(style, category, name) for name in slice]
+                doms = [(self._provider.load_icon(style, category, name), name) for name in slice]
                 self._content_column.add(Row(padding=(0 | px, 0 | px), children=[
-                    Icon(dom, 24, 32) for dom in doms
+                    Icon(name, dom, 24, 32) for dom, name in doms
                 ]))
 
 
