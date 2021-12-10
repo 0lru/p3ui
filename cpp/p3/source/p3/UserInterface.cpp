@@ -6,6 +6,7 @@
 #include "Popup.h"
 #include "UserInterface.h"
 #include "log.h"
+#include "RenderLayer.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -24,6 +25,8 @@ namespace p3
         set_theme(Theme::make_default());
         _im_gui_context->IO.IniFilename = nullptr;
         _im_gui_context->IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+        set_render_layer(std::make_shared<RenderLayer>());
     }
 
     UserInterface::~UserInterface()
@@ -227,19 +230,15 @@ namespace p3
         }
     }
 
-    void UserInterface::render(
-        Context& context,
-        float width,
-        float height,
-        bool)
+    void UserInterface::render(Context& context, float width, float height, bool)
     {
         //
         // make context
         ImGui::SetCurrentContext(_im_gui_context.get());
         ImPlot::SetCurrentContext(_im_plot_context.get());
-        
+
         ImGui::NewFrame();
-        
+
         update_restyle(context);
 
         std::optional<OnScopeExit> theme_guard;
@@ -274,25 +273,33 @@ namespace p3
             }
         }
 
-        //
-        // draw optional content
-        auto content_region = ImGui::GetContentRegionAvail();
-        if (_content)
-            _content->render(context, content_region.x, content_region.y);
+        auto content_size = ImGui::GetContentRegionAvail();
 
         //
-        // draw optional child windows
+        // draw content
+        if (_content)
+        {
+            //
+            // child windows, popups, menus are all positioned absolute
+            // and do not contribute to this render layer
+            render_layer()->push_to(context);
+            _content->render(context, content_size.x, content_size.y);
+            render_layer()->pop_from_context_and_render(context, *this);
+        }
+
+        //
+        // draw child windows
         for (auto& child_window : children())
-            if(std::dynamic_pointer_cast<ChildWindow>(child_window))
+            if (std::dynamic_pointer_cast<ChildWindow>(child_window))
                 child_window->render(
                     context,
-                    child_window->width(content_region.x),
-                    child_window->height(content_region.y));
+                    child_window->width(content_size.x),
+                    child_window->height(content_size.y));
 
         //
-        // draw optional popups
+        // draw popups
 /*        _popups.erase(std::remove_if(_popups.begin(), _popups.end(), [&](auto& popup) {
-            popup->render(context, popup->width(content_region.x), popup->height(content_region.y));
+            popup->render(context, popup->width(content_size.x), popup->height(content_size.y));
             return !popup->opened();
         }), _popups.end());
         */
@@ -300,7 +307,6 @@ namespace p3
         //
         // 
         ImGui::End();
-
         //
         // generate draw-lists
         ImGui::Render();

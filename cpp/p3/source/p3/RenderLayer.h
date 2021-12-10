@@ -30,8 +30,8 @@ namespace p3
         using Viewport = std::array<double, 4>;
         ~RenderLayer();
 
-        void init_frame(Context&);
-        void finish_frame(Node&, Context&);
+        void push_to(Context&);
+        void pop_from_context_and_render(Context&, Node&);
 
         /// increases _object_count internally
         void register_object();

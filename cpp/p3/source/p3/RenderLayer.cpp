@@ -24,7 +24,7 @@ namespace p3
             _render_backend->delete_render_target(_render_target);
     }
 
-    void RenderLayer::init_frame(Context& context)
+    void RenderLayer::push_to(Context& context)
     {
         //
         // push this layer onto the stack.
@@ -93,7 +93,7 @@ namespace p3
         window.DrawList->AddRect(p1, p2, _render_target ? green : red, 0, 0, 2);
     }
 
-    void RenderLayer::finish_frame(Node& node, Context& context)
+    void RenderLayer::pop_from_context_and_render(Context& context, Node& node)
     {
         context.pop_render_layer();
         auto& backend = context.render_backend();
@@ -129,10 +129,10 @@ namespace p3
         // need to redraw. bind rt and do the traversal
         if (_dirty)
         {
+            // log_info("rendering {} objects", _object_count);
             auto& canvas = *_render_target->skia_surface()->getCanvas();
             _render_target->bind();
             canvas.clear(0x0000000);
-            // log_info("rendering {} objects", _object_count);
             node.render(*_render_target);
             _render_target->skia_surface()->flushAndSubmit();
             _render_target->release();
@@ -140,23 +140,20 @@ namespace p3
         }
 
         //
-        // always draw rect, if fbo is present
+        // if fbo is present, add color buffer as texture
         ImU32 constexpr white = 0xFFFFFFFF;
         static auto const zero2D = ImVec2(0.f, 0.f);
         static auto const ones2D = ImVec2(1.f, 1.f);
 
         auto& window = *ImGui::GetCurrentWindow();
-
         ImVec2 p1(
             window.Pos.x,
             window.Pos.y
         );
-
         ImVec2 p2(
             p1.x + float(_render_target->width()),
             p1.y + float(_render_target->height())
         );
-
         window.DrawList->AddImage(_render_target->texture_id(),
             p1, p2, zero2D, ones2D, white);
 

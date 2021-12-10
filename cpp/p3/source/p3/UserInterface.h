@@ -27,6 +27,8 @@ namespace p3
         UserInterface(std::size_t width=1024, std::size_t height=768);
         ~UserInterface();
 
+        bool is_layered() const final override { return true; }
+
         void frame();
         using MousePosition = std::array<float, 2>;
         MousePosition mouse_position() const;
