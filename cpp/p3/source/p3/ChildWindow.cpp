@@ -2,6 +2,7 @@
 #include "constant.h"
 #include "ChildWindow.h"
 #include "Context.h"
+#include "RenderLayer.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -14,6 +15,7 @@ namespace p3
     ChildWindow::ChildWindow()
         : Node("ChildWindow")
     {
+        set_render_layer(std::make_shared<RenderLayer>());
     }
 
     void ChildWindow::render_impl(Context& context, float width, float height)
@@ -21,7 +23,6 @@ namespace p3
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
         ImGuiCond conditions = 0;
         if (!_moveable)
-
             flags |= ImGuiWindowFlags_NoMove;
         if (!_resizeable)
             flags |= ImGuiWindowFlags_NoResize;
@@ -37,9 +38,13 @@ namespace p3
         ImGui::SetNextWindowSize(size, _resizeable ? ImGuiCond_Appearing : ImGuiCond_Always);
         bool open=true;
         ImGui::Begin(imgui_label().c_str(), _on_close ? &open : nullptr, flags);
-        auto avail = ImGui::GetContentRegionAvail();
         if (_content)
+        {
+            render_layer()->push_to(context);
+            auto avail = ImGui::GetContentRegionAvail();
             _content->render(context, avail.x, avail.y);
+            render_layer()->pop_from_context_and_render(context, *this);
+        }
         ImGui::End();
 
         if (_on_close && !open)

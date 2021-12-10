@@ -15,6 +15,7 @@ namespace p3
         using OnClose = std::function<void()>;
 
         ChildWindow();
+        virtual bool is_layered() const final override { return true; }
 
         void render_impl(Context&, float width, float height) override;
 
@@ -31,6 +32,7 @@ namespace p3
 
         void set_on_close(OnClose);
         OnClose on_close() const;
+
     protected:
         void dispose();
 
