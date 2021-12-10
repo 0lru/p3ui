@@ -35,9 +35,9 @@ namespace p3
             auto available = ImGui::GetContentRegionAvail();
             _content->render(context, _content->width(available.x), _content->height(available.y));
         }
+        render_layer()->finish_frame(*this, context);
         ImGui::EndChild();
         update_status();
-        render_layer()->finish_frame(*this, context);
     }
 
     void ScrollArea::set_content(std::shared_ptr<Node> content)

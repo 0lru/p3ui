@@ -115,7 +115,7 @@ namespace p3
             }
             _render_target = backend.create_render_target(_requested_width, _requested_height);
             _dirty = true;
-            log_info("created render target {}x{}", _render_target->width(), _render_target->height());
+            log_debug("created render target {}x{}", _render_target->width(), _render_target->height());
         }
 
         //
@@ -125,6 +125,7 @@ namespace p3
             auto& canvas = *_render_target->skia_surface()->getCanvas();
             _render_target->bind();
             canvas.clear(0x0000000);
+            log_info("rendering {} objects", _object_count);
             node.render(*_render_target);
             _render_target->skia_surface()->flushAndSubmit();
             _render_target->release();

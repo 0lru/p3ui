@@ -64,8 +64,7 @@ namespace p3
     {
         log_debug("dispose surface");
         _skia_picture.reset();
-        //        _skia_surface.reset();
-        //        _skia_target.reset();
+        set_render_layer(nullptr);
         _on_click = nullptr;
         _on_viewport_change = nullptr;
         Node::dispose();
@@ -76,7 +75,6 @@ namespace p3
         _automatic_width = 1.f;
         _automatic_height = 1.f;
     }
-
 
     void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
@@ -122,12 +120,12 @@ namespace p3
     {
         auto& canvas = *render_target.skia_surface()->getCanvas();
         canvas.save();
-        canvas.translate(_viewport[0], _viewport[1]);
         auto clip_rect = SkRect::MakeWH(
             std::uint32_t(_viewport[2] + 0.5f),
             std::uint32_t(_viewport[3] + 0.5f)
         );
         canvas.clipRect(clip_rect, false);
+        canvas.translate(-_viewport[0], -_viewport[1]);
         canvas.drawPicture(_skia_picture);
         canvas.restore();
     }
