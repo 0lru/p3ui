@@ -20,8 +20,7 @@ namespace p3
 
     RenderLayer::~RenderLayer()
     {
-        if (_render_target)
-            _render_backend->delete_render_target(_render_target);
+        _reset();
     }
 
     void RenderLayer::push_to(Context& context)
@@ -93,6 +92,14 @@ namespace p3
         window.DrawList->AddRect(p1, p2, _render_target ? green : red, 0, 0, 2);
     }
 
+    void RenderLayer::_reset()
+    {
+        if (_render_target)
+            _render_backend->delete_render_target(_render_target);
+        _render_backend.reset();
+        _render_target = nullptr;
+    }
+
     void RenderLayer::pop_from_context_and_render(Context& context, Node& node)
     {
         context.pop_render_layer();
@@ -101,11 +108,9 @@ namespace p3
         // return and possibly free object memory
         if (!_object_count)
         {
-            if (_render_target)
-                backend.delete_render_target(_render_target);
-            _render_target = nullptr;
             if (context.show_render_layers())
                 _draw_debug();
+            _reset();
             return;
         }
 
@@ -117,10 +122,10 @@ namespace p3
         {
             if (_render_target)
             {
-                backend.delete_render_target(_render_target);
-                _render_target = nullptr;
+                _reset();
             }
             _render_target = backend.create_render_target(_requested_width, _requested_height);
+            _render_backend = backend.shared_from_this();
             _dirty = true;
             log_debug("created render target {}x{}", _render_target->width(), _render_target->height());
         }
