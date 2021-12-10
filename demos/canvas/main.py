@@ -72,7 +72,7 @@ class CanvasDemo(ScrollArea):
                     StrokeWidth=3.0,
                     AntiAlias=True,
                     Color=0xFF4285F4)
-                canvas.clear(skia.ColorWHITE)
+                # canvas.clear(skia.ColorWHITE)
                 path = CanvasDemo.star()
                 canvas.drawPath(path, paint)
                 draw_text(canvas)
