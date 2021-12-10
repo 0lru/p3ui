@@ -31,6 +31,13 @@ namespace p3
         return _textures.back().get();
     }
 
+    std::uint32_t OpenGL2RenderBackend::max_texture_size() const
+    {
+        GLint value;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+        return static_cast<std::uint32_t>(value);
+    }
+
     RenderBackend::RenderTarget* OpenGL2RenderBackend::create_render_target(std::uint32_t width, std::uint32_t height)
     {
         _render_targets.push_back(std::make_unique<OpenGLRenderTarget>(*this, width, height));

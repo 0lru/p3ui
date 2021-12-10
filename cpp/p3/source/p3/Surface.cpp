@@ -81,135 +81,50 @@ namespace p3
         _automatic_height = 1.f;
     }
 
-    void Surface::_draw_textured_rectangle()
-    {
-        static auto const zero2D = ImVec2(0.f, 0.f);
-        static auto const ones2D = ImVec2(1.f, 1.f);
-        static auto const whitef = ImVec4(1, 1, 1, 1);
-        static auto const whiteu = ImGui::GetColorU32(whitef);
-
-        if (!_render_target)
-            return;
-        auto& window = *ImGui::GetCurrentWindow();
-        auto const& padding = window.WindowPadding;
-
-        ImVec2 p1(
-            window.Pos.x,
-            window.Pos.y
-        );
-        ImVec2 p2(
-            p1.x + float(_render_target->width()),
-            p1.y + float(_render_target->height())
-        );
-        window.DrawList->AddImage(_render_target->texture_id(),
-            p1, p2,
-            zero2D, ones2D,
-            whiteu);
-    }
-
-    void Surface::_dispose_render_target()
-    {
-    }
 
     void Surface::render_impl(Context& context, float fwidth, float fheight)
     {
-        ImGuiWindow& window = *ImGui::GetCurrentWindow();
         //
         // nothing todo.. leave
-        if (fwidth * fheight <= 0 || !_skia_picture || window.SkipItems)
+        if (fwidth * fheight <= 0 || !_skia_picture)
             return;
 
         //
-        // use rounded width/height for fbo
-        auto width = std::uint32_t(fwidth + 0.5f);
-        auto height = std::uint32_t(fheight + 0.5f);
-        //
-        // get pos in local coordinates
-        auto cursor = ImGui::GetCursorPos();
-
-        //
-        //
-        auto const& imgui_context = *ImGui::GetCurrentContext();
-        auto const& frame_padding = imgui_context.Style.FramePadding;
-
-        auto content_min = ImGui::GetWindowContentRegionMin();
-        auto content_max = ImGui::GetWindowContentRegionMax();
-
-        //
-        // the content can overlap the frame spacing if parent is scrolled
-        auto vp_width = content_max.x - content_min.x;
-        auto vp_height = content_max.y - content_min.y;
-        auto viewport_width = std::uint32_t(content_max.x - content_min.x + 2 * frame_padding.x + 0.5f);
-        auto viewport_height = std::uint32_t(content_max.y - content_min.y + 2 * frame_padding.y + 0.5f);
-
-        //
-        // 1) render target does not fit
-        bool render_target_dirty = !_render_target
-            || viewport_width != _render_target->width()
-            || viewport_height != _render_target->height();
-
-        _is_dirty = _is_dirty || render_target_dirty;
-
-        //
-        // define viewport rect (the viewport is the containing window)
-        // of this surface in the coordinate-spface of the surface
-        Viewport viewport{
-            -cursor.x + ImGui::GetScrollX(),
-            -cursor.y + ImGui::GetScrollY(),
-            double(vp_width),
-            double(vp_height)
-        };
-        if (viewport != _viewport)
+        // set_needs_update dirties the active render_layer
+        if (context.render_layer().dirty())
         {
-            _is_dirty = true;
-            _viewport = viewport;
-            if (_on_viewport_change) postpone([f = _on_viewport_change, rect = viewport]() {
-                f(rect);
-            });
-        }
-
-        //
-        // only acquire gil if needed
-        if (_is_dirty)
-        {
-            if (render_target_dirty)
-            {
-                //
-                // free existing resources
-                if (_render_target)
-                {
-                    context.render_backend().delete_render_target(_render_target);
-                }
-                //
-                // create..
-                _render_target = context.render_backend().create_render_target(viewport_width, viewport_height);
-                _render_target->bind();
-                log_debug("created render target {}x{}", viewport_width, viewport_height);
-            }
+            //
+            // get pos in local coordinates
+            auto cursor = ImGui::GetCursorPos();
 
             //
-            // draw to fbo
-            _render_target->bind();
-            auto& canvas = *_render_target->skia_surface()->getCanvas();
+            // check if viewport was scrolled or resized
+            auto viewport = context.render_layer().viewport();
+            // move viewport to local coordinates
+            viewport[0] -= cursor.x; viewport[1] -= cursor.y;
+            if (viewport != _viewport)
+            {
+                _viewport = viewport;
+                if (_on_viewport_change) postpone([f = _on_viewport_change, rect = viewport]() {
+                    f(rect);
+                });
+            }
+
+            auto& canvas = context.render_layer().use(context.render_backend());
             canvas.save();
-            canvas.clear(0x0000000);
-            canvas.translate(
-                cursor.x - ImGui::GetScrollX(),
-                cursor.y - ImGui::GetScrollY()
+            canvas.translate(cursor.x - ImGui::GetScrollX(), cursor.y - ImGui::GetScrollY());
+            auto clip_rect = SkRect::MakeWH(
+                std::uint32_t(fwidth + 0.5f), 
+                std::uint32_t(fheight + 0.5f)
             );
-            auto clip_rect = SkRect::MakeWH(width, height);
             canvas.clipRect(clip_rect, false);
             canvas.drawPicture(_skia_picture);
             canvas.restore();
-            _is_dirty = false;
-            _render_target->skia_surface()->flushAndSubmit();
-            _render_target->release();
         }
 
-        _draw_textured_rectangle();
-
         //
-        // advance cursor
+        // TODO: move out of here, specialize
+        ImGuiWindow& window = *ImGui::GetCurrentWindow();
         auto const id = window.GetID(this->imgui_label().c_str());
         ImVec2 pos(window.DC.CursorPos.x, window.DC.CursorPos.y + window.DC.CurrLineTextBaseOffset);
         auto bb_bottom_right = ImVec2(window.DC.CursorPos.x + fwidth, window.DC.CursorPos.y + fheight);
@@ -228,7 +143,7 @@ namespace p3
     void Surface::set_picture(sk_sp<SkPicture> picture)
     {
         _skia_picture = std::move(picture);
-        _is_dirty = true;
+        set_needs_update();
         redraw();
     }
 

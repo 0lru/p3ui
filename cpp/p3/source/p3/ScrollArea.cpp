@@ -1,6 +1,7 @@
 
 #include "constant.h"
 #include "ScrollArea.h"
+#include "Context.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -13,6 +14,7 @@ namespace p3
     ScrollArea::ScrollArea()
         : Node("ScrollArea")
     {
+        set_render_layer(std::make_shared<RenderLayer>());
     }
 
     void ScrollArea::render_impl(Context& context, float width, float height)
@@ -29,7 +31,9 @@ namespace p3
         if (_content)
         {
             auto available = ImGui::GetContentRegionAvail();
+            render_layer()->init_frame(context);
             _content->render(context, _content->width(available.x), _content->height(available.y));
+            render_layer()->finish_frame(context);
         }
         ImGui::EndChild();
         update_status();
