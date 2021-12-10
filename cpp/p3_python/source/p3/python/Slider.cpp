@@ -1,6 +1,5 @@
-
 #include "p3ui.h"
-#include <p3/Slider.h>
+#include <p3/widgets/Slider.h>
 #include <p3/DataSuffix.h>
 
 

@@ -1,16 +1,20 @@
-#include "ChildWindow.h"
 #include "Context.h"
 #include "Font.h"
-#include "Menu.h"
-#include "MenuBar.h"
-#include "Popup.h"
 #include "UserInterface.h"
 #include "log.h"
 #include "RenderLayer.h"
 
+
+// hm.. move this to widgets?
+#include <p3/widgets/ChildWindow.h>
+#include <p3/widgets/Menu.h>
+#include <p3/widgets/MenuBar.h>
+#include <p3/widgets/Popup.h>
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <implot.h>
+
 
 namespace p3
 {

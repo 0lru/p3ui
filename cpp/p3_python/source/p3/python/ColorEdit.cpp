@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/ColorEdit.h>
+
+#include <p3/widgets/ColorEdit.h>
+
 
 namespace p3::python
 {

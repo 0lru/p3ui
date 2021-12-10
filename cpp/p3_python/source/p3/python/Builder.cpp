@@ -6,8 +6,6 @@
 
 #include <regex>
 
-#include <iostream>
-
 namespace p3::python
 {
 

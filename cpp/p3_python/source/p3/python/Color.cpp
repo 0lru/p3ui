@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
+
 #include <p3/Color.h>
+
 #include <fmt/format.h>
 
 

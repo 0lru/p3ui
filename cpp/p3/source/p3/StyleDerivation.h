@@ -7,6 +7,10 @@ namespace p3
 
     class StyleBlock;
 
+    //
+    // this is the default, cascadable styling. one or more style 
+    // blocks can be merged to override these defaults.
+    // e.g. this uses a lot of memory and is probably optimizable
     struct StyleDerivation
     {
         Cascadable<Position> position = Cascade::Initial;

@@ -1,6 +1,6 @@
-
 #include "p3ui.h"
-#include <p3/InputText.h>
+
+#include <p3/widgets/InputText.h>
 
 
 namespace p3::python

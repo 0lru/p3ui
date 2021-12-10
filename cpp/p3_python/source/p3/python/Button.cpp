@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/Button.h>
+
+#include <p3/widgets/Button.h>
+
 
 namespace p3::python
 {

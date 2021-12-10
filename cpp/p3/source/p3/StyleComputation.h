@@ -5,6 +5,8 @@
 namespace p3
 {
 
+    //
+    // the computed, resp. cascaded style.
     struct StyleComputation
     {
         Position position;

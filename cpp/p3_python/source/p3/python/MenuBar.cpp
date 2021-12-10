@@ -1,7 +1,8 @@
-
 #include "p3ui.h"
-#include <p3/Menu.h>
-#include <p3/MenuBar.h>
+
+#include <p3/widgets/Menu.h>
+#include <p3/widgets/MenuBar.h>
+
 
 namespace p3::python
 {

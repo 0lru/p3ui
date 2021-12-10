@@ -1,8 +1,9 @@
-
 #include "p3ui.h"
 #include "numpy.h"
+
 #include <p3/Texture.h>
 #include <fmt/format.h>
+
 
 namespace p3::python
 {

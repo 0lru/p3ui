@@ -1,6 +1,5 @@
-
 #include "p3ui.h"
-#include <p3/ScrollArea.h>
+#include <p3/widgets/ScrollArea.h>
 
 
 namespace p3::python

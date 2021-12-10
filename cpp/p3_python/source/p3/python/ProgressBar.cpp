@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/ProgressBar.h>
+
+#include <p3/widgets/ProgressBar.h>
+
 
 namespace p3::python
 {

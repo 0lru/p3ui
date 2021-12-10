@@ -1,5 +1,6 @@
-file(GLOB SOURCES source/p3/python/*.cpp)
-set(SOURCES ${SOURCES})
+file(GLOB SOURCES
+    source/p3/python/*.cpp
+)
 pybind11_add_module(_p3ui ${SOURCES})
 target_link_libraries(_p3ui PUBLIC p3)
 
