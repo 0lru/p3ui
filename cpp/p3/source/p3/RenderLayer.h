@@ -14,12 +14,8 @@ namespace p3
     // or custom gl content. for the moment, we do not support tiling,
     // but it's foreseen.
     //
-    // the layer is lazily initialized. in consequence, it's buffer is created
-    // on first usage. The buffer will be destroyed on resize, or 
-    // if it wasn't used by any children during the render traversal.
-    //
-    // the buffer will always as big as the content area size (the viewport
-    // of the owning container element
+    // the buffer will always as big as the content area size which
+    // is what we here call viewport
     //
     // in debug mode, a layer will appear
     //    * green, if the buffer is in use
@@ -43,14 +39,15 @@ namespace p3
 
     private:
         void _draw_debug();
+        void _reset();
 
         bool _dirty = true;
         std::uint32_t _object_count = 0;
-        
+
         Viewport _viewport{ 0, 0, 0, 0 };
         std::uint32_t _requested_width = 0;
         std::uint32_t _requested_height = 0;
-        
+
         std::shared_ptr<RenderBackend> _render_backend = nullptr;
         RenderBackend::RenderTarget* _render_target = nullptr;
     };
