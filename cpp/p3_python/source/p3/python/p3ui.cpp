@@ -4,7 +4,6 @@
 
 PYBIND11_MODULE(_p3ui, module)
 {
-    std::cout << "initializing.." << std::endl;
     using namespace ::p3;
 
     module.doc() =
