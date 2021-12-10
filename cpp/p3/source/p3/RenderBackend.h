@@ -53,6 +53,7 @@ namespace p3
 
         virtual Texture* create_texture() = 0;
         virtual RenderTarget* create_render_target(std::uint32_t width, std::uint32_t height) = 0;
+        virtual std::uint32_t max_texture_size() const = 0;
 
         void gc();
         void shutdown();

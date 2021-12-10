@@ -153,6 +153,7 @@ namespace p3
             //
             // let imggui "hook into"
             _render_backend->init();
+            log_info("maximum texture size: {}", _render_backend->max_texture_size());
             ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), true);
         });
     }

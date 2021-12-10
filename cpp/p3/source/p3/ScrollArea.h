@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "Node.h"
-
+#include "RenderLayer.h"
 
 namespace p3
 {
@@ -33,9 +33,7 @@ namespace p3
         void set_vertical_scroll_autohide(bool);
         bool vertical_scroll_autohide() const;
 
-        /// if set to true, content width is set to available horizontal space
-        void set_auto_adjust_content(bool);
-        bool auto_adjust_content() const;
+        bool is_layered() const final override { return true; }
 
     private:
         std::shared_ptr<Node> _content;

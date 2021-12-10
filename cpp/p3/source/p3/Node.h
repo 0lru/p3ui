@@ -22,6 +22,7 @@ namespace p3
 {
 
     class Context;
+    class RenderLayer;
 
     template<typename T>
     using ref = std::shared_ptr<T>;
@@ -136,8 +137,13 @@ namespace p3
 
         static std::size_t node_count();
 
+        void set_render_layer(std::shared_ptr<RenderLayer>);
+        std::shared_ptr<RenderLayer> const& render_layer() const;
+
     protected:
         Node(std::string element_name);
+
+        virtual bool is_layered() const { return false; }
 
         virtual void render_absolute(Context&);
 
@@ -176,6 +182,8 @@ namespace p3
         std::optional<std::string> _label;
         std::uint64_t _imgui_id;
         std::string _imgui_label;
+
+        std::shared_ptr<RenderLayer> _render_layer;
 
         std::shared_ptr<Node> _tooltip;
         Node* _parent = nullptr;

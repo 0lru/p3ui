@@ -14,6 +14,7 @@ namespace p3
         
         Texture *create_texture() override;
         RenderTarget *create_render_target(std::uint32_t width, std::uint32_t height) override;
+        std::uint32_t max_texture_size() const override;
     };
 
 }

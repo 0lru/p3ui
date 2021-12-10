@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "StyleTypes.h"
@@ -16,6 +15,8 @@ namespace p3
     class UserInterface;
     class RenderBackend;
     class TaskQueue;
+    class RenderLayer;
+    class RenderTarget;
 
     class Context : public std::enable_shared_from_this<Context>
     {
@@ -39,11 +40,23 @@ namespace p3
         // task queue related to the user interface
         TaskQueue& task_queue() const;
 
+        RenderLayer& render_layer() const;
+        void push_render_layer(RenderLayer& layer) { _render_layer.push_back(&layer); }
+        void pop_render_layer() { _render_layer.pop_back(); }
+        void set_render_target(RenderTarget* render_target) { _render_target = render_target; }
+        RenderTarget* render_target() const { return _render_target; }
+
+        void set_show_render_layers(bool show_render_layers) { _show_render_layers = show_render_layers; }
+        bool show_render_layers() const { return _show_render_layers; }
+
     private:
+        bool _show_render_layers = true;
         UserInterface& _user_interface;
         TaskQueue& _task_queue;
         RenderBackend& _render_backend;
         MouseMove _mouse_move;
+        RenderTarget* _render_target;
+        std::vector<RenderLayer*> _render_layer;
     };
 
 }

@@ -79,8 +79,6 @@ namespace p3
 
         virtual void synchronize_with(Synchronizable&) override;
 
-
-
     protected:
         void update_content() override;
         void update_restyle(Context&, bool whole_tree=false) override;

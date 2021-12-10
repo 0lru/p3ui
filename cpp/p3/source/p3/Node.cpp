@@ -1,4 +1,3 @@
-
 #include "Node.h"
 #include "convert.h"
 #include "Context.h"
@@ -6,6 +5,7 @@
 #include "log.h"
 #include "StyleDerivation.h"
 #include "TaskQueue.h"
+#include "RenderLayer.h"
 
 #include <p3/Parser.h>
 
@@ -269,6 +269,10 @@ namespace p3
             //
             // at this point the anchestor-style is still applied
             _compile_style_computation(context);
+            //
+            // force layer to redraw
+            if (_render_layer)
+                _render_layer->set_dirty();
         }
 
         {
@@ -310,8 +314,18 @@ namespace p3
 
     void Node::set_needs_update()
     {
+        auto it = this;
+        while (it)
+        {
+            if (it->_render_layer)
+            {
+                it->_render_layer->set_dirty();
+                break;
+            }
+            it = it->_parent;
+        }
         _needs_update = true;
-        auto it = _parent;
+        it = _parent;
         while (it)
         {
             if (it->_needs_update)
@@ -393,10 +407,25 @@ namespace p3
             node->synchronize_with(*this);
     }
 
+    void Node::set_render_layer(std::shared_ptr<RenderLayer> render_layer)
+    {
+        _render_layer = std::move(render_layer);
+    }
+
+    std::shared_ptr<RenderLayer> const& Node::render_layer() const
+    {
+        return _render_layer;
+    }
+
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
+        //
+        // do not traverse this tree if rect is invalid
         if (width * height < 0)
             return;
+        
+        //
+        // emit on_resize
         auto size = Size{ width, height };
         if (size != _size)
         {
@@ -404,14 +433,21 @@ namespace p3
                 postpone([on_resize = _on_resize, size]() { on_resize(std::move(size)); });
             std::swap(size, _size);
         }
+
+        //
+        // hacky "disabled"
         float disabled_alpha = 0.2f;
         if (_disabled)
             std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
+
+        //
+        // apply style
         auto compiled_guard = _apply_style_compiled();
+
         if (adjust_worksrect)
         {
             //
-            // TODO: better do this to Layout.cpp?
+            // this needs to be done after style was applied and is only used by Layout.cpp
             auto& work_rect = GImGui->CurrentWindow->WorkRect;
             ImVec2 work_rect_max = work_rect.Min;
             work_rect_max.x += width + ImGui::GetCurrentContext()->Style.FramePadding.x /* 2*/;
@@ -424,6 +460,9 @@ namespace p3
         {
             render_impl(context, width, height);
         }
+
+        //
+        // hacky disabled
         if (_disabled)
             std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
     }

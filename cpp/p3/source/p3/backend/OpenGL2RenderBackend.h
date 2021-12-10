@@ -14,6 +14,7 @@ namespace p3
         void render(UserInterface const&) override;
 
         Texture* create_texture() override;
+        std::uint32_t max_texture_size() const override;
         RenderTarget* create_render_target(std::uint32_t width, std::uint32_t height) override;
     };
 

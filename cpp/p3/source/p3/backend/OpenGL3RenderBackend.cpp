@@ -38,5 +38,12 @@ namespace p3
         return _render_targets.back().get();
     }
 
+    std::uint32_t OpenGL3RenderBackend::max_texture_size() const
+    {
+        GLint value;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+        return static_cast<std::uint32_t>(value);
+    }
+
 }
 

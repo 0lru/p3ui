@@ -25,6 +25,13 @@ namespace p3
     {
     }
 
+    RenderLayer& Context::render_layer() const 
+    {
+        if (_render_layer.empty())
+            throw std::runtime_error("no render layer present");
+        return *_render_layer.back(); 
+    }
+
     Context& Context::current()
     {
         if (!p3::current_context)
