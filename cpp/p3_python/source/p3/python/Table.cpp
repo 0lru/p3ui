@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/Table.h>
+
+#include <p3/widgets/Table.h>
+
 
 namespace p3::python
 {

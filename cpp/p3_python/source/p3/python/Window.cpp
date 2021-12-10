@@ -1,13 +1,14 @@
-
 #include "p3ui.h"
 #include "Promise.h"
 #include "AsyncTaskQueue.h"
 
-#include <p3/Popup.h>
-#include <p3/platform/Window.h>
 #include <p3/Theme.h>
 #include <p3/UserInterface.h>
-#include <p3/MenuBar.h>
+
+#include <p3/platform/Window.h>
+
+#include <p3/widgets/MenuBar.h>
+#include <p3/widgets/Popup.h>
 
 namespace p3::python
 {

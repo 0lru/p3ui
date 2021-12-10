@@ -1,6 +1,6 @@
-
 #include "p3ui.h"
-#include <p3/Popup.h>
+
+#include <p3/widgets/Popup.h>
 
 
 namespace p3::python

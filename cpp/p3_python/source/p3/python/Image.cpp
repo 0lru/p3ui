@@ -1,6 +1,6 @@
-
 #include "p3ui.h"
-#include <p3/Image.h>
+
+#include <p3/widgets/Image.h>
 
 
 namespace p3::python

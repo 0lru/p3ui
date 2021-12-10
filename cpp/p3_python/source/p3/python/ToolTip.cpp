@@ -1,6 +1,5 @@
-
 #include "p3ui.h"
-#include <p3/ToolTip.h>
+#include <p3/widgets/ToolTip.h>
 
 namespace p3::python
 {

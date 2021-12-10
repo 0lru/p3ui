@@ -5,30 +5,29 @@
 
 #include "log.h"
 
-#include "Button.h"
 #include "Text.h"
-
-#include "CheckBox.h"
-#include "ChildWindow.h"
-#include "Collapsible.h"
-#include "ColorEdit.h"
-#include "ComboBox.h"
 #include "Layout.h"
-#include "Image.h"
-#include "InputScalar.h"
-#include "InputText.h"
-#include "Menu.h"
-#include "MenuBar.h"
-#include "MenuItem.h"
-#include "Plot.h"
-#include "Popup.h"
-#include "ProgressBar.h"
-#include "ScrollArea.h"
-#include "Slider.h"
-#include "Tab.h"
-#include "Text.h"
 #include "UserInterface.h"
 #include "DataSuffix.h"
+
+#include <p3/widgets/Button.h>
+#include <p3/widgets/CheckBox.h>
+#include <p3/widgets/ChildWindow.h>
+#include <p3/widgets/Collapsible.h>
+#include <p3/widgets/ColorEdit.h>
+#include <p3/widgets/ComboBox.h>
+#include <p3/widgets/Image.h>
+#include <p3/widgets/InputScalar.h>
+#include <p3/widgets/InputText.h>
+#include <p3/widgets/Menu.h>
+#include <p3/widgets/MenuBar.h>
+#include <p3/widgets/MenuItem.h>
+#include <p3/widgets/Plot.h>
+#include <p3/widgets/Popup.h>
+#include <p3/widgets/ProgressBar.h>
+#include <p3/widgets/ScrollArea.h>
+#include <p3/widgets/Slider.h>
+#include <p3/widgets/Tab.h>
 
 #include <pugixml.hpp>
 

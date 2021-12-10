@@ -1,6 +1,6 @@
-
 #include "p3ui.h"
-#include <p3/ComboBox.h>
+
+#include <p3/widgets/ComboBox.h>
 
 
 namespace p3::python

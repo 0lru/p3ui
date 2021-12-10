@@ -1,6 +1,5 @@
-
 #include "p3ui.h"
-#include <p3/Tab.h>
+#include <p3/widgets/Tab.h>
 
 
 namespace p3::python

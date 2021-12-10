@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
+
 #include <p3/StyleBlock.h>
+
 
 namespace p3::python
 {

@@ -1,6 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/CheckBox.h>
+
+#include <p3/widgets/CheckBox.h>
+
 
 namespace p3::python
 {

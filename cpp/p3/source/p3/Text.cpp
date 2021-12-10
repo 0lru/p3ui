@@ -1,4 +1,3 @@
-
 #include "constant.h"
 #include "Text.h"
 
@@ -6,6 +5,7 @@
 #include <imgui_internal.h>
 
 #include <iostream>
+
 
 namespace p3
 {

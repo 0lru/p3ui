@@ -5,6 +5,8 @@
 namespace p3
 {
 
+    //
+    // this is for the definition of how styling is applied to the imgui context
     class StyleStrategy
     {
     public:

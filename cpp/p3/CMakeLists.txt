@@ -1,4 +1,11 @@
-file(GLOB SOURCES source/p3/*.cpp source/p3/backend/*.cpp source/p3/platform/*.cpp)
+file(GLOB SOURCES 
+
+    source/p3/*.cpp 
+    source/p3/widgets/*.cpp 
+    source/p3/backend/*.cpp 
+    source/p3/platform/*.cpp
+
+)
 add_library(p3 STATIC ${SOURCES})
 target_include_directories(p3 PUBLIC source/)
 target_link_libraries(p3 

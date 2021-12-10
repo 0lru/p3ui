@@ -1,7 +1,7 @@
-
 #include "p3ui.h"
-#include <p3/InputScalar.h>
+
 #include <p3/DataSuffix.h>
+#include <p3/widgets/InputScalar.h>
 
 
 namespace p3::python
