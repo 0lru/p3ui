@@ -18,7 +18,9 @@ class IconProvider:
 
     _style_prefix_length = len('materialicons')
 
-    def __init__(self, zip_filename):
+    def __init__(self, zip_filename, *, buffered=True):
+        if buffered:
+            self._buff = dict()
         self._hash = dict()
         self._by_name = dict()
         self._by_category = dict()
@@ -86,7 +88,12 @@ class IconProvider:
         if bucket is None:
             raise IconProvider.Error(f'icon not found ({style}:{category}:{name})')
         icon = bucket[-1]
-        bytes = self._file.read(icon.path.as_posix())
-        stream = skia.MemoryStream(bytes, True)
-        dom = skia.SVGDOM.MakeFromStream(stream)
-        return dom
+        bytes = None
+        if self._buff and icon in self._buff:
+            bytes = self._buff[icon]
+        else:
+            bytes = self._file.read(icon.path.as_posix())
+            if self._buff:
+                self._buff[icon] = bytes
+        stream = skia.MemoryStream(bytes, False)
+        return skia.SVGDOM.MakeFromStream(stream)
