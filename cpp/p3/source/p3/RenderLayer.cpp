@@ -125,7 +125,7 @@ namespace p3
             auto& canvas = *_render_target->skia_surface()->getCanvas();
             _render_target->bind();
             canvas.clear(0x0000000);
-            log_info("rendering {} objects", _object_count);
+            // log_info("rendering {} objects", _object_count);
             node.render(*_render_target);
             _render_target->skia_surface()->flushAndSubmit();
             _render_target->release();
