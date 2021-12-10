@@ -26,6 +26,7 @@ namespace p3
 
         Context(UserInterface&, TaskQueue&, RenderBackend&, MouseMove);
         ~Context();
+
         static Context& current();
 
         UserInterface& user_interface() const;
