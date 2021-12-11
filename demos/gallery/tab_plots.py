@@ -123,14 +123,17 @@ class TabPlots(VerticalScrollArea):
             yield x, np.sin(x)
 
     async def update(self):
-        x, y = next(self.sin_signal)
-        self.line_plot.x_axis.limits = (x.min(), x.max())
-        while True:
-            with self.lock:
-                _, y = next(self.sin_signal)
-                # self.line_plot.x_axis.limits = (x.min(), x.max())
-                self.line_series.x = x
-                self.line_series.y = y
-                self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
-            # await asyncio.sleep(1.0/60.0)
-            await asyncio.sleep(0)
+        try:
+            x, y = next(self.sin_signal)
+            self.line_plot.x_axis.limits = (x.min(), x.max())
+            while True:
+                with self.lock:
+                    _, y = next(self.sin_signal)
+                    # self.line_plot.x_axis.limits = (x.min(), x.max())
+                    self.line_series.x = x
+                    self.line_series.y = y
+                    self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
+                # await asyncio.sleep(1.0/60.0)
+                await asyncio.sleep(0)
+        except asyncio.CancelledError:
+            pass
