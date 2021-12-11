@@ -19,7 +19,7 @@ class Viewer(Surface):
             with self as canvas:
                 canvas.save()
                 canvas.rotate(rotation, rgba.shape[1] / 2, rgba.shape[0] / 2)
-                rotation += 0.1
+                rotation += 0.5
                 canvas.drawImage(skia_rgba, 0, 0)
                 canvas.restore()
                 canvas.save()
@@ -43,6 +43,7 @@ async def main():
     window = Window(title='video')
     window.position = (256, 256)
     window.size = (512, 512)
+    window.vsync = False
     viewer = Viewer()
     t = asyncio.create_task(viewer.update())
     await window.serve(UserInterface(content=viewer))
