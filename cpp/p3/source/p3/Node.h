@@ -142,8 +142,12 @@ namespace p3
         void set_render_layer(std::shared_ptr<RenderLayer>);
         std::shared_ptr<RenderLayer> const& render_layer() const;
 
+
     protected:
         Node(std::string element_name);
+
+        // validate if node valid for beeing added to this, throws..
+        virtual void before_add(Node&) const;
 
         virtual bool is_layered() const { return false; }
 

@@ -350,13 +350,18 @@ namespace p3
         _parent = parent;
     }
 
+    void Node::before_add(Node& node) const
+    {
+        if (node._disposed)
+            throw std::invalid_argument("cannot reuse disposed node");
+        if (node._parent)
+            throw std::invalid_argument("node is already assigned");
+    }
+
     void Node::add(std::shared_ptr<Node> node)
     {
-        if (node->_disposed)
-            throw std::invalid_argument("cannot reuse disposed node");
+        before_add(*node);
         node->synchronize_with(*this);
-        if (node->parent())
-            throw std::invalid_argument("node is already assigned");
         node->set_parent(this);
         _children.push_back(std::move(node));
         _children.back()->set_needs_restyle();
@@ -364,10 +369,7 @@ namespace p3
 
     void Node::insert(std::size_t index, std::shared_ptr<Node> node)
     {
-        if (node->_disposed)
-            throw std::invalid_argument("cannot reuse disposed node");
-        if (node->parent())
-            throw std::invalid_argument("node is already assigned");
+        before_add(*node);
         node->synchronize_with(*this);
         node->set_parent(this);
         auto it = _children.begin();
