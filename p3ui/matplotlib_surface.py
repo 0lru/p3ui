@@ -1,7 +1,7 @@
 from p3ui import *
 import matplotlib.pyplot as plt
-from .matplotlib import Renderer
-from .matplotlib import dpi as default_dpi
+from .mpl import Renderer
+from .mpl import dpi as default_dpi
 
 
 class MatplotlibSurface(Surface):

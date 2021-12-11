@@ -134,7 +134,7 @@ setup(
     ext_modules=[CMakeExtension("p3ui._p3ui")],
     cmdclass={"build_ext": CMakeBuild},
 # https://stackoverflow.com/questions/37031456/include-pyd-files-in-python-packages
-    packages=['p3ui', 'p3ui.matplotlib'],
+    packages=['p3ui', 'p3ui.mpl'],
     zip_safe=False,
     #    extras_require={"test": ["pytest"]},
 )

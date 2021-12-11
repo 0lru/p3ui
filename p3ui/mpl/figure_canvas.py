@@ -1,7 +1,7 @@
 from matplotlib import _api
 from matplotlib.backend_bases import FigureCanvasBase
 
-from p3ui.matplotlib import Renderer
+from .renderer import Renderer
 
 
 class FigureCanvas(FigureCanvasBase):
