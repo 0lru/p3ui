@@ -33,7 +33,6 @@ async def main():
         except asyncio.CancelledError:
             pass
 
-    asyncio.get_event_loop().create_task(update())
 
     user_interface = UserInterface(content=Column(
         width=(font_size_px * 40 | em, 0, 0), height=(font_size_px * 30 | em, 0, 0),
@@ -63,7 +62,10 @@ async def main():
     user_interface.load_font(assets.joinpath("DroidSans.ttf").as_posix(), font_size_px)
     user_interface.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), font_size_px)
 
+    task = asyncio.get_event_loop().create_task(update())
     await window.serve(user_interface)
+    task.cancel()
+    await task
 
 
 asyncio.run(main())
