@@ -54,25 +54,28 @@ class ImageViewer(Layout):
         return path
 
     async def update(self):
-        rotation = 0
-        distort = 5
-        while True:
-            await asyncio.sleep(0.01)
-            with self._surface as canvas:
-                canvas.drawImage(image, 0, 0)
-                canvas.rotate(rotation, 256, 256)
-                paint = skia.Paint(
-                    PathEffect=skia.DiscretePathEffect.Make(distort, 4.0),
-                    Style=skia.Paint.kStroke_Style,
-                    StrokeWidth=10.0,
-                    AntiAlias=True,
-                    Color=0xFF4285F4)
-                path = ImageViewer.star()
-                canvas.drawPath(path, paint)
-            distort += 0.01
-            rotation += 1
-            if distort >= 10:
-                distort = 5
+        try:
+            rotation = 0
+            distort = 5
+            while True:
+                await asyncio.sleep(0.01)
+                with self._surface as canvas:
+                    canvas.drawImage(image, 0, 0)
+                    canvas.rotate(rotation, 256, 256)
+                    paint = skia.Paint(
+                        PathEffect=skia.DiscretePathEffect.Make(distort, 4.0),
+                        Style=skia.Paint.kStroke_Style,
+                        StrokeWidth=10.0,
+                        AntiAlias=True,
+                        Color=0xFF4285F4)
+                    path = ImageViewer.star()
+                    canvas.drawPath(path, paint)
+                distort += 0.01
+                rotation += 1
+                if distort >= 10:
+                    distort = 5
+        except asyncio.CancelledError:
+            pass
 
 
 async def main():
@@ -86,10 +89,9 @@ async def main():
     user_interface.theme.make_dark()
 
     t = asyncio.create_task(iw.update())
-
     await window.serve(user_interface)
-
     t.cancel()
+    await t
 
 
 if __name__ == "__main__":

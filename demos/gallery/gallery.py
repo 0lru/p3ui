@@ -42,6 +42,8 @@ class Gallery(UserInterface):
         self.t1 = asyncio.get_event_loop().create_task(tab_system.update())
         self.t2 = asyncio.get_event_loop().create_task(tab_plots.update())
 
-    def shutdown(self):
+    async def shutdown(self):
         self.t1.cancel()
         self.t2.cancel()
+        await self.t1
+        await self.t2

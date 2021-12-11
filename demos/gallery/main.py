@@ -9,7 +9,7 @@ async def main():
     window.size = (1000, 900)
     gallery = Gallery(window)
     await window.serve(gallery)
-    gallery.shutdown()
+    await gallery.shutdown()
 
 
 asyncio.run(main())
