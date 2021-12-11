@@ -1,3 +1,4 @@
+.run/**
 out/**
 doc/sphinx/**
 python/venv/**
