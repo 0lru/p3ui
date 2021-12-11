@@ -88,6 +88,8 @@ namespace p3
 
     Node::~Node()
     {
+        for (auto& child : _children)
+            child->_parent = nullptr;
         log_verbose("~Node: {} {}", this->imgui_label(), element_name());
         NodeRegistry::instance().release(_imgui_id);
     }
