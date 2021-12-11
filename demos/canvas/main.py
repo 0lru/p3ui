@@ -58,42 +58,45 @@ class CanvasDemo(ScrollArea):
         return path
 
     async def update(self):
-        rotation = 0
-        distort = 5
-        while True:
-            await asyncio.sleep(0.01)
-            with self.surface as canvas:
-                canvas.save()
-                canvas.translate(50, 50)
-                canvas.rotate(rotation, 128, 128)
-                paint = skia.Paint(
-                    PathEffect=skia.DiscretePathEffect.Make(distort, 4.0),
-                    Style=skia.Paint.kStroke_Style,
-                    StrokeWidth=3.0,
-                    AntiAlias=True,
-                    Color=0xFF4285F4)
-                # canvas.clear(skia.ColorWHITE)
-                path = CanvasDemo.star()
-                canvas.drawPath(path, paint)
-                draw_text(canvas)
-                canvas.restore()
-                canvas.translate(256, 256)
-                paint = skia.Paint(AntiAlias=True)
-                blob = skia.TextBlob('Skia', skia.Font(None, 36), [(0, 0), (32, 5), (64, -5), (96, 2)])
-                canvas.drawTextBlob(blob, 10, 48, paint)
-                xform = [
-                    skia.RSXform(1, 0, 0, 0),
-                    skia.RSXform(1.2, 0, 28, 0),
-                    skia.RSXform(0.8, -0.1, 48, 0),
-                    skia.RSXform(1, 0.2, 64, 0),
-                ]
-                blob = skia.TextBlob.MakeFromRSXform('Skia', xform, skia.Font(None, 36))
-                canvas.drawTextBlob(blob, 10, 96, paint)
+        try:
+            rotation = 0
+            distort = 5
+            while True:
+                await asyncio.sleep(0.01)
+                with self.surface as canvas:
+                    canvas.save()
+                    canvas.translate(50, 50)
+                    canvas.rotate(rotation, 128, 128)
+                    paint = skia.Paint(
+                        PathEffect=skia.DiscretePathEffect.Make(distort, 4.0),
+                        Style=skia.Paint.kStroke_Style,
+                        StrokeWidth=3.0,
+                        AntiAlias=True,
+                        Color=0xFF4285F4)
+                    # canvas.clear(skia.ColorWHITE)
+                    path = CanvasDemo.star()
+                    canvas.drawPath(path, paint)
+                    draw_text(canvas)
+                    canvas.restore()
+                    canvas.translate(256, 256)
+                    paint = skia.Paint(AntiAlias=True)
+                    blob = skia.TextBlob('Skia', skia.Font(None, 36), [(0, 0), (32, 5), (64, -5), (96, 2)])
+                    canvas.drawTextBlob(blob, 10, 48, paint)
+                    xform = [
+                        skia.RSXform(1, 0, 0, 0),
+                        skia.RSXform(1.2, 0, 28, 0),
+                        skia.RSXform(0.8, -0.1, 48, 0),
+                        skia.RSXform(1, 0.2, 64, 0),
+                    ]
+                    blob = skia.TextBlob.MakeFromRSXform('Skia', xform, skia.Font(None, 36))
+                    canvas.drawTextBlob(blob, 10, 96, paint)
 
-            distort += 0.01
-            rotation += 1
-            if distort >= 10:
-                distort = 5
+                distort += 0.01
+                rotation += 1
+                if distort >= 10:
+                    distort = 5
+        except asyncio.CancelledError:
+            pass
 
 
 async def main():
@@ -101,8 +104,10 @@ async def main():
     window.position = (50, 50)
     window.size = (1024, 768)
     surface_demo = CanvasDemo()
-    asyncio.create_task(surface_demo.update())
+    t = asyncio.create_task(surface_demo.update())
     await window.serve(UserInterface(content=surface_demo))
+    t.cancel()
+    await t
 
 
 asyncio.run(main())
