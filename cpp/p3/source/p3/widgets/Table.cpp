@@ -5,7 +5,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-
 namespace p3
 {
 
@@ -72,7 +71,6 @@ namespace p3
 
     void Table::render_impl(Context& context, float width, float height)
     {
-
         ImVec2 size(width, height);
         //
         // NOTE: todo: scrollbars.. borders.. 
@@ -96,8 +94,6 @@ namespace p3
                 std::size_t suffix = 0;
                 for (auto& column : _columns)
                 {
-                    auto infix = std::to_string(imgui_id());
-                    auto label = column->title() + "##" + infix + "_" + std::to_string(suffix++);
                     ImGuiTableColumnFlags flags = ImGuiTableColumnFlags_None;
                     float width = 0.f;
                     if (column->width())
@@ -105,9 +101,17 @@ namespace p3
                         flags |= ImGuiTableColumnFlags_WidthFixed;
                         width = context.to_actual(column->width().value());
                     }
-                    ImGui::TableSetupColumn(label.c_str(), flags, width);
+                    ImGui::TableSetupColumn(column->title().c_str(), flags, width);
                 }
-                ImGui::TableHeadersRow();
+                ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+                for (int column = 0; column < _columns.size(); column++)
+                {
+                    ImGui::TableSetColumnIndex(column);
+                    ImGui::PushID(column);
+                    ImGui::TableHeader(_columns[column]->title().c_str());
+                    ImGui::PopID();
+                }
+//                ImGui::TableHeadersRow();
             }
 
             for (auto& child : children())
