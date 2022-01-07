@@ -20,7 +20,7 @@ namespace p3
     {
         if (_force_open)
         {
-            ImGui::SetNextTreeNodeOpen(_force_open.value());
+            ImGui::SetNextItemOpen(_force_open.value());
             _force_open.reset();
         }
         auto window = ImGui::GetCurrentWindow();
