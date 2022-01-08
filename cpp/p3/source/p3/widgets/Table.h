@@ -54,7 +54,7 @@ namespace p3
         {
         public:
             Row() : Node("Row") {}
-            void render_impl(Context&, float width, float height) override;
+            void render(Context&, float width, float height, bool) override;
         };
 
         void render_impl(Context&, float width, float height) override;

@@ -103,40 +103,34 @@ namespace p3
                     }
                     ImGui::TableSetupColumn(column->title().c_str(), flags, width);
                 }
-                ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-                for (int column = 0; column < _columns.size(); column++)
-                {
-                    ImGui::TableSetColumnIndex(column);
-                    ImGui::PushID(column);
-                    ImGui::TableHeader(_columns[column]->title().c_str());
-                    ImGui::PopID();
-                }
-//                ImGui::TableHeadersRow();
+                ImGui::TableHeadersRow();
             }
-
-            for (auto& child : children())
-                child->render(context, width, height);
-
+            auto const& children_ = children();
+            ImGuiListClipper clipper;
+            clipper.Begin(children_.size());
+            while (clipper.Step())
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+                    children_[row]->render(context, width, height, false);
             ImGui::EndTable();
         }
     }
 
     void Table::update_content()
     {
-
         auto const em = ImGui::GetCurrentContext()->FontSize;
         _automatic_width = _automatic_height = DefaultItemWidthEm * em;
     }
 
-    void Table::Row::render_impl(Context& context, float width, float height)
+    void Table::Row::render(Context& context, float width, float height, bool)
     {
         ImGui::TableNextRow();
-        for (auto& child : children())
+        auto const& ch = children();
+        for (int column=0; column<ch.size(); ++column)
         {
-            ImGui::TableNextColumn();
-            // auto s = ImGui::GetContentRegionAvail() - pad;
-            child->render(context, 0, 0);
+            ImGui::TableSetColumnIndex(column);
+            auto const& item = *ch[column];
+            ch[column]->render(context, item.automatic_width(), item.automatic_height(), false);
         }
-    }
+    } 
 
 }
