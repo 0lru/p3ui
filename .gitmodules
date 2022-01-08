@@ -3,7 +3,7 @@
 	url = https://github.com/pybind/pybind11.git
 [submodule "extern/imgui"]
 	path = extern/imgui
-	url = https://github.com/ocornut/imgui.git
+	url = https://github.com/0lru/imgui.git
 [submodule "extern/implot"]
 	path = extern/implot
 	url = https://github.com/epezent/implot.git
