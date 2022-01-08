@@ -133,7 +133,7 @@ namespace p3
         assign(im_plot_style->Colors[ImPlotCol_AxisGrid], _plot_axis_grid_color);
         assign(im_plot_style->Colors[ImPlotCol_Selection], _plot_selection_color);
         assign(im_plot_style->Colors[ImPlotCol_Crosshairs], _plot_crosshairs_color);
-        im_plot_style->LineWeight = 3.0f;
+        im_plot_style->LineWeight = _plot_line_weight;
         im_plot_style->AntiAliasedLines = false;
         im_gui_style->AntiAliasedLines = false;
         im_gui_style->AntiAliasedFill = false;
@@ -965,7 +965,6 @@ namespace p3
         _on_change();
     }
 
-
     std::optional<Color> Theme::plot_line_color() const
     {
         return _plot_line_color;
@@ -975,6 +974,16 @@ namespace p3
     {
         _plot_line_color = std::move(plot_line_color);
         _on_change();
+    }
+
+    float Theme::plot_line_weight() const
+    {
+        return _plot_line_weight;
+    }
+
+    void Theme::set_plot_line_weight(float line_weight)
+    {
+        _plot_line_weight = line_weight;
     }
 
     std::optional<Color> Theme::plot_fill_color() const

@@ -97,6 +97,7 @@ namespace p3::python
         def_property(theme, "modal_window_dim_background_color", &Theme::modal_window_dim_background_color, &Theme::set_modal_window_dim_background_color);
         // plot
         def_property(theme, "plot_line_color", &Theme::plot_line_color, &Theme::set_plot_line_color);
+        def_property(theme, "plot_line_weight", &Theme::plot_line_weight, &Theme::set_plot_line_weight);
         def_property(theme, "plot_fill_color", &Theme::plot_fill_color, &Theme::set_plot_fill_color);
         def_property(theme, "plot_marker_outline_color", &Theme::plot_marker_outline_color, &Theme::set_plot_marker_outline_color);
         def_property(theme, "plot_marker_fill_color", &Theme::plot_marker_fill_color, &Theme::set_plot_marker_fill_color);

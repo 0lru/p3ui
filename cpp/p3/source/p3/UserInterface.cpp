@@ -29,7 +29,7 @@ namespace p3
         set_theme(Theme::make_default());
         _im_gui_context->IO.IniFilename = nullptr;
         _im_gui_context->IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
+        
         set_render_layer(std::make_shared<RenderLayer>());
     }
 

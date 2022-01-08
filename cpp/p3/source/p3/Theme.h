@@ -264,6 +264,9 @@ namespace p3
         std::optional<Color> plot_line_color() const;
         void set_plot_line_color(std::optional<Color>);
 
+        float plot_line_weight() const;
+        void set_plot_line_weight(float);
+
         std::optional<Color> plot_fill_color() const;
         void set_plot_fill_color(std::optional<Color>);
 
@@ -414,6 +417,7 @@ namespace p3
         std::optional<Color> _plot_axis_grid_color;
         std::optional<Color> _plot_selection_color;
         std::optional<Color> _plot_crosshairs_color;
+        float _plot_line_weight = 1.5f;
     };
 
     /*
