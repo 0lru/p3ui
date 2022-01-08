@@ -124,7 +124,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="p3ui",
-    version="0.0.17",
+    version="0.0.18",
     author="Martin Rudoff",
     url='https://github.com/0lru/p3ui',
     #    author_email="dean0x7d@gmail.com",
