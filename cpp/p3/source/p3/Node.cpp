@@ -430,6 +430,8 @@ namespace p3
 
     void Node::render(Context& context, float width, float height, bool adjust_worksrect)
     {
+        if (!_visible)
+            return;
         //
         // do not traverse this tree if rect is invalid
         if (width * height < 0)
