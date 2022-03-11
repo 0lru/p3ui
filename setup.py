@@ -124,14 +124,14 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="p3ui",
-    version="0.0.20",
+    version="0.0.21",
     author="Martin Rudoff",
     url='https://github.com/0lru/p3ui',
     #    author_email="dean0x7d@gmail.com",
     description="Async Python User Interface Library",
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    ext_modules=[CMakeExtension("p3ui.p3ui")],
+    ext_modules=[CMakeExtension("p3ui.native")],
     cmdclass={"build_ext": CMakeBuild},
 # https://stackoverflow.com/questions/37031456/include-pyd-files-in-python-packages
     packages=['p3ui', 'p3ui.mpl'],

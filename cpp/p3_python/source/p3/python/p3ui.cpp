@@ -1,7 +1,7 @@
 #include "p3ui.h"
 
 
-PYBIND11_MODULE(p3ui, module)
+PYBIND11_MODULE(native, module)
 {
     using namespace ::p3;
 
