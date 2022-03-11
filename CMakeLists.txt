@@ -19,7 +19,7 @@ add_subdirectory(extern)
 
 add_subdirectory(cpp)
 
-set_target_properties(_p3ui
+set_target_properties(p3ui
     PROPERTIES 
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/p3ui"
 )

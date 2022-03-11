@@ -131,7 +131,7 @@ setup(
     description="Async Python User Interface Library",
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    ext_modules=[CMakeExtension("p3ui._p3ui")],
+    ext_modules=[CMakeExtension("p3ui.p3ui")],
     cmdclass={"build_ext": CMakeBuild},
 # https://stackoverflow.com/questions/37031456/include-pyd-files-in-python-packages
     packages=['p3ui', 'p3ui.mpl'],
