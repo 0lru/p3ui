@@ -134,9 +134,9 @@ namespace p3
         assign(im_plot_style->Colors[ImPlotCol_Selection], _plot_selection_color);
         assign(im_plot_style->Colors[ImPlotCol_Crosshairs], _plot_crosshairs_color);
         im_plot_style->LineWeight = _plot_line_weight;
-        im_plot_style->AntiAliasedLines = false;
-        im_gui_style->AntiAliasedLines = false;
-        im_gui_style->AntiAliasedFill = false;
+        im_plot_style->AntiAliasedLines = true;
+        im_gui_style->AntiAliasedLines = true;
+        im_gui_style->AntiAliasedFill = true;
         auto apply = [im_gui_style{ std::move(im_gui_style) }, im_plot_style{ std::move(im_plot_style) }]() mutable
         {
             if(GImGui)
