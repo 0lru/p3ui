@@ -2,3 +2,4 @@ matplotlib==3.4.2
 psutil
 numpy
 matplotlib
+imageio
