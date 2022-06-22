@@ -119,6 +119,7 @@ namespace p3::python
     {
         assign(kwargs, "opacity", item, &Plot::Item::set_opacity);
         assign(kwargs, "line_color", item, &Plot::Item::set_line_color);
+        assign(kwargs, "line_weight", item, &Plot::Item::set_line_weight);
         assign(kwargs, "fill_color", item, &Plot::Item::set_fill_color);
         assign(kwargs, "marker_line_color", item, &Plot::Item::set_marker_line_color);
         assign(kwargs, "marker_fill_color", item, &Plot::Item::set_marker_fill_color);
@@ -293,6 +294,7 @@ namespace p3::python
         def_method(plot_item, "remove", &Plot::Item::remove);
         def_property(plot_item, "opacity", &Plot::Item::opacity, &Plot::Item::set_opacity);
         def_property(plot_item, "line_color", &Plot::Item::line_color, &Plot::Item::set_line_color);
+        def_property(plot_item, "line_weight", &Plot::Item::line_weight, &Plot::Item::set_line_weight);
         def_property(plot_item, "fill_color", &Plot::Item::fill_color, &Plot::Item::set_fill_color);
         def_property(plot_item, "annotations", &Plot::Item::annotations, &Plot::Item::set_annotations);
         def_property(plot_item, "marker_style", &Plot::Item::marker_style, &Plot::Item::set_marker_style);
