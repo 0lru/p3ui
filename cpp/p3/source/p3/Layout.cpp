@@ -94,6 +94,7 @@ namespace p3
         h -= frame_padding.y * 2.f;
 
         ImGui::SetCursorPos(initial_cursor);
+
         auto cursor = initial_cursor;
         if (style_computation().direction == Direction::Horizontal)
         {
@@ -176,6 +177,8 @@ namespace p3
                 if (x) cursor.x += x.value();
                 if (y) cursor.y += y.value();
                 ImGui::SetCursorPos(cursor);
+                auto window = ImGui::GetCurrentWindow();
+                window->DC.CursorPosPrevLine.y = window->DC.CursorPos.y;
                 float backup = 0.f;
                 child->render(context, width, height, true);
                 cursor.x += width + ImGui::GetStyle().ItemSpacing.x;
