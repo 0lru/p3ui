@@ -124,6 +124,13 @@ namespace p3
         static void GlfwCharCallback(GLFWwindow* window, unsigned int c);
         static void GlfwFramebufferSizeCallback(GLFWwindow* window, int, int);
         static void GlfwCursorPosCallback(GLFWwindow* window, double, double);
+
+        struct KeyReleaseEvent {
+            int key;
+            int scancode;
+            int modifications;
+        };
+        std::vector<KeyReleaseEvent> _key_release_events;
     };
 
 }
