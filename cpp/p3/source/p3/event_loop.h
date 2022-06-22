@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <algorithm>
 
 namespace p3 {
 
@@ -26,12 +27,19 @@ public:
     using Queue = std::vector<ScheduledEvent>;
     using Work = std::vector<Event>;
 
+    class Observer;
+    void add_observer(Observer* observer) { _observer.push_back(observer); }
+//    void remove_observer(Observer* observer) { std::erase(_observer, observer); }
+
     void call_at(TimePoint, Event);
     void close();
 
     void run_forever();
 
     Queue const& queue() const { return _queue; }
+
+protected:
+    virtual void process_work(Work);
 
 private:
     Work pop_work_from_queue();
@@ -40,6 +48,14 @@ private:
     std::condition_variable _condition;
     Queue _queue;
     bool _closed = false;
+    std::vector<Observer *> _observer;
+};
+
+class EventLoop::Observer 
+{
+public:
+    virtual ~Observer() = default;
+    virtual void on_work_processed(EventLoop&) = 0;
 };
 
 }

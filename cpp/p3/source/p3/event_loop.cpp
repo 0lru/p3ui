@@ -42,13 +42,20 @@ EventLoop::Work EventLoop::pop_work_from_queue()
     return work;
 }
 
+void EventLoop::process_work(Work work)
+{
+    for (auto& task : work) {
+        task();
+    }
+}
+
 void EventLoop::run_forever()
 {
     auto work = pop_work_from_queue();
     do {
-        for (auto& task : work) {
-            task();
-        }
+        process_work(std::move(work));
+        for (auto observer : _observer)
+            observer->on_work_processed(*this);
         work = pop_work_from_queue();
     } while (!work.empty());
 }

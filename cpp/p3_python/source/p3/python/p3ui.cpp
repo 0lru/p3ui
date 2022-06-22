@@ -9,6 +9,7 @@ PYBIND11_MODULE(native, module)
         R"docstring(
         Object Oriented ImGUI (https://github.com/0lru/p3ui)
     )docstring";
+    python::Definition<python::EventLoop>::apply(module);
 
     python::Definition<Node>::apply(module);
     python::Definition<Button>::apply(module);

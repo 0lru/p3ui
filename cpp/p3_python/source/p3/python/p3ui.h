@@ -18,6 +18,7 @@ namespace p3::python
 {
     class Builder;
     class Surface;
+    class EventLoop;
 
     //
     // wrap parameters

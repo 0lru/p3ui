@@ -9,6 +9,7 @@ namespace p3
     class Color;
     class ColorEdit;
     class ComboBox;
+    class EventLoop;
     class Layout;
     class Image;
     template<typename T> class InputScalar;
