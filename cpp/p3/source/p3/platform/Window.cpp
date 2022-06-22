@@ -161,6 +161,7 @@ void Window::serve(
         // non-hooked callbacks
         glfwSetWindowFocusCallback(_glfw_window.get(), ImGui_ImplGlfw_WindowFocusCallback);
         glfwSetCursorEnterCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorEnterCallback);
+        glfwSetCursorPosCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorPosCallback);
         glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
     });
 }
