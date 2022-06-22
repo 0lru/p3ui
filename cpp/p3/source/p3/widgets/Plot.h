@@ -376,7 +376,7 @@ namespace p3
     {
         auto sample_count = this->values().size();
         if (direction() == Direction::Horizontal)
-            ImPlot::PlotBarsH(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
+            ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
         else
             ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
         for (auto& annotation : this->annotations())
@@ -439,13 +439,13 @@ namespace p3
     template<typename T>
     void Plot::HorizontalLines<T>::render()
     {
-        ImPlot::PlotHLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
+        ImPlot::PlotInfLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
     }
 
     template<typename T>
     void Plot::VerticalLines<T>::render()
     {
-        ImPlot::PlotVLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
+        ImPlot::PlotInfLines(this->name().c_str(), this->values().data(), static_cast<int>(this->values().size()));
     }
 
 }

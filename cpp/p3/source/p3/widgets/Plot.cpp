@@ -58,31 +58,8 @@ namespace p3
     void Plot::render_impl(Context&, float width, float height)
     {
         ImVec2 size(width, height);
-
         ImPlotAxisFlags x_flags = 0;
-        if (x_axis()->type() != Axis::Type::Numeric)
-        {
-            if (x_axis()->type() == Axis::Type::Logarithmic)
-                x_flags |= ImPlotAxisFlags_LogScale;
-            else
-            {
-                x_flags |= ImPlotAxisFlags_Time;
-                ImPlot::GetStyle().UseLocalTime = x_axis()->type() == Axis::Type::LocalTime;
-            }
-        }
-
         ImPlotAxisFlags y_flags = 0;
-        if (y_axis()->type() != Axis::Type::Numeric)
-        {
-            if (y_axis()->type() == Axis::Type::Logarithmic)
-                y_flags |= ImPlotAxisFlags_LogScale;
-            else
-            {
-                y_flags |= ImPlotAxisFlags_Time;
-                ImPlot::GetStyle().UseLocalTime = y_axis()->type() == Axis::Type::LocalTime;
-            }
-        }
-
         if (_x_axis->inverted())
             x_flags |= ImPlotAxisFlags_Invert;
         if (_x_axis->auto_fit())
@@ -115,6 +92,30 @@ namespace p3
             x_flags,
             y_flags))
             return;
+        if (x_axis()->type() != Axis::Type::Numeric)
+        {
+            ImPlotScale scale = 0;
+            if (x_axis()->type() == Axis::Type::Logarithmic)
+                scale |= ImPlotScale_Log10;
+            else
+            {
+                scale |= ImPlotScale_Time;
+                ImPlot::GetStyle().UseLocalTime = x_axis()->type() == Axis::Type::LocalTime;
+            }
+            ImPlot::SetupAxisScale(ImAxis_X1, scale);
+        }
+        if (y_axis()->type() != Axis::Type::Numeric)
+        {
+            ImPlotScale scale = 0;
+            if (y_axis()->type() == Axis::Type::Logarithmic)
+                scale |= ImPlotScale_Log10;
+            else
+            {
+                scale |= ImPlotScale_Time;
+                ImPlot::GetStyle().UseLocalTime = y_axis()->type() == Axis::Type::LocalTime;
+            }
+            ImPlot::SetupAxisScale(ImAxis_Y1, scale);
+        }
         if (_x_axis->ticks())
         {
             if (_x_axis->tick_labels())
