@@ -31,4 +31,4 @@ jobs:
       run: python -m pip install --no-cache-dir --upgrade wheel setuptools
 
     - name: Build
-      run:  python -m pip wheel . --use-feature=in-tree-build -w whl --no-deps
+      run:  python -m pip wheel . -w whl --no-deps
