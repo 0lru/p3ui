@@ -13,7 +13,8 @@ namespace p3
     {
         ImGui_ImplOpenGL3_Init();
         log_debug("creating skia context");
-        _skia_context = GrContext::MakeGL();
+        if (!_skia_context)
+            _skia_context = GrContext::MakeGL();
     }
 
     void OpenGL3RenderBackend::new_frame()

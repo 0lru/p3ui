@@ -12,7 +12,8 @@ namespace p3
     void OpenGL2RenderBackend::init()
     {
         ImGui_ImplOpenGL2_Init();
-        _skia_context = GrContext::MakeGL();
+        if (!_skia_context)
+            _skia_context = GrContext::MakeGL();
     }
 
     void OpenGL2RenderBackend::new_frame()
