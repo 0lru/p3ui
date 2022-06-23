@@ -63,9 +63,10 @@ async def main():
     user_interface.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), font_size_px)
 
     task = asyncio.get_event_loop().create_task(update())
-    await window.serve(user_interface)
+    window.user_interface = user_interface
+    await window.closed
     task.cancel()
     await task
 
 
-asyncio.run(main())
+run(main())

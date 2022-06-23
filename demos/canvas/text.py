@@ -25,7 +25,7 @@ async def main():
     window = Window(title='Skia Fonts')
     window.position = (50, 50)
     window.size = (1024, 768)
-    await window.serve(UserInterface(content=ScrollArea(content=TextSurface())))
+    window.user_interface.content = ScrollArea(content=TextSurface())
+    await window.closed
 
-
-asyncio.run(main())
+run(main())

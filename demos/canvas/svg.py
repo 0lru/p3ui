@@ -26,7 +26,8 @@ async def main():
         canvas.clear(skia.ColorWHITE)
         canvas.translate(50, 50)
         dom.render(canvas)
-    await window.serve(UserInterface(content=surface))
+    window.user_interface.content = surface
+    await window.closed
 
 
-asyncio.run(main())
+run(main())

@@ -90,7 +90,7 @@ async def main():
     window = Window(title='Icons')
     window.position = (50, 50)
     window.size = (1000, 900)
-    window.user_interface = IconBrowser()
+    window.user_interface.content = IconBrowser()
     await window.closed
 
 
