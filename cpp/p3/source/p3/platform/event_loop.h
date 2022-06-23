@@ -57,10 +57,7 @@ public:
     static std::shared_ptr<EventLoop> current();
 
 private:
-    Work pop_work_from_queue();
-
     std::mutex _mutex;
-    std::condition_variable _condition;
     Queue _queue;
     bool _closed = false;
     bool _stopped = false;

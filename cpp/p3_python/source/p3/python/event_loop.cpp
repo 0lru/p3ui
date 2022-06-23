@@ -51,6 +51,7 @@ void Definition<EventLoop>::apply(py::module& module)
         return 0.0;
     });
     event_loop.def("stop", &EventLoop::stop);
+    event_loop.def("close", &EventLoop::close);
     //    def_property(image, "texture", &Image::texture, &Image::set_texture);
     //    def_property(image, "scale", &Image::scale, &Image::set_scale);
     //    def_property(image, "on_click", &Image::on_click, &Image::set_on_click);

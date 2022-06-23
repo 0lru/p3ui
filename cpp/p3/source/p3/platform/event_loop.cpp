@@ -58,37 +58,6 @@ EventLoop::~EventLoop()
     glfwTerminate();
 }
 
-EventLoop::Work EventLoop::pop_work_from_queue()
-{
-    EventLoop::Work work;
-    std::unique_lock<std::mutex> l(_mutex);
-    while (!_stopped) {
-
-        glfwPollEvents();
-        
-        if (_queue.empty()) {
-            _condition.wait_until(l, Clock::now() + std::chrono::milliseconds(500));
-            continue;
-        }
-        
-        if (_queue.front().first - Clock::now() > Duration::zero()) {
-            _condition.wait_until(l, _queue.front().first);
-            continue;
-        }
-        
-        while (!_queue.empty() && _queue.front().first - Clock::now() <= Duration::zero()) {
-            work.push_back(std::move(_queue.front().second));
-            //
-            // pop heap moves effectively to the back
-            std::pop_heap(_queue.begin(), _queue.end(), event_comparator());
-            _queue.pop_back();
-        }
-
-        return work;
-    }
-    return work;
-}
-
 class FunctionalEvent : public Event {
 public:
     FunctionalEvent(std::function<void()> function)
@@ -112,14 +81,48 @@ std::unique_ptr<Event> Event::create(std::function<void()> function)
 
 void EventLoop::run_forever()
 {
-    auto work = pop_work_from_queue();
-    do {
-        for (auto& task : work)
-            task->operator()();
+    while (true) {
+        EventLoop::Work work;
+        double timeout=0.5;
+        {
+            //
+            // locked..
+            std::lock_guard<std::mutex> l(_mutex);
+            if (_closed)
+                _queue.clear();
+            if (_stopped)
+                break;
+            while (!_queue.empty() && _queue.front().first - Clock::now() <= Duration::zero()) {
+                work.push_back(std::move(_queue.front().second));
+                std::pop_heap(_queue.begin(), _queue.end(), event_comparator());
+                _queue.pop_back();
+            }
+        }
+
+        //
+        // at this point glfw events are already pushed
+        for (auto& w : work)
+            w->operator()();
+        work.clear();
+
+        //
+        // glfw updated and work is done.. render
         for (auto observer : _observer)
             observer->on_work_processed(*this);
-        work = pop_work_from_queue();
-    } while (!work.empty());
+
+        //
+        // probably optimizable... (only one lock required)
+        {
+            std::lock_guard<std::mutex> l(_mutex);
+            if (!_queue.empty() && _queue.front().first - Clock::now() > Duration::zero()) {
+                auto duration = _queue.front().first - Clock::now();
+                auto seconds = std::chrono::duration<double>(duration).count();
+                timeout = std::max(0., std::min(timeout, seconds));
+            }
+        }
+
+        glfwWaitEventsTimeout(timeout);
+    }
 }
 
 void EventLoop::call_at(TimePoint time_point, std::unique_ptr<Event> event)
@@ -133,17 +136,18 @@ void EventLoop::call_at(TimePoint time_point, std::unique_ptr<Event> event)
     }
     //
     // https://stackoverflow.com/questions/17101922/do-i-have-to-acquire-lock-before-calling-condition-variable-notify-one
-    _condition.notify_all();
+    glfwPostEmptyEvent();
 }
 
 void EventLoop::close()
 {
+    log_info("closing event loop");
     {
         std::lock_guard<std::mutex> l(_mutex);
         _stopped = true;
         _closed = true;
     }
-    _condition.notify_all();
+    glfwPostEmptyEvent();
 }
 
 void EventLoop::stop()
@@ -152,7 +156,7 @@ void EventLoop::stop()
         std::lock_guard<std::mutex> l(_mutex);
         _stopped = true;
     }
-    _condition.notify_all();
+    glfwPostEmptyEvent();
 }
 
 }

@@ -96,6 +96,9 @@ public:
 
     std::shared_ptr<Window const> shared_ptr() const;
 
+    using CloseCallback = std::function<void()>;
+    void set_close_callback(CloseCallback);
+
 private:
     bool _vsync = true;
     std::string _title;
@@ -135,6 +138,7 @@ private:
     static void GlfwCharCallback(GLFWwindow* window, unsigned int c);
     static void GlfwFramebufferSizeCallback(GLFWwindow* window, int, int);
     static void GlfwCursorPosCallback(GLFWwindow* window, double, double);
+    static void GlfwWindowCloseCallback(GLFWwindow* window);
 
     struct KeyReleaseEvent {
         int key;
@@ -143,6 +147,7 @@ private:
     };
     std::vector<KeyReleaseEvent> _key_release_events;
     std::shared_ptr<EventLoop> _event_loop;
+    CloseCallback _close_callback;
 };
 
 }

@@ -14,8 +14,6 @@ namespace p3::python {
 
 void Definition<Window>::apply(py::module& module)
 {
-    auto asyncio = py::module::import("asyncio");
-
     py::class_<Timer, std::shared_ptr<Timer>>(module, "Timer")
         .def(py::init<>([]() { return std::make_shared<Timer>(); }))
         .def("time", [](Timer& timer) { return std::chrono::duration_cast<std::chrono::duration<double>>(timer.time()).count(); })
@@ -59,8 +57,8 @@ void Definition<Window>::apply(py::module& module)
         return window;
     }),
         py::kw_only(),
-        py::arg("title") = "p3", 
-        py::arg("width") = 1024, 
+        py::arg("title") = "p3",
+        py::arg("width") = 1024,
         py::arg("height") = 768);
 
     window.def_property_readonly("monitor", &Window::monitor);
@@ -77,6 +75,16 @@ void Definition<Window>::apply(py::module& module)
     window.def_property("idle_timeout", &Window::idle_timeout, &Window::set_idle_timeout);
     window.def_property("idle_frame_time", &Window::idle_frame_time, &Window::set_idle_frame_time);
     window.def_property("user_interface", &Window::user_interface, &Window::set_user_interface);
+
+    window.def_property_readonly("closed", [&](Window& w) {
+        auto asyncio = py::module::import("asyncio");
+        auto promise_impl = std::make_unique<Promise<void>>(asyncio);
+        auto future = promise_impl->get_future();
+        w.set_close_callback([promise { p3::Promise<void>(std::move(promise_impl)) }]() mutable {
+            promise.set_value();
+        });
+        return future;
+    });
 }
 
 }

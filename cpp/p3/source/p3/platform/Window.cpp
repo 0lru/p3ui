@@ -61,6 +61,7 @@ Window::Window(std::string title, std::size_t width, std::size_t height)
     glfwSetKeyCallback(_glfw_window.get(), GlfwKeyCallback);
     glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);
     glfwSetFramebufferSizeCallback(_glfw_window.get(), GlfwFramebufferSizeCallback);
+    glfwSetWindowCloseCallback(_glfw_window.get(), GlfwWindowCloseCallback);
 
     glfwGetCursorPos(_glfw_window.get(), &_window_state.mouse[0], &_window_state.mouse[1]);
     glfwGetFramebufferSize(_glfw_window.get(), &_window_state.framebuffer_size.width, &_window_state.framebuffer_size.height);
@@ -282,6 +283,16 @@ void Window::GlfwMouseButtonCallback(GLFWwindow* window, int button, int action,
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
+void Window::GlfwWindowCloseCallback(GLFWwindow* window)
+{
+    auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    log_info("closing window");
+    if (self->_close_callback) {
+        log_info("calling");
+        self->_close_callback();
+    }
+}
+
 void Window::GlfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     static_cast<Window*>(glfwGetWindowUserPointer(window))->_idle_timer.reset();
@@ -383,11 +394,19 @@ void Window::redraw()
 {
     //
     // wake up the loop if sleeping
-    _event_loop->call_at(EventLoop::Clock::now(), Event::create([]() {}));
+    glfwPostEmptyEvent();
 }
 
 void Window::set_needs_update()
 {
     redraw();
 }
+
+void Window::set_close_callback(CloseCallback close_callback)
+{
+    if (_close_callback)
+        log_fatal("can only set window close callback once for now");
+    _close_callback = close_callback;
+}
+
 }
