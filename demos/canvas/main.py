@@ -62,7 +62,7 @@ class CanvasDemo(ScrollArea):
             rotation = 0
             distort = 5
             while True:
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.0)
                 with self.surface as canvas:
                     canvas.save()
                     canvas.translate(50, 50)
@@ -99,15 +99,24 @@ class CanvasDemo(ScrollArea):
             pass
 
 
+async def dump_fps(window):
+    while (True):
+        print(window.frames_per_second)
+        await asyncio.sleep(1.)
+
+
 async def main():
     window = Window(title='Skia Surface')
     window.position = (50, 50)
     window.size = (1024, 768)
+    # window.vsync=False
     surface_demo = CanvasDemo()
     t = asyncio.create_task(surface_demo.update())
-    await window.serve(UserInterface(content=surface_demo))
+    t2 = asyncio.create_task(dump_fps(window))
+    window.user_interface.content = surface_demo
+    await window.closed
     t.cancel()
-    await t
+    t2.cancel()
 
 
-asyncio.run(main())
+run(main())

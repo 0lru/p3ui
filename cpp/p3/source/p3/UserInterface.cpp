@@ -215,11 +215,6 @@ void UserInterface::update_restyle(Context& context, bool force_restyle)
 
 void UserInterface::render(Context& context, float width, float height, bool)
 {
-    //
-    // make context
-    ImGui::SetCurrentContext(_im_gui_context.get());
-    ImPlot::SetCurrentContext(_im_plot_context.get());
-
     ImGui::NewFrame();
 
     update_restyle(context);
