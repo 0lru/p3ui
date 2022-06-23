@@ -28,7 +28,7 @@ namespace logger
 #elif _DEBUG
         constexpr std::uint32_t current = 6;
 #else
-        constexpr std::uint32_t current = 6;
+        constexpr std::uint32_t current = info;
 #endif
     }
 
