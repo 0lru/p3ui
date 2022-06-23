@@ -82,7 +82,7 @@ public:
         int _index;
     };
 
-    class Item : public Synchronizable {
+    class Item {
     public:
         virtual ~Item() = default;
         virtual void render() = 0;
@@ -287,8 +287,6 @@ public:
     void add(std::shared_ptr<Item>);
     void remove(std::shared_ptr<Item>);
     void clear();
-
-    virtual void synchronize_with(Synchronizable&) override;
 
 private:
     std::string _title;

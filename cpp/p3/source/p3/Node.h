@@ -6,7 +6,6 @@
 #include "StyleBlock.h"
 #include "StyleStrategy.h"
 #include "StyleComputation.h"
-#include "Synchronizable.h"
 #include "TaskQueue.h"
 #include "RenderBackend.h"
 
@@ -49,13 +48,9 @@ namespace p3
     class Node
         : public std::enable_shared_from_this<Node>
         , public StyleBlock::Observer
-        , public Synchronizable
     {
     public:
         virtual ~Node();
-
-        virtual void synchronize_with(Synchronizable&) override;
-        virtual void release() override;
 
         std::string const& element_name() const;
         // this is used by the loader to apply xml attributes

@@ -45,18 +45,8 @@ namespace p3::python
         }));
 
         texture.def_property("data", [](std::shared_ptr<Texture> texture) {
-            decltype(texture->lock()) guard;
-            {
-                py::gil_scoped_release release;
-                guard = texture->lock();
-            }
             return wrap<std::uint8_t>(texture->data(), texture->height(), texture->width(), 4).attr("copy")();
         }, [](std::shared_ptr<Texture> texture, py::array_t<std::uint8_t> data) {
-            decltype(texture->lock()) guard;
-            {
-                py::gil_scoped_release release;
-                guard = texture->lock();
-            }
             copy(*texture, data);
             texture->update();
         });

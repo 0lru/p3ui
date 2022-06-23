@@ -9,6 +9,7 @@
 #pragma warning(pop)
 
 #include "WindowTaskQueue.h"
+#include "event_loop.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <p3/UserInterface.h>
@@ -22,152 +23,76 @@
 #include <mutex>
 #include <thread>
 
+// window -> eventloop : obligaroty
+// eventloop -> window : weak
+
 namespace p3 {
 
 Window::Window(std::string title, std::size_t width, std::size_t height)
     : Node("MainWindow")
     , _render_backend(std::make_shared<OpenGL3RenderBackend>())
     , _task_queue(std::make_shared<TaskQueue>(this))
-    , _thread()
 {
-    auto promise = std::make_shared<std::promise<void>>();
-    auto f = promise->get_future();
-    _thread = std::thread([this, promise, title, width, height]() { thread(promise, title, width, height); });
-    f.get();
+    set_user_interface(std::make_shared<UserInterface>());
+    ImGui::SetCurrentContext(&_user_interface->im_gui_context());
+    ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
     log_debug("window created");
-}
 
-Window::~Window()
-{
-    _thread.detach();
-    // _thread.join();
-    _glfw_window.reset();
-    glfwTerminate();
-}
+    _event_loop = EventLoop::current();
+    _event_loop->add_observer(this);
 
-void Window::thread(std::shared_ptr<std::promise<void>> promise, std::string title, std::size_t width, std::size_t height)
-{
-    if (!glfwInit())
-        log_fatal("could not init glfw");
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-    glfwSetErrorCallback([](int code, char const* text) {
-        log_fatal("glfw error, code={}, text=\"{}\"", code, text);
-    });
+    if (!_event_loop)
+        log_fatal("failed to create window, missing active event loop");
 
     _glfw_window = std::shared_ptr<GLFWwindow>(
         glfwCreateWindow(int(width), int(height), title.c_str(), nullptr, nullptr),
         glfwDestroyWindow);
-    if (!_glfw_window) {
-        glfwTerminate();
-        promise->set_exception(std::make_exception_ptr(std::runtime_error("failed to create glfw window")));
-        return;
-    }
+
+    if (!_glfw_window)
+        throw std::runtime_error("failed to create glfw window");
+
     glfwSetWindowUserPointer(_glfw_window.get(), this);
     glfwMakeContextCurrent(_glfw_window.get());
     gladLoadGL(glfwGetProcAddress);
     glfwSwapInterval(_vsync ? 1 : 0);
-    log_debug("window created, vsync={}", _vsync);
-    promise->set_value();
-    try {
-        while (!glfwWindowShouldClose(_glfw_window.get())) {
-            glfwWaitEventsTimeout(0.5);
-            _task_queue->process();
-            frame();
-            //
-            // postpone release events, since else they may get lost
-            if (!_key_release_events.empty()) {
-                for (auto& e : _key_release_events)
-                    ImGui_ImplGlfw_KeyCallback(_glfw_window.get(), e.key, e.scancode, GLFW_RELEASE, e.modifications);
-                _key_release_events.clear();
-                glfwPostEmptyEvent();
-            }
-        }
-        _task_queue->close();
-        //
-        // release textures, targets..
-        log_debug("shutdown render backend");
-        _render_backend->shutdown();
-        //
-        // e. g. remove callbacks for preventing memory leaks
-        if (_user_interface)
-            _serve_promise.set_value();
-    } catch (...) {
-        if (_user_interface)
-            _serve_promise.set_exception(std::current_exception());
-    }
+
+    glfwSetMouseButtonCallback(_glfw_window.get(), GlfwMouseButtonCallback);
+    glfwSetScrollCallback(_glfw_window.get(), GlfwScrollCallback);
+    glfwSetKeyCallback(_glfw_window.get(), GlfwKeyCallback);
+    glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);
+    glfwSetFramebufferSizeCallback(_glfw_window.get(), GlfwFramebufferSizeCallback);
+
+    glfwGetCursorPos(_glfw_window.get(), &_window_state.mouse[0], &_window_state.mouse[1]);
+    glfwGetFramebufferSize(_glfw_window.get(), &_window_state.framebuffer_size.width, &_window_state.framebuffer_size.height);
+
+    _render_backend->init();
+    log_debug("maximum texture size: {}", _render_backend->max_texture_size());
+    ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), false);
+    //
+    // TODO: hook!
+    glfwSetWindowFocusCallback(_glfw_window.get(), ImGui_ImplGlfw_WindowFocusCallback);
+    glfwSetCursorEnterCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorEnterCallback);
+    glfwSetCursorPosCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorPosCallback);
+    glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
 }
 
-void Window::set_title(std::string title)
+Window::~Window()
 {
-    return _task_queue->run_blocking_task([this, title] {
-        glfwSetWindowTitle(_glfw_window.get(), title.c_str());
-        _title = std::move(title);
-    });
+    log_debug("shutdown render backend");
+    _render_backend->shutdown();
+    log_debug("destroying window");
+    _event_loop->remove_observer(this);
+    _glfw_window.reset();
 }
 
-std::string Window::title() const
+void Window::on_work_processed(EventLoop&)
 {
-    return _task_queue->run_blocking_task([this] {
-        return _title;
-    });
-}
+    if (!_user_interface)
+        return;
 
-void Window::serve(
-    Promise<void>&& promise,
-    std::shared_ptr<UserInterface> user_interface,
-    std::shared_ptr<p3::TaskQueue> queue)
-{
-    _task_queue->run_blocking_task([this,
-                                       user_interface,
-                                       promise { std::move(promise) },
-                                       queue { std::move(queue) }]() mutable {
-        _user_interface = std::move(user_interface);
-        Node::add(_user_interface);
+    ImGui::SetCurrentContext(&_user_interface->im_gui_context());
+    ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
 
-        _user_interface->synchronize_with(*this);
-        _user_interface->set_parent(this);
-        _serve_promise = std::move(promise);
-        _serve_queue = std::move(queue);
-
-        //
-        // this is global a. t. m. ...
-        ImGui::SetCurrentContext(&_user_interface->im_gui_context());
-        ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
-
-        //
-        // reset callback state
-        glfwSetMouseButtonCallback(_glfw_window.get(), GlfwMouseButtonCallback);
-        glfwSetScrollCallback(_glfw_window.get(), GlfwScrollCallback);
-        glfwSetKeyCallback(_glfw_window.get(), GlfwKeyCallback);
-        glfwSetCharCallback(_glfw_window.get(), GlfwCharCallback);
-        glfwSetFramebufferSizeCallback(_glfw_window.get(), GlfwFramebufferSizeCallback);
-        // glfwSetWindowSizeCallback
-        // glfwSetCursorPosCallback(_glfw_window.get(), GlfwCursorPosCallback);
-
-        //
-        // init member variables
-        glfwGetCursorPos(_glfw_window.get(), &_window_state.mouse[0], &_window_state.mouse[1]);
-        glfwGetFramebufferSize(_glfw_window.get(), &_window_state.framebuffer_size.width, &_window_state.framebuffer_size.height);
-
-        //
-        // let imggui "hook into"
-        _render_backend->init();
-        log_debug("maximum texture size: {}", _render_backend->max_texture_size());
-        ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), false);
-        //
-        // non-hooked callbacks
-        glfwSetWindowFocusCallback(_glfw_window.get(), ImGui_ImplGlfw_WindowFocusCallback);
-        glfwSetCursorEnterCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorEnterCallback);
-        glfwSetCursorPosCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorPosCallback);
-        glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
-    });
-}
-
-void Window::frame()
-{
     MousePosition mouse_position;
     glfwGetCursorPos(_glfw_window.get(), &(mouse_position[0]), &mouse_position[1]);
     Context::MouseMove mouse_move = std::nullopt;
@@ -193,7 +118,6 @@ void Window::frame()
         ImGui_ImplGlfw_NewFrame();
         {
             {
-                auto guard = _user_interface->lock();
                 _render_backend->gc(); // needs to be locked/synchonized
                 Context context(*_user_interface, *_serve_queue, *_render_backend, mouse_move);
                 _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
@@ -205,155 +129,150 @@ void Window::frame()
         glFlush();
         glfwSwapBuffers(_glfw_window.get());
     }
+
+    if (!_key_release_events.empty()) {
+        for (auto& e : _key_release_events)
+            ImGui_ImplGlfw_KeyCallback(_glfw_window.get(), e.key, e.scancode, GLFW_RELEASE, e.modifications);
+        _key_release_events.clear();
+        redraw();
+    }
+}
+
+void Window::set_title(std::string title)
+{
+    glfwSetWindowTitle(_glfw_window.get(), title.c_str());
+    _title = std::move(title);
+}
+
+std::string Window::title() const
+{
+    return _title;
+}
+
+void Window::set_user_interface(std::shared_ptr<UserInterface> user_interface)
+{
+    _user_interface = std::move(user_interface);
+    Node::add(_user_interface);
+    _user_interface->set_parent(this);
 }
 
 std::shared_ptr<UserInterface> Window::user_interface() const
 {
-    return _task_queue->run_blocking_task([this] {
-        return _user_interface;
-    });
+    return _user_interface;
 }
 
 bool Window::closed() const
 {
-    return _task_queue->run_blocking_task([this] {
-        return glfwWindowShouldClose(_glfw_window.get());
-    });
+    return glfwWindowShouldClose(_glfw_window.get());
 }
 
 Window::Size Window::framebuffer_size() const
 {
-    return _task_queue->run_blocking_task([this] {
-        Size size;
-        glfwGetFramebufferSize(_glfw_window.get(), &size.width, &size.height);
-        return size;
-    });
+    Size size;
+    glfwGetFramebufferSize(_glfw_window.get(), &size.width, &size.height);
+    return size;
 }
 
 double Window::frames_per_second() const
 {
-    return _task_queue->run_blocking_task([this] {
-        return ImGui::GetIO().Framerate;
-    });
+    return ImGui::GetIO().Framerate;
 }
 
 double Window::time_till_enter_idle_mode() const
 {
-    return _task_queue->run_blocking_task([this] {
-        return _idle_timeout
-            ? std::max(0., std::chrono::duration<double>(_idle_timeout.value() - _idle_timer.time()).count())
-            : 0.;
-    });
+    return _idle_timeout
+        ? std::max(0., std::chrono::duration<double>(_idle_timeout.value() - _idle_timer.time()).count())
+        : 0.;
 }
 
 std::optional<VideoMode> Window::video_mode() const
 {
-    return _task_queue->run_blocking_task([this]() -> std::optional<VideoMode> {
-        auto monitor = glfwGetWindowMonitor(_glfw_window.get());
-        if (monitor) {
-            auto mode = glfwGetVideoMode(monitor);
-            return VideoMode(monitor, mode->width, mode->height, mode->refreshRate);
-        }
-        return std::nullopt;
-    });
+    auto monitor = glfwGetWindowMonitor(_glfw_window.get());
+    if (monitor) {
+        auto mode = glfwGetVideoMode(monitor);
+        return VideoMode(monitor, mode->width, mode->height, mode->refreshRate);
+    }
+    return std::nullopt;
 }
 
 void Window::set_video_mode(std::optional<VideoMode> mode)
 {
-    return _task_queue->run_blocking_task([this, mode] {
-        auto monitor = glfwGetWindowMonitor(_glfw_window.get());
-        if (mode) {
-            if (!monitor) {
-                glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
-                glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
-            }
-            glfwSetWindowMonitor(
-                _glfw_window.get(),
-                mode.value().glfw_monitor(),
-                0, 0,
-                mode.value().width(), mode.value().height(),
-                mode.value().hz());
-        } else if (monitor) {
-            glfwSetWindowMonitor(
-                _glfw_window.get(),
-                nullptr,
-                _position.x, _position.y, _size.width, _size.height, 0);
+    auto monitor = glfwGetWindowMonitor(_glfw_window.get());
+    if (mode) {
+        if (!monitor) {
+            glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
+            glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
         }
-        glfwSwapInterval(_vsync ? 1 : 0);
-    });
+        glfwSetWindowMonitor(
+            _glfw_window.get(),
+            mode.value().glfw_monitor(),
+            0, 0,
+            mode.value().width(), mode.value().height(),
+            mode.value().hz());
+    } else if (monitor) {
+        glfwSetWindowMonitor(
+            _glfw_window.get(),
+            nullptr,
+            _position.x, _position.y, _size.width, _size.height, 0);
+    }
+    glfwSwapInterval(_vsync ? 1 : 0);
 }
 
 Window::Position Window::position() const
 {
-    return _task_queue->run_blocking_task([this] {
-        if (!glfwGetWindowMonitor(_glfw_window.get()))
-            glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
-        return _position;
-    });
+    if (!glfwGetWindowMonitor(_glfw_window.get()))
+        glfwGetWindowPos(_glfw_window.get(), &_position.x, &_position.y);
+    return _position;
 }
 
 void Window::set_position(Position position)
 {
-    return _task_queue->run_blocking_task([this, position]() {
-        if (glfwGetWindowMonitor(_glfw_window.get()))
-            _position = std::move(position);
-        else
-            glfwSetWindowPos(_glfw_window.get(), position.x, position.y);
-    });
+    if (glfwGetWindowMonitor(_glfw_window.get()))
+        _position = std::move(position);
+    else
+        glfwSetWindowPos(_glfw_window.get(), position.x, position.y);
 }
 
 Window::Size Window::size() const
 {
-    return _task_queue->run_blocking_task([this] {
-        if (!glfwGetWindowMonitor(_glfw_window.get()))
-            glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
-        return _size;
-    });
+    if (!glfwGetWindowMonitor(_glfw_window.get()))
+        glfwGetWindowSize(_glfw_window.get(), &_size.width, &_size.height);
+    return _size;
 }
 
 void Window::set_size(Size size)
 {
-    return _task_queue->run_blocking_task([this, size]() {
-        if (glfwGetWindowMonitor(_glfw_window.get()))
-            _size = std::move(size);
-        else
-            glfwSetWindowSize(_glfw_window.get(), size.width, size.height);
-    });
+    if (glfwGetWindowMonitor(_glfw_window.get()))
+        _size = std::move(size);
+    else
+        glfwSetWindowSize(_glfw_window.get(), size.width, size.height);
 }
 
 Monitor Window::primary_monitor() const
 {
-    return _task_queue->run_blocking_task([this] {
-        std::shared_ptr<Node const> x = shared_from_this();
-        return Monitor(std::const_pointer_cast<Window>(shared_ptr()), glfwGetPrimaryMonitor());
-    });
+    std::shared_ptr<Node const> x = shared_from_this();
+    return Monitor(std::const_pointer_cast<Window>(shared_ptr()), glfwGetPrimaryMonitor());
 }
 
 std::vector<Monitor> Window::monitors() const
 {
-    return _task_queue->run_blocking_task([this] {
-        int monitor_count;
-        GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitor_count);
-        std::vector<Monitor> monitors(monitor_count);
-        for (int i = 0; i < monitor_count; ++i)
-            monitors[i] = Monitor(std::const_pointer_cast<Window>(shared_ptr()), glfw_monitors[i]);
-        return monitors;
-    });
+    int monitor_count;
+    GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitor_count);
+    std::vector<Monitor> monitors(monitor_count);
+    for (int i = 0; i < monitor_count; ++i)
+        monitors[i] = Monitor(std::const_pointer_cast<Window>(shared_ptr()), glfw_monitors[i]);
+    return monitors;
 }
 
 void Window::set_vsync(bool vsync)
 {
-    return _task_queue->run_blocking_task([this, vsync] {
-        _vsync = vsync;
-        glfwSwapInterval(_vsync ? 1 : 0);
-    });
+    _vsync = vsync;
+    glfwSwapInterval(_vsync ? 1 : 0);
 }
 
 bool Window::vsync() const
 {
-    return _task_queue->run_blocking_task([this] {
-        return _vsync;
-    });
+    return _vsync;
 }
 
 void Window::GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -462,12 +381,13 @@ double Monitor::dpi() const
 
 void Window::redraw()
 {
-    glfwPostEmptyEvent();
+    //
+    // wake up the loop if sleeping
+    _event_loop->call_at(EventLoop::Clock::now(), Event::create([]() {}));
 }
 
 void Window::set_needs_update()
 {
     redraw();
 }
-
 }

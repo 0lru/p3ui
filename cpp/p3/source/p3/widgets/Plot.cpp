@@ -181,7 +181,6 @@ void Plot::Item::redraw()
 
 void Plot::add(std::shared_ptr<Item> item)
 {
-    item->synchronize_with(*this);
     item->set_plot(this);
     _items.push_back(std::move(item));
 }
@@ -191,7 +190,6 @@ void Plot::remove(std::shared_ptr<Item> item)
     _items.erase(std::remove_if(_items.begin(), _items.end(), [&](auto iterated) {
         if (iterated != item)
             return false;
-        item->release();
         item->set_plot(nullptr);
         return true;
     }),
@@ -201,17 +199,9 @@ void Plot::remove(std::shared_ptr<Item> item)
 void Plot::clear()
 {
     for (auto& item : _items) {
-        item->release();
         item->set_plot(nullptr);
     }
     _items.clear();
-}
-
-void Plot::synchronize_with(Synchronizable& synchronizable)
-{
-    Node::synchronize_with(synchronizable);
-    for (auto& item : _items)
-        item->synchronize_with(*this);
 }
 
 std::shared_ptr<Plot::Axis> const& Plot::x_axis() const
@@ -438,7 +428,6 @@ void Plot::Item::add(std::shared_ptr<Annotation> annotation)
 {
     if (!annotation)
         return;
-    annotation->synchronize_with(*this);
     _annotations.push_back(std::move(annotation));
 }
 
@@ -446,7 +435,6 @@ void Plot::Item::remove(std::shared_ptr<Annotation> annotation)
 {
     if (!annotation)
         return;
-    annotation->release();
     // 20: std::erase(_annotations, annotation);
     _annotations.erase(std::remove(_annotations.begin(), _annotations.end(), annotation), _annotations.end());
 }
