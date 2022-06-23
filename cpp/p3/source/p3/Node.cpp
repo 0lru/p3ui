@@ -6,6 +6,7 @@
 #include "Theme.h"
 #include "convert.h"
 #include "log.h"
+#include "platform/event_loop.h"
 
 #include <p3/Parser.h>
 
@@ -135,7 +136,7 @@ void Node::update_status()
 
 void Node::postpone(std::function<void()> f)
 {
-    Context::current().task_queue().run(std::move(f));
+    EventLoop::current()->call_at(EventLoop::Clock::now(), Event::create(f));
 }
 
 namespace {
