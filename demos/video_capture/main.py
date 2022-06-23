@@ -2,18 +2,18 @@ import asyncio
 from p3ui import *
 import cv2
 
-video = cv2.VideoCapture(0)
-
 
 class Viewer(Surface):
 
     def __init__(self):
         super().__init__()
+        self.video = cv2.VideoCapture(0)
 
     async def update(self):
         rotation = 0
         while True:
-            _, frame = video.read()
+            await asyncio.sleep(0.01)
+            _, frame = self.video.read()
             rgba = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             skia_rgba = skia.Image.fromarray(rgba, skia.ColorType.kRGBA_8888_ColorType)
             with self as canvas:
@@ -43,11 +43,12 @@ async def main():
     window = Window(title='video')
     window.position = (256, 256)
     window.size = (512, 512)
-    window.vsync = False
     viewer = Viewer()
+    window.user_interface = viewer
     t = asyncio.create_task(viewer.update())
-    await window.serve(UserInterface(content=viewer))
-    t.cancel()
+    await window.closed
 
 
-asyncio.run(main())
+#    t.cancel()
+
+run(main())

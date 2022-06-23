@@ -85,14 +85,12 @@ async def main():
 
     iw = ImageViewer()
     scroll = ScrollArea(content=iw)
-    user_interface = UserInterface(content=scroll)
-    user_interface.theme.make_dark()
-
+    window.user_interface.theme.make_dark()
+    window.user_interface.content = scroll
     t = asyncio.create_task(iw.update())
-    await window.serve(user_interface)
+    await window.closed
     t.cancel()
-    await t
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(main())

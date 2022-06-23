@@ -90,7 +90,8 @@ async def main():
     window = Window(title='Icons')
     window.position = (50, 50)
     window.size = (1000, 900)
-    await window.serve(UserInterface(content=IconBrowser()))
+    window.user_interface = IconBrowser()
+    await window.closed
 
 
-asyncio.run(main())
+run(main())
