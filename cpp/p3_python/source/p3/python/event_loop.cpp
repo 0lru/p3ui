@@ -14,14 +14,14 @@ public:
     ~PythonTask() override
     {
         py::gil_scoped_acquire acquire;
-        _task = py::none();
+        _task.release();
     }
 
     void operator()() override
     {
         py::gil_scoped_acquire acquire;
         _task.attr("_run")();
-        _task = py::none();
+//        _task.release();
     }
 
 private:

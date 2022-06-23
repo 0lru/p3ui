@@ -18,32 +18,6 @@ namespace p3::python {
 class Builder;
 class Surface;
 
-//
-// wrap parameters
-// TODO: counterpart for result types
-template <typename T>
-struct WrapParameter {
-    using ResultType = T;
-    using ParameterType = T;
-    ResultType operator()(T&& param) { return param; }
-};
-
-//
-// acquire gil if parameter is a callback
-template <typename... Args>
-struct WrapParameter<std::function<void(Args...)>> {
-    using ResultType = std::function<void(Args...)>;
-    using ParameterType = py::function;
-    ResultType operator()(ParameterType f)
-    {
-        return [f { std::move(f) }](Args... args) {
-            py::gil_scoped_acquire acquire;
-            f(std::move(args)...);
-        };
-    }
-};
-
-
 template <typename T, typename Object>
 void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Object::*setter)(T))
 {
@@ -51,14 +25,32 @@ void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Ob
         (object.*setter)(kwargs[name].cast<T>());
 }
 
+//
+// bit hacky.. revise later
+struct FunctionGuard {
+    py::function f;
+    FunctionGuard(py::function f)
+        : f(std::move(f))
+    {
+    }
+
+    ~FunctionGuard()
+    {
+        py::gil_scoped_acquire acquire;
+        f.release();
+    }
+};
+
 template <typename... Args, typename Object>
 void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Object::*setter)(std::function<void(Args...)>))
 {
-    if (kwargs.contains(name))
-        (object.*setter)([f { kwargs[name].cast<py::function>() }](Args... args) {
+    if (kwargs.contains(name)) {
+        
+        (object.*setter)([guard { std::make_shared<FunctionGuard>(kwargs[name].cast<py::function>()) }](Args... args) mutable {
             py::gil_scoped_acquire acquire;
-            f(std::move(args)...);
+            guard->f(std::move(args)...);
         });
+    }
 }
 
 template <typename T, typename Object>

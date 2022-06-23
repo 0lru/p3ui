@@ -58,6 +58,9 @@ class GuiEventLoop(asyncio.AbstractEventLoop):
         self.__native_event_loop.push(0, handle)
         return handle
 
+    def call_soon_threadsafe(self, callback, *args, **kwargs):
+        return self.call_soon(callback, *args, **kwargs)
+
     def call_later(self, delay, callback, *args):
         #
         # TODO: use decent time representation

@@ -295,9 +295,8 @@ void Window::GlfwMouseButtonCallback(GLFWwindow* window, int button, int action,
 void Window::GlfwWindowCloseCallback(GLFWwindow* window)
 {
     auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    log_info("closing window");
+    log_debug("closing window");
     if (self->_close_callback) {
-        log_info("calling");
         self->_close_callback();
     }
 }

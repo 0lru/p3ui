@@ -141,7 +141,7 @@ void EventLoop::call_at(TimePoint time_point, std::unique_ptr<Event> event)
 
 void EventLoop::close()
 {
-    log_info("closing event loop");
+    log_debug("closing event loop");
     {
         std::lock_guard<std::mutex> l(_mutex);
         _stopped = true;
