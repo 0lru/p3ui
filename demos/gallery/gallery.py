@@ -20,12 +20,11 @@ class Gallery(UserInterface):
         super().__init__(
             menu_bar=MenuBar()
         )
-        tab_plots = TabPlots()
-        tab_system = TabSystem(window)
-
         assets = pathlib.Path(__file__).parents[1].joinpath('assets').absolute()
         self.load_font(assets.joinpath("DroidSans.ttf").as_posix(), 20)
         self.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
+        tab_plots = TabPlots()
+        tab_system = TabSystem(window)
         self.content = Tab(
             padding=(1.5 | em, 0.5 | em),
 

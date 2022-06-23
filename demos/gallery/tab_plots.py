@@ -1,6 +1,7 @@
 from p3ui import *
 import numpy as np
 import asyncio
+import time
 
 from vertical_scroll_area import VerticalScrollArea
 
@@ -116,9 +117,8 @@ class TabPlots(VerticalScrollArea):
 
     @staticmethod
     def create_sin_signal():
-        shift = 0.0
         while True:
-            shift += 0.00020
+            shift = time.time()
             x = np.arange(0 + shift, 10.0 + shift, 0.001)
             yield x, np.sin(x)
 
@@ -127,12 +127,11 @@ class TabPlots(VerticalScrollArea):
             x, y = next(self.sin_signal)
             self.line_plot.x_axis.limits = (x.min(), x.max())
             while True:
-                with self.lock:
-                    _, y = next(self.sin_signal)
-                    # self.line_plot.x_axis.limits = (x.min(), x.max())
-                    self.line_series.x = x
-                    self.line_series.y = y
-                    self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
+                _, y = next(self.sin_signal)
+                # self.line_plot.x_axis.limits = (x.min(), x.max())
+                self.line_series.x = x
+                self.line_series.y = y
+                self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])
                 # await asyncio.sleep(1.0/60.0)
                 await asyncio.sleep(0)
         except asyncio.CancelledError:

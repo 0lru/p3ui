@@ -16,36 +16,28 @@ class ProcessInfo(p3.Layout):
     def utc_now_seconds(cls):
         return cls.utc_seconds(datetime.utcnow())
 
-    async def get_frames_per_second(self):
-        return await asyncio.get_event_loop().run_in_executor(None, getattr, self.window, 'frames_per_second')
-
-    async def get_idle_timer(self):
-        return await asyncio.get_event_loop().run_in_executor(None, getattr, self.window, 'idle_timer')
-
     async def update(self):
         try:
             while True:
-                self.__frames_per_second.value = f'{await self.get_frames_per_second():.2f}'
-                self.__seconds_till_idle.value = f'{await self.get_idle_timer():.2f}'
-                with self.lock:
-                    x = self._memory_series.x
-                    x = np.roll(x, -1)
-                    y = np.roll(self._memory_series.y, -1)
-                    x[-1] = time.time()
-                    y[-1] = self.memory_usage
-                    ymin, ymax = y.min(), y.max()
-                    offset = (ymax - ymin) * 0.1
-                    self.__memory_plot.y_axis.limits = (ymin - offset, ymax + offset)
-                    self._memory_series.x = x
-                    self._memory_series.y = y
+                self.__frames_per_second.value = f'{self.window.frames_per_second:.2f}'
+                self.__seconds_till_idle.value = f'{self.window.idle_timer:.2f}'
+                x = self._memory_series.x
+                x = np.roll(x, -1)
+                y = np.roll(self._memory_series.y, -1)
+                x[-1] = time.time()
+                y[-1] = self.memory_usage
+                ymin, ymax = y.min(), y.max()
+                offset = (ymax - ymin) * 0.1
+                self.__memory_plot.y_axis.limits = (ymin - offset, ymax + offset)
+                self._memory_series.x = x
+                self._memory_series.y = y
 
-                    x = np.roll(self._cpu_series.x, -1)
-                    y = np.roll(self._cpu_series.y, -1)
-                    x[-1] = time.time()
-                    y[-1] = self.cpu_usage
-                    self._cpu_series.x = x
-                    self._cpu_series.y = y
-
+                x = np.roll(self._cpu_series.x, -1)
+                y = np.roll(self._cpu_series.y, -1)
+                x[-1] = time.time()
+                y[-1] = self.cpu_usage
+                self._cpu_series.x = x
+                self._cpu_series.y = y
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
             pass

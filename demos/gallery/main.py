@@ -1,6 +1,7 @@
 import asyncio
 from p3ui import *
 from gallery import Gallery
+import pathlib
 
 
 async def main():
@@ -8,8 +9,11 @@ async def main():
     window.position = (50, 50)
     window.size = (1000, 900)
     gallery = Gallery(window)
-    await window.serve(gallery)
-    await gallery.shutdown()
+    window.user_interface = gallery
+    await window.closed
 
 
-asyncio.run(main())
+#    await gallery.shutdown()
+
+
+run(main())
