@@ -8,7 +8,6 @@
 #include <glad/gl.h>
 #pragma warning(pop)
 
-#include "WindowTaskQueue.h"
 #include "event_loop.h"
 
 #include <backends/imgui_impl_glfw.h>
@@ -31,9 +30,10 @@ namespace p3 {
 Window::Window(std::string title, std::size_t width, std::size_t height)
     : Node("MainWindow")
     , _render_backend(std::make_shared<OpenGL3RenderBackend>())
-    , _task_queue(std::make_shared<TaskQueue>(this))
 {
-    set_user_interface(std::make_shared<UserInterface>());
+    _user_interface = std::make_shared<UserInterface>();
+    Node::add(_user_interface);
+    _user_interface->set_parent(this);
     ImGui::SetCurrentContext(&_user_interface->im_gui_context());
     ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
     log_debug("window created");
@@ -70,7 +70,7 @@ Window::Window(std::string title, std::size_t width, std::size_t height)
     log_debug("maximum texture size: {}", _render_backend->max_texture_size());
     ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), false);
     //
-    // TODO: hook!
+    // TODO: hook and route!
     glfwSetWindowFocusCallback(_glfw_window.get(), ImGui_ImplGlfw_WindowFocusCallback);
     glfwSetCursorEnterCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorEnterCallback);
     glfwSetCursorPosCallback(_glfw_window.get(), ImGui_ImplGlfw_CursorPosCallback);
@@ -120,7 +120,7 @@ void Window::on_work_processed(EventLoop&)
         {
             {
                 _render_backend->gc(); // needs to be locked/synchonized
-                Context context(*_user_interface, *_serve_queue, *_render_backend, mouse_move);
+                Context context(*_user_interface, *_render_backend, mouse_move);
                 _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
             }
             glViewport(0, 0, _window_state.framebuffer_size.width, _window_state.framebuffer_size.height);
@@ -155,6 +155,15 @@ void Window::set_user_interface(std::shared_ptr<UserInterface> user_interface)
     _user_interface = std::move(user_interface);
     Node::add(_user_interface);
     _user_interface->set_parent(this);
+    if (_user_interface) {
+        log_debug("init imgui for opengl");
+        ImGui::SetCurrentContext(&_user_interface->im_gui_context());
+        ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
+// _render_backend = std::make_shared < OpenGL3RenderBackend>();
+        ImGui_ImplGlfw_InitForOpenGL(_glfw_window.get(), false);
+        _render_backend->init();
+        log_debug("done");
+    }
 }
 
 std::shared_ptr<UserInterface> Window::user_interface() const

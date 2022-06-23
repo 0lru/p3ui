@@ -117,8 +117,9 @@ class TabPlots(VerticalScrollArea):
 
     @staticmethod
     def create_sin_signal():
+        start = time.time()
         while True:
-            shift = time.time()
+            shift = time.time() - start
             x = np.arange(0 + shift, 10.0 + shift, 0.001)
             yield x, np.sin(x)
 
@@ -128,7 +129,7 @@ class TabPlots(VerticalScrollArea):
             self.line_plot.x_axis.limits = (x.min(), x.max())
             while True:
                 _, y = next(self.sin_signal)
-                # self.line_plot.x_axis.limits = (x.min(), x.max())
+                self.line_plot.x_axis.limits = (x.min(), x.max())
                 self.line_series.x = x
                 self.line_series.y = y
                 self.scatter_series.y = np.random.rand(self.scatter_series.y.shape[0])

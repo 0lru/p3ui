@@ -1,11 +1,9 @@
-
 #include "Monitor.h"
 #include "Timer.h"
 #include "event_loop.h"
 
 #include <p3/Context.h>
 #include <p3/Node.h>
-#include <p3/TaskQueue.h>
 #include <p3/Theme.h>
 
 #include <imgui.h>
@@ -104,12 +102,6 @@ private:
     std::string _title;
 
     std::shared_ptr<RenderBackend> _render_backend;
-    std::shared_ptr<TaskQueue> _task_queue;
-
-    void thread(std::shared_ptr<std::promise<void>>, std::string title, std::size_t width, std::size_t height);
-    std::thread _thread;
-
-    using Task = std::function<void()>;
 
     struct
     {
@@ -121,9 +113,6 @@ private:
     mutable Size _size { 1024, 768 };
 
     std::shared_ptr<GLFWwindow> _glfw_window = nullptr;
-
-    Promise<void> _serve_promise;
-    std::shared_ptr<p3::TaskQueue> _serve_queue = nullptr;
     std::shared_ptr<UserInterface> _user_interface = nullptr;
 
     Timer _frame_timer;

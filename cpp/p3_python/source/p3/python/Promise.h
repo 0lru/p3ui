@@ -1,6 +1,7 @@
 #pragma once
 
-#include <p3/TaskQueue.h>
+#include "p3ui.h"
+#include <p3/Promise.h>
 
 namespace p3::python {
 

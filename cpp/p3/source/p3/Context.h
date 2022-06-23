@@ -14,7 +14,6 @@ namespace p3
     class Theme;
     class UserInterface;
     class RenderBackend;
-    class TaskQueue;
     class RenderLayer;
     class RenderTarget;
 
@@ -24,7 +23,7 @@ namespace p3
         using MouseMove = std::optional<std::array<float, 2>>;
         using Postponed = std::function<void()>;
 
-        Context(UserInterface&, TaskQueue&, RenderBackend&, MouseMove);
+        Context(UserInterface&, RenderBackend&, MouseMove);
         ~Context();
 
         static Context& current();
@@ -38,9 +37,6 @@ namespace p3
         MouseMove const& mouse_move() const;
         float to_actual(Length const&) const;
 
-        // task queue related to the user interface
-        TaskQueue& task_queue() const;
-
         RenderLayer& render_layer() const;
         void push_render_layer(RenderLayer& layer) { _render_layer.push_back(&layer); }
         void pop_render_layer() { _render_layer.pop_back(); }
@@ -53,7 +49,6 @@ namespace p3
     private:
         bool _show_render_layers = true;
         UserInterface& _user_interface;
-        TaskQueue& _task_queue;
         RenderBackend& _render_backend;
         MouseMove _mouse_move;
         RenderTarget* _render_target;
