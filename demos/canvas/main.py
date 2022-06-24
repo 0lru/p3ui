@@ -100,9 +100,12 @@ class CanvasDemo(ScrollArea):
 
 
 async def dump_fps(window):
-    while (True):
-        print(window.frames_per_second)
-        await asyncio.sleep(1.)
+    try:
+        while (True):
+            print(window.frames_per_second)
+            await asyncio.sleep(1.)
+    except asyncio.CancelledError:
+        pass
 
 
 async def main():
@@ -116,7 +119,10 @@ async def main():
     window.user_interface.content = surface_demo
     await window.closed
     t.cancel()
+    await t
     t2.cancel()
+    await t2
+    pass
 
 
 run(main())
