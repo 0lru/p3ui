@@ -130,6 +130,12 @@ void Node::update_status()
         if (_mouse.leave)
             postpone([f = _mouse.leave, e = MouseEvent(this)]() mutable { f(std::move(e)); });
     }
+    if (_mouse.hovered && _mouse.wheel) {
+        auto wheel = ImGui::GetIO().MouseWheel;
+        if (wheel != 0.f) {
+            postpone([f = _mouse.wheel, wheel]() mutable { f(wheel); });
+        }
+    }
     _status_flags = status_flags;
 }
 
@@ -476,6 +482,15 @@ void Node::set_disabled(bool disabled)
 bool Node::disabled() const
 {
     return _disabled;
+}
+void Node::set_on_mouse_wheel(MouseWheelHandler handler)
+{
+    _mouse.wheel = std::move(handler);
+}
+
+Node::MouseWheelHandler Node::on_mouse_wheel() const
+{
+    return _mouse.wheel;
 }
 
 void Node::set_on_mouse_enter(MouseEventHandler handler)

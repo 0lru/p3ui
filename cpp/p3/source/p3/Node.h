@@ -97,14 +97,18 @@ public:
 
     class MouseEvent;
     using MouseEventHandler = std::function<void(MouseEvent)>;
+    using MouseWheelHandler = std::function<void(float)>;
 
-    void set_on_mouse_enter(MouseEventHandler handler);
+    void set_on_mouse_wheel(MouseWheelHandler);
+    MouseWheelHandler on_mouse_wheel() const;
+
+    void set_on_mouse_enter(MouseEventHandler);
     MouseEventHandler on_mouse_enter() const;
 
-    void set_on_mouse_leave(MouseEventHandler handler);
+    void set_on_mouse_leave(MouseEventHandler);
     MouseEventHandler on_mouse_leave() const;
 
-    void set_on_mouse_move(MouseEventHandler handler);
+    void set_on_mouse_move(MouseEventHandler);
     MouseEventHandler on_mouse_move() const;
 
     bool hovered() const;
@@ -199,6 +203,7 @@ private:
         MouseEventHandler enter;
         MouseEventHandler leave;
         MouseEventHandler move;
+        std::function<void(float)> wheel;
     } _mouse;
 
     bool _needs_update = true;
