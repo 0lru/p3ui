@@ -14,14 +14,13 @@ public:
     ~PythonTask() override
     {
         py::gil_scoped_acquire acquire;
-        _task.release();
+        _task = py::function();
     }
 
     void operator()() override
     {
         py::gil_scoped_acquire acquire;
         _task.attr("_run")();
-//        _task.release();
     }
 
 private:
@@ -56,5 +55,4 @@ void Definition<EventLoop>::apply(py::module& module)
     //    def_property(image, "scale", &Image::scale, &Image::set_scale);
     //    def_property(image, "on_click", &Image::on_click, &Image::set_on_click);
 }
-
 }

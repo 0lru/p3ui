@@ -31,8 +31,8 @@ public:
         _loop.attr("call_soon")(_future.attr("set_result"), py::cast(std::move(t)));
         //
         // need to release that with gil..
-        _loop.release();
-        _future.release();
+        _loop = py::none();
+        _future = py::none();
     }
 
     void set_exception(std::exception_ptr e) override final
@@ -41,8 +41,8 @@ public:
         _loop.attr("call_soon")(_future.attr("set_exception"), py::cast(std::move(e)));
         //
         // need to release that with gil..
-        _loop.release();
-        _future.release();
+        _loop = py::none();
+        _future = py::none();
     }
 
 private:
@@ -76,8 +76,8 @@ public:
         _loop.attr("call_soon")(_future.attr("set_result"), py::none());
         //
         // need to release that with gil..
-        _loop.release();
-        _future.release();
+        _loop = py::none();
+        _future = py::none();
     }
 
     void set_exception(std::exception_ptr e) override final
@@ -86,8 +86,8 @@ public:
         _loop.attr("call_soon")(_future.attr("set_exception"), py::cast(std::move(e)));
         //
         // need to release that with gil..
-        _loop.release();
-        _future.release();
+        _loop = py::none();
+        _future = py::none();
     }
 
 private:

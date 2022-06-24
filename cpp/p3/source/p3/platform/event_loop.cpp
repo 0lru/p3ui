@@ -83,7 +83,7 @@ void EventLoop::run_forever()
 {
     while (true) {
         EventLoop::Work work;
-        double timeout=0.5;
+        double timeout = 0.5;
         {
             //
             // locked..
@@ -101,8 +101,9 @@ void EventLoop::run_forever()
 
         //
         // at this point glfw events are already pushed
-        for (auto& w : work)
+        for (auto& w : work) {
             w->operator()();
+        }
         work.clear();
 
         //

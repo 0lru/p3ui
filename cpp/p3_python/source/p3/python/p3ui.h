@@ -37,7 +37,7 @@ struct FunctionGuard {
     ~FunctionGuard()
     {
         py::gil_scoped_acquire acquire;
-        f.release();
+        f = py::function();
     }
 };
 
