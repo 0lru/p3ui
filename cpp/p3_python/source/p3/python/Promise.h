@@ -27,7 +27,7 @@ public:
 
     void set_value(T t) override final
     {
-        py::gil_scoped_acquire acquire;
+        //py::gil_scoped_acquire acquire;
         _loop.attr("call_soon")(_future.attr("set_result"), py::cast(std::move(t)));
         //
         // need to release that with gil..
@@ -37,7 +37,7 @@ public:
 
     void set_exception(std::exception_ptr e) override final
     {
-        py::gil_scoped_acquire acquire;
+        //py::gil_scoped_acquire acquire;
         _loop.attr("call_soon")(_future.attr("set_exception"), py::cast(std::move(e)));
         //
         // need to release that with gil..
@@ -72,7 +72,7 @@ public:
 
     void set_value() override final
     {
-        py::gil_scoped_acquire acquire;
+        //py::gil_scoped_acquire acquire;
         _loop.attr("call_soon")(_future.attr("set_result"), py::none());
         //
         // need to release that with gil..
@@ -82,7 +82,7 @@ public:
 
     void set_exception(std::exception_ptr e) override final
     {
-        py::gil_scoped_acquire acquire;
+        //py::gil_scoped_acquire acquire;
         _loop.attr("call_soon")(_future.attr("set_exception"), py::cast(std::move(e)));
         //
         // need to release that with gil..

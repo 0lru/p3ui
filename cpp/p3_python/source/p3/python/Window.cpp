@@ -53,6 +53,10 @@ void Definition<Window>::apply(py::module& module)
 
     window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
         auto window = std::make_shared<Window>(std::move(title), width, height);
+        window->set_render_scope([](std::function<void()> render) {
+            py::gil_scoped_release release;
+            render();
+        });
         return window;
     }),
         py::kw_only(),

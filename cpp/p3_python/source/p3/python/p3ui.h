@@ -36,7 +36,7 @@ struct FunctionGuard {
 
     ~FunctionGuard()
     {
-        py::gil_scoped_acquire acquire;
+        //py::gil_scoped_acquire acquire;
         f = py::function();
     }
 };
@@ -47,7 +47,7 @@ void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Ob
     if (kwargs.contains(name)) {
         
         (object.*setter)([guard { std::make_shared<FunctionGuard>(kwargs[name].cast<py::function>()) }](Args... args) mutable {
-            py::gil_scoped_acquire acquire;
+            //py::gil_scoped_acquire acquire;
             guard->f(std::move(args)...);
         });
     }
@@ -65,7 +65,7 @@ void assign(std::optional<py::function>& f, Object& object, void (Object::*sette
 {
     if (f)
         (object.*setter)([f = f.value()](Args... args) {
-            py::gil_scoped_acquire acquire;
+            //py::gil_scoped_acquire acquire;
             f(std::move(args)...);
         });
 }
