@@ -33,6 +33,7 @@ namespace p3
         std::size_t height,
         std::uint8_t const* rgba_data)
     {
+        glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint&>(_id));
         glTexImage2D(
             GL_TEXTURE_2D,
             0, GL_RGBA,
