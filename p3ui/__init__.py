@@ -82,7 +82,7 @@ class GuiEventLoop(asyncio.AbstractEventLoop):
     def create_future(self):
         return asyncio.Future(loop=self)
 
-    def run_in_executor(self, executor, func, *args):
+    def run_in_executor(self, executor, func, *args, **kwargs):
         # if self.closed:
         #    raise RuntimeError('...')
         if executor is None:
