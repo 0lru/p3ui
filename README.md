@@ -36,10 +36,7 @@ async def main():
         justify_content=Justification.SpaceAround,
         align_items=Alignment.Center,
         padding=(1 | em, 1 | em),
-        children=[
-            Text(label='Hello'),
-            Text(label='World!')
-        ])
+        children=[Text('Hello'), Text('World!')])
     await window.closed
 
 
