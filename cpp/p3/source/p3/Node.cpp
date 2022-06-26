@@ -182,6 +182,7 @@ void Node::_cascade_styles_from_parent(Context& context)
     static Alignment initial_alignment = Alignment::Stretch;
     static Justification initial_justification = Justification::Start;
     bool initial_visibility = true;
+    _style_computation.background_color = cascade(*this, combined.background_color, &StyleComputation::background_color, Color::named::black);
     _style_computation.visible = cascade(*this, combined.visible, &StyleComputation::visible, initial_visibility);
     _style_computation.x = cascade(*this, combined.x, &StyleComputation::x, initial_position);
     _style_computation.y = cascade(*this, combined.y, &StyleComputation::y, initial_position);

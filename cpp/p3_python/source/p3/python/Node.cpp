@@ -38,7 +38,7 @@ void Definition<Node>::apply(py::module& module)
     //
     // Node, synced
     py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
-    node.def("node_count", &Node::node_count);
+    node.def_property_readonly("node_count", &Node::node_count);
     def_property_readonly(node, "parent", &Node::shared_parent);
     def_property_readonly(node, "children", &Node::children);
     def_property_readonly(node, "style", &Node::style);

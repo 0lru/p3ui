@@ -142,6 +142,9 @@ protected:
     // validate if node valid for beeing added to this, throws..
     virtual void before_add(Node&) const;
 
+    //
+    // layers will only be created on demand for user interfaces, 
+    // scrolls areas, popups and child windows.
     virtual bool is_layered() const { return false; }
 
     virtual void render_absolute(Context&);

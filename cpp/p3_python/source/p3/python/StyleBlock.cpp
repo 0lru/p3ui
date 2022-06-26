@@ -10,6 +10,7 @@ namespace p3::python
     {
         assign(kwargs, "position", style_block, &StyleBlock::set_position);
         assign(kwargs, "color", style_block, &StyleBlock::set_color);
+        assign(kwargs, "background_color", style_block, &StyleBlock::set_background_color);
         assign(kwargs, "spacing", style_block, &StyleBlock::set_spacing);
         assign(kwargs, "padding", style_block, &StyleBlock::set_padding);
         assign(kwargs, "x", style_block, &StyleBlock::set_x);
@@ -36,6 +37,7 @@ namespace p3::python
 
         def_property(style, "position", &StyleBlock::position, &StyleBlock::set_position);
         def_property(style, "color", &StyleBlock::color, &StyleBlock::set_color);
+        def_property(style, "background_color", &StyleBlock::color, &StyleBlock::set_background_color);
         def_property(style, "spacing", &StyleBlock::spacing, &StyleBlock::set_spacing);
         def_property(style, "padding", &StyleBlock::padding, &StyleBlock::set_padding);
         def_property(style, "x", &StyleBlock::x, &StyleBlock::set_x);
