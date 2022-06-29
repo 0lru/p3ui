@@ -10,6 +10,7 @@ void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
     assign(kwargs, "visible", node, &Node::set_visible);
     assign(kwargs, "disabled", node, &Node::set_disabled);
     assign(kwargs, "on_resize", node, &Node::set_on_resize);
+    assign(kwargs, "on_frame", node, &Node::set_on_frame);
     assign(kwargs, "on_mouse_enter", node, &Node::set_on_mouse_enter);
     assign(kwargs, "on_mouse_move", node, &Node::set_on_mouse_move);
     assign(kwargs, "on_mouse_leave", node, &Node::set_on_mouse_leave);
@@ -38,10 +39,20 @@ void Definition<Node>::apply(py::module& module)
     //
     // Node, synced
     py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
+    node.def_property_readonly("__user_data__", [](Node& node) {
+        py::object result = py::none();
+        if (node.user_data())
+            result = *std::static_pointer_cast<py::dict>(node.user_data());
+        return result;
+    });
     node.def_property_readonly("node_count", &Node::node_count);
     def_property_readonly(node, "parent", &Node::shared_parent);
     def_property_readonly(node, "children", &Node::children);
     def_property_readonly(node, "style", &Node::style);
+    node.def_property_readonly("foo", [](std::shared_ptr<Node>& self) {
+        auto s = py::cast(self);
+        return s.attr("__foo");
+    });
     def_property(node, "visible", &Node::visible, &Node::set_visible);
     def_property(node, "disabled", &Node::disabled, &Node::set_disabled);
     def_property(node, "label", &Node::label, &Node::set_label);

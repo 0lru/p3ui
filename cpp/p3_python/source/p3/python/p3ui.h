@@ -15,6 +15,7 @@ namespace py = pybind11;
 #include "Promise.h"
 
 namespace p3::python {
+
 class Builder;
 class Surface;
 
@@ -36,7 +37,7 @@ struct FunctionGuard {
 
     ~FunctionGuard()
     {
-        //py::gil_scoped_acquire acquire;
+        // py::gil_scoped_acquire acquire;
         f = py::function();
     }
 };
@@ -45,10 +46,16 @@ template <typename... Args, typename Object>
 void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Object::*setter)(std::function<void(Args...)>))
 {
     if (kwargs.contains(name)) {
-        
-        (object.*setter)([guard { std::make_shared<FunctionGuard>(kwargs[name].cast<py::function>()) }](Args... args) mutable {
-            //py::gil_scoped_acquire acquire;
-            guard->f(std::move(args)...);
+        if (!object.user_data())
+            object.set_user_data(std::make_shared<py::dict>());
+        auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+        (*user_data)[name] = kwargs[name].cast<py::object>();
+        auto weak_ref = py::weakref(kwargs[name].cast<py::object>(), {});
+        (object.*setter)([weak_ref](Args... args) mutable {
+            // py::gil_scoped_acquire acquire;
+//            py::object f = weak_ref();
+//            if (f != py::none())
+                weak_ref(std::move(args)...);
         });
     }
 }
@@ -65,7 +72,7 @@ void assign(std::optional<py::function>& f, Object& object, void (Object::*sette
 {
     if (f)
         (object.*setter)([f = f.value()](Args... args) {
-            //py::gil_scoped_acquire acquire;
+            // py::gil_scoped_acquire acquire;
             f(std::move(args)...);
         });
 }

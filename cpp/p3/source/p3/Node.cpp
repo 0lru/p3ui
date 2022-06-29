@@ -389,6 +389,16 @@ std::shared_ptr<RenderLayer> const& Node::render_layer() const
     return _render_layer;
 }
 
+std::shared_ptr<void> const& Node::user_data() const
+{
+    return _user_data;
+}
+
+void Node::set_user_data(std::shared_ptr<void> user_data)
+{
+    _user_data = std::move(user_data);
+}
+
 void Node::render(RenderBackend::RenderTarget& render_target)
 {
     for (auto& child : _children)
@@ -614,6 +624,12 @@ float Node::MouseEvent::y() const
     return _y;
 }
 
+void Node::render_impl(Context&, float width, float height)
+{
+    if (on_frame())
+        on_frame()();
+}
+
 OnScopeExit Node::_apply_style_compiled()
 {
     auto apply = [this]() {
@@ -630,6 +646,7 @@ void Node::dispose()
     _mouse.leave = nullptr;
     _mouse.move = nullptr;
     _on_resize = nullptr;
+    _on_frame = nullptr;
     for (auto& child : _children)
         child->dispose();
     _disposed = true;
@@ -658,6 +675,16 @@ void Node::set_on_resize(OnResize on_resize)
 Node::OnResize Node::on_resize() const
 {
     return _on_resize;
+}
+
+void Node::set_on_frame(OnFrame on_frame)
+{
+    _on_frame = std::move(on_frame);
+}
+
+Node::OnFrame Node::on_frame() const
+{
+    return _on_frame;
 }
 
 }

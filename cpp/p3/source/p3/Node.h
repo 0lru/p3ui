@@ -31,9 +31,6 @@ std::shared_ptr<T> make(Args&&... args)
 }
 
 /**
- * for synchronization/multi-threading, a shared mutex is used. the
- * mutex is assigned to the one of the parent.
- *
  * node are state-descriptions. concerning styling and sizing, the
  * node can be in the state of
  * - needs restyling (needs to perform a style cascade)
@@ -93,6 +90,11 @@ public:
     Size size() const;
     void set_on_resize(OnResize);
     OnResize on_resize() const;
+
+    using OnFrame = std::function<void(void)>;
+    void set_on_frame(OnFrame);
+    OnFrame on_frame() const;
+
     // ##### mouse #########################################################
 
     class MouseEvent;
@@ -136,7 +138,12 @@ public:
     void set_render_layer(std::shared_ptr<RenderLayer>);
     std::shared_ptr<RenderLayer> const& render_layer() const;
 
+    std::shared_ptr<void> const& user_data() const;
+    void set_user_data(std::shared_ptr<void>);
+
 protected:
+    std::shared_ptr<void> _user_data = nullptr;
+
     Node(std::string element_name);
 
     // validate if node valid for beeing added to this, throws..
@@ -163,13 +170,14 @@ protected:
     float _automatic_height = 0.f;
     Size _size = Size { 0, 0 };
     OnResize _on_resize;
+    OnFrame _on_frame;
 
     void update_status();
     // TODO: remove this
     void postpone(std::function<void()>);
 
     // node specific render implementation
-    virtual void render_impl(Context&, float width, float height) {};
+    virtual void render_impl(Context&, float width, float height);
 
     [[nodiscard]] OnScopeExit _apply_style_compiled();
 

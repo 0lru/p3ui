@@ -29,6 +29,8 @@ void ScrollArea::render_impl(Context& context, float width, float height)
 
     ImVec2 size(width, height);
     ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
+    if (on_frame())
+        on_frame()();
     auto content_min = ImGui::GetWindowContentRegionMin();
     auto content_max = ImGui::GetWindowContentRegionMax();
     auto content_region = ContentRegion {
@@ -119,6 +121,36 @@ void ScrollArea::set_vertical_scroll_autohide(bool value)
 bool ScrollArea::vertical_scroll_autohide() const
 {
     return _vertical_scroll_autohide;
+}
+
+float ScrollArea::scroll_x() const
+{
+    return _scroll_x;
+}
+
+float ScrollArea::scroll_x_max() const
+{
+    return _scroll_x_max;
+}
+
+void ScrollArea::set_scroll_x(float scroll_x)
+{
+    _scroll_x = scroll_x;
+}
+
+float ScrollArea::scroll_y() const
+{
+    return _scroll_y;
+}
+
+float ScrollArea::scroll_y_max() const
+{
+    return _scroll_y_max;
+}
+
+void ScrollArea::set_scroll_y(float scroll_y)
+{
+    _scroll_y = _scroll_y;
 }
 
 }
