@@ -21,13 +21,17 @@ namespace p3
             return;
         if (!ImGui::IsItemHovered())
             return;
+        float alpha = .95f;
+        
+        auto& style = ImGui::GetCurrentContext()->Style;
+        std::swap(alpha, style.Alpha);
         ImGui::BeginTooltip();
         auto avail = ImGui::GetContentRegionAvail();
-        auto& style = ImGui::GetCurrentContext()->Style;
         _content->render(context, 
             _content->width(avail.x), 
             _content->height(avail.y));
         ImGui::EndTooltip();
+        std::swap(alpha, style.Alpha);
     }
 
     void ToolTip::set_content(std::shared_ptr<Node> content)

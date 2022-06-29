@@ -31,7 +31,7 @@ public:
     OnClick on_click() const;
 
     //
-    // viewport coordinates, relative to the surface ("local coordinates")
+    // viewport coordinates, relative to the render target ("local coordinates")
     Viewport const& viewport() const;
     void set_on_viewport_change(OnViewportChange);
     OnViewportChange on_viewport_change() const;

@@ -81,9 +81,12 @@ void Surface::render_impl(Context& context, float fwidth, float fheight)
     //
     // make viewport in local coordinates
     auto cursor = ImGui::GetCursorPos();
+    //
+    // viewport is scollx/scrolly
     auto viewport = context.render_layer().viewport();
-    viewport[0] -= cursor.x;
-    viewport[1] -= cursor.y;
+    auto& window = *ImGui::GetCurrentWindow();
+    viewport[0] = window.ClipRect.Min.x - window.DC.CursorPos.x;
+    viewport[1] = window.ClipRect.Min.y - window.DC.CursorPos.y;
     if (viewport != _viewport) {
         _viewport = viewport;
         if (_on_viewport_change)
@@ -94,7 +97,7 @@ void Surface::render_impl(Context& context, float fwidth, float fheight)
 
     //
     // TODO: move out of here, specialize
-    ImGuiWindow& window = *ImGui::GetCurrentWindow();
+//    ImGuiWindow& window = *ImGui::GetCurrentWindow();
     auto const id = window.GetID(this->imgui_label().c_str());
     ImVec2 pos(window.DC.CursorPos.x, window.DC.CursorPos.y + window.DC.CurrLineTextBaseOffset);
     auto bb_bottom_right = ImVec2(window.DC.CursorPos.x + fwidth, window.DC.CursorPos.y + fheight);

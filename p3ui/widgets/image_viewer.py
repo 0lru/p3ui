@@ -8,6 +8,16 @@ from .icons import Icons
 import math
 
 
+def make_text_tooltip(text):
+    return ToolTip(
+        alpha=1,
+        content=Row(
+            width=(auto, 0 | px, 0 | px),
+            height=(auto, 0 | px, 0 | px),
+            children=[Text(text)]
+        ))
+
+
 def make_skia_image(image):
     if isinstance(image, np.ndarray):
         if len(image.shape) == 2:
@@ -295,32 +305,88 @@ class ImageSurface(ScrollArea):
         self.__update_surface()
 
 
-class ImageViewer(Row):
+class ImageViewer(Layout):
 
     def __init__(self, *, on_repaint=None):
-        self.__image_surface = ImageSurface(
+        self._image_surface = ImageSurface(
             padding=(2 | px, 2 | px),
             on_scale_changed=self.__on_scale_changed,
             on_fitting_mode_changed=self.__on_fitting_mode_changed,
             on_repaint=on_repaint)
-        self.__scale_x_input = InputDouble(height=(auto, 0, 0), min=0.1, max=10., value=1,
-                                           format='x=%g',
-                                           on_change=lambda v: setattr(self.__image_surface, 'scale_x', v),
-                                           step=self.__image_surface.scale_step_width)
-        self.__scale_y_input = InputDouble(height=(auto, 0, 0), min=0.1, max=10., value=1,
-                                           format='y=%g',
-                                           on_change=lambda v: setattr(self.__image_surface, 'scale_y', v),
-                                           step=self.__image_surface.scale_step_width)
-        self.__scale_to_contain_button = Button(
-            label=f'{Icons.AspectRatio}', width=(auto, 0, 0), on_click=self.__image_surface.set_scale_to_contain,
+        self._scale_x_input = InputDouble(
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            min=0.1,
+            max=10.,
+            value=1,
+            format='x=%g',
+            on_change=lambda v: setattr(self._image_surface, 'scale_x', v),
+            step=self._image_surface.scale_step_width)
+        self._scale_y_input = InputDouble(
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            min=0.1,
+            max=10.,
+            value=1,
+            format='y=%g',
+            on_change=lambda v: setattr(self._image_surface, 'scale_y', v),
+            step=self._image_surface.scale_step_width)
+        self._scale_to_contain_button = Button(
+            label=f'{Icons.AspectRatio}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.set_scale_to_contain,
             disabled=True)
-        self.__fitting_mode_combo_box = ComboBox(
-            width=(auto, 0, 1),
+        # self._scale_to_contain_button.add(make_text_tooltip('scale image to be contained'))
+        self._reset_scale_button = Button(
+            label=f'{Icons.Filter}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.set_no_scale)
+        # self._reset_scale_button.add(make_text_tooltip('reset scale'))
+        self._scale_cover_button = Button(
+            label=f'{Icons.PhotoAlbum}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.set_no_scale)
+        # self._scale_cover_button.add(make_text_tooltip('scale to cover frame'))
+        self._scale_fill_button = Button(
+            label=f'{Icons.Photo}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.set_no_scale)
+        # self._scale_fill_button.add(make_text_tooltip('scale to fill frame'))
+        self._zoom_in_button = Button(
+            label=f'{Icons.ZoomIn}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.zoom_in)
+        # self._zoom_in_button.add(make_text_tooltip('zoom in'))
+        self._zoom_out_button = Button(
+            label=f'{Icons.ZoomOut}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self._image_surface.zoom_out)
+        # self._zoom_out_button.add(make_text_tooltip('zoom out'))
+        self._fitting_mode_combo_box = ComboBox(
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
             options=['custom scale', 'scale to fill', 'scale to contain', 'scale to cover'],
-            selected_index=int(self.__image_surface.fitting_mode),
-            on_change=lambda index: setattr(self.__image_surface, 'fitting_mode', ImageSurface.FittingMode(index))
+            selected_index=int(self._image_surface.fitting_mode),
+            on_change=lambda index: setattr(self._image_surface, 'fitting_mode', ImageSurface.FittingMode(index))
         )
+        self._feature_scaling_combo_box = ComboBox(
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            options=['original colors', 'scale to fit', 'log(x+1)'],
+            selected_index=0,
+            on_change=lambda index: setattr(self._image_surface, 'feature_scaling', ImageSurface.FeatureScaling(index))
+        )
+        self._make_layout()
+
+    def _make_layout(self):
         super().__init__(
+            direction=Direction.Horizontal,
             justify_content=Justification.Start,
             align_items=Alignment.Stretch,
             children=[
@@ -331,46 +397,39 @@ class ImageViewer(Row):
                     align_items=Alignment.End,
                     height=(auto, 1, 0),
                     children=[
-                        ComboBox(
-                            width=(auto, 0, 1),
-                            height=(auto, 0, 0),
-                            options=['original colors', 'scale to fit', 'log(x+1)'],
-                            selected_index=0,
-                            on_change=lambda index: setattr(self.__image_surface, 'feature_scaling',
-                                                            ImageSurface.FeatureScaling(index))
-                        ),
+                        self._feature_scaling_combo_box,
                         Text(''),  # force spacing of text height
                         Row(
                             height=(auto, 0, 0),
                             padding=(0 | px, 0 | px),
                             children=[
-                                self.__scale_to_contain_button,
-                                Button(label=f'{Icons.Filter}', width=(auto, 0, 0),
-                                       on_click=self.__image_surface.set_no_scale)
+                                self._scale_to_contain_button,
+                                self._reset_scale_button,
+                                #                                self._scale_fill_button,
+                                #                                self._scale_cover_button
                             ]
                         ),
-                        Button(label=f'{Icons.ZoomIn}', width=(auto, 0, 0),
-                               on_click=self.__image_surface.zoom_in),
-                        Button(label=f'{Icons.ZoomOut}', width=(auto, 0, 0),
-                               on_click=self.__image_surface.zoom_out),
+                        self._zoom_in_button,
+                        self._zoom_out_button,
                         Row(),
-                        self.__fitting_mode_combo_box,
-                        self.__scale_x_input,
-                        self.__scale_y_input
-                    ]), self.__image_surface
+                        self._fitting_mode_combo_box,
+                        self._scale_x_input,
+                        self._scale_y_input
+                    ]),
+                self._image_surface
             ])
 
     @property
     def image(self):
-        return self.__image_surface.image
+        return self._image_surface.image
 
     @image.setter
     def image(self, image):
-        self.__image_surface.image = image
+        self._image_surface.image = image
 
     def __on_scale_changed(self, scale):
-        self.__scale_x_input.value, self.__scale_y_input.value = scale
+        self._scale_x_input.value, self._scale_y_input.value = scale
 
     def __on_fitting_mode_changed(self, mode):
-        self.__fitting_mode_combo_box.selected_index = int(mode)
-        self.__scale_to_contain_button.disabled = mode is ImageSurface.FittingMode.Contain
+        self._fitting_mode_combo_box.selected_index = int(mode)
+        self._scale_to_contain_button.disabled = mode is ImageSurface.FittingMode.Contain

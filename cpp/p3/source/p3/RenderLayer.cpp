@@ -57,7 +57,7 @@ void RenderLayer::push_to(Context& context)
         _dirty = true;
 
     //
-    // this is just virtual, the rt is 2 * padding larger
+    // this is just virtual
     Viewport viewport {
         ImGui::GetScrollX(),
         ImGui::GetScrollY(),
