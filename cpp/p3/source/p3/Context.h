@@ -45,7 +45,7 @@ public:
     bool show_render_layers() const { return _show_render_layers; }
 
 private:
-    bool _show_render_layers = true;
+    bool _show_render_layers = false;
     UserInterface& _user_interface;
     RenderBackend& _render_backend;
     MouseMove _mouse_move;

@@ -34,18 +34,18 @@ void RenderLayer::push_to(Context& context)
     // in consequence, we create the rt as big as the container
     // and provide a virtual viewport which is sligtly smaller than the rt.
     auto const& imgui_context = *ImGui::GetCurrentContext();
-    auto const& frame_padding = imgui_context.Style.FramePadding;
     auto content_min = ImGui::GetWindowContentRegionMin();
     auto content_max = ImGui::GetWindowContentRegionMax();
     //
     // e.g. same as GetContentRegionAvail, but does not depend on cursor pos
-    auto content_width = content_max.x - content_min.x;
-    auto content_height = content_max.y - content_min.y;
+    auto& window = *ImGui::GetCurrentWindow();
+    auto content_width = window.ClipRect.Max.x - window.ClipRect.Min.x;//content_max.x - content_min.x;
+    auto content_height = window.ClipRect.Max.y - window.ClipRect.Min.y;//    content_max.y - content_min.y;
 
     //
     // the rt is 2 * padding larger than the content region
-    _requested_width = std::uint32_t(std::max(1.f, content_width + 2 * frame_padding.x + 0.5f));
-    _requested_height = std::uint32_t(std::max(1.f, content_height + 2 * frame_padding.y + 0.5f));
+    _requested_width = std::uint32_t(std::max(1.f, content_width + 0.5f));
+    _requested_height = std::uint32_t(std::max(1.f, content_height + 0.5f));
 
     //
     // no render target -> needs redraw, mark dirty
@@ -80,15 +80,10 @@ void RenderLayer::register_object()
 
 void RenderLayer::_draw_debug()
 {
-    ImU32 constexpr red = 0x00FF00FF;
-    ImU32 constexpr green = 0x00FF00FF;
-    auto const& imgui_context = *ImGui::GetCurrentContext();
-    auto const& frame_padding = imgui_context.Style.FramePadding;
-
+    ImU32 constexpr red = 0xFF0000FF;
+    ImU32 constexpr green = 0xFF00FF00;
     auto& window = *ImGui::GetCurrentWindow();
-    ImVec2 p1(window.Pos.x + frame_padding.x, window.Pos.y + frame_padding.y);
-    ImVec2 p2(p1.x + _viewport[2], p1.y + _viewport[3]);
-    window.DrawList->AddRect(p1, p2, _render_target ? green : red, 0, 0, 2);
+    window.DrawList->AddRect(window.ClipRect.Min, window.ClipRect.Max, _render_target ? green : red, 0, 0, 2);
 }
 
 void RenderLayer::_reset()
@@ -147,8 +142,8 @@ void RenderLayer::pop_from_context_and_render(Context& context, Node& node)
 
     auto& window = *ImGui::GetCurrentWindow();
     ImVec2 p1(
-        window.Pos.x,
-        window.Pos.y);
+        window.ClipRect.Min.x,
+        window.ClipRect.Min.y);
     ImVec2 p2(
         p1.x + float(_render_target->width()),
         p1.y + float(_render_target->height()));

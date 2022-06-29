@@ -10,7 +10,7 @@ namespace p3 {
 
 class ScrollArea : public Node {
 public:
-    using ContentRegion = RenderLayer::Viewport;
+    using ContentRegion = std::array<double, 5>;
     using OnContentRegionChanged = std::function<void(ContentRegion)>;
     using Callback = std::function<void()>;
 

@@ -27,17 +27,27 @@ void ScrollArea::render_impl(Context& context, float width, float height)
     if (!_vertical_scroll_autohide)
         flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
 
+    auto& style = ImGui::GetStyle();
+    style.WindowPadding = style.FramePadding;
+
     ImVec2 size(width, height);
     ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
-    if (on_frame())
-        on_frame()();
-    auto content_min = ImGui::GetWindowContentRegionMin();
-    auto content_max = ImGui::GetWindowContentRegionMax();
+    // auto content_min = ImGui::GetWindowContentRegionMin();
+    // auto content_max = ImGui::GetWindowContentRegionMax();
+    auto clip_rect = ImGui::GetCurrentWindow()->ClipRect;
+    auto& window = *ImGui::GetCurrentWindow();
+    auto content_width = width - window.WindowBorderSize * 2.f - window.WindowPadding.x * 2.f;
+    auto content_height = height - window.WindowBorderSize * 2.f - window.WindowPadding.y * 2.f;
+    if (_vertical_scroll_autohide == false)
+        content_height -= style.ScrollbarSize;
+    if (_horizontal_scroll_autohide == false)
+        content_width -= style.ScrollbarSize;
     auto content_region = ContentRegion {
         ImGui::GetScrollX(),
         ImGui::GetScrollY(),
-        content_max.x - content_min.x,
-        content_max.y - content_min.y
+        content_width,
+        content_height,
+        style.ScrollbarSize
     };
     if (content_region != _content_region) {
         _content_region = std::move(content_region);
@@ -50,7 +60,6 @@ void ScrollArea::render_impl(Context& context, float width, float height)
     if (_content) {
         auto available = ImGui::GetContentRegionAvail();
         _content->render(context, _content->width(available.x), _content->height(available.y));
-        //        TODO: avail..
     }
     render_layer()->pop_from_context_and_render(context, *this);
     ImGui::EndChild();

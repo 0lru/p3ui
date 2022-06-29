@@ -31,10 +31,9 @@ class TabIcons(Layout):
             yield icon_name
 
     def filter(self):
-        with self.lock:
-            text = self.search.value.lower()
-            for icon_text in self.icons_list:
-                if icon_text is self.search:
-                    continue
-                lbl = icon_text.value.split(' ')[1]
-                icon_text.visible = text in lbl.lower()
+        text = self.search.value.lower()
+        for icon_text in self.icons_list:
+            if icon_text is self.search:
+                continue
+            lbl = icon_text.value.split(' ')[1]
+            icon_text.visible = text in lbl.lower()

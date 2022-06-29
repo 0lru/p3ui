@@ -10,7 +10,6 @@ void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
     assign(kwargs, "visible", node, &Node::set_visible);
     assign(kwargs, "disabled", node, &Node::set_disabled);
     assign(kwargs, "on_resize", node, &Node::set_on_resize);
-    assign(kwargs, "on_frame", node, &Node::set_on_frame);
     assign(kwargs, "on_mouse_enter", node, &Node::set_on_mouse_enter);
     assign(kwargs, "on_mouse_move", node, &Node::set_on_mouse_move);
     assign(kwargs, "on_mouse_leave", node, &Node::set_on_mouse_leave);

@@ -91,10 +91,6 @@ public:
     void set_on_resize(OnResize);
     OnResize on_resize() const;
 
-    using OnFrame = std::function<void(void)>;
-    void set_on_frame(OnFrame);
-    OnFrame on_frame() const;
-
     // ##### mouse #########################################################
 
     class MouseEvent;
@@ -170,7 +166,6 @@ protected:
     float _automatic_height = 0.f;
     Size _size = Size { 0, 0 };
     OnResize _on_resize;
-    OnFrame _on_frame;
 
     void update_status();
     // TODO: remove this

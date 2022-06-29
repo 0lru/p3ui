@@ -19,6 +19,7 @@ void Definition<ScrollArea>::apply(py::module& module)
         assign(horizontal_scroll_enabled, *scroll_area, &ScrollArea::set_horizontal_scroll_enabled);
         assign(horizontal_scroll_autohide, *scroll_area, &ScrollArea::set_horizontal_scroll_autohide);
         assign(vertical_scroll_autohide, *scroll_area, &ScrollArea::set_vertical_scroll_autohide);
+        assign(kwargs, "on_content_region_changed", *scroll_area, &p3::ScrollArea::set_on_content_region_changed);
         return scroll_area;
     }),
         py::kw_only(),
