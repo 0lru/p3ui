@@ -133,7 +133,7 @@ void UserInterface::set_menu_bar(std::shared_ptr<MenuBar> menu_bar)
         Node::add(_menu_bar);
 }
 
-std::shared_ptr<MenuBar> const& UserInterface::menu_bar() const
+std::shared_ptr<MenuBar> UserInterface::menu_bar() const
 {
     return _menu_bar;
 }

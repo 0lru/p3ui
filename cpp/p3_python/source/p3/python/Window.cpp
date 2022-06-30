@@ -53,10 +53,24 @@ void Definition<Window>::apply(py::module& module)
 
     window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
         auto window = std::make_shared<Window>(std::move(title), width, height);
+
+        auto window_dict = std::make_shared<py::dict>();
+        (*window_dict)["children"] = py::list();
+        window->set_user_data(std::make_shared<py::dict>());
+
+        auto user_interface_dict = std::make_shared<py::dict>();
+        (*user_interface_dict)["children"] = py::list();
+        window->user_interface()->set_user_data(std::make_shared<py::dict>());
+
+        (*std::static_pointer_cast<py::dict>(window->user_data()))["content"] = py::cast(window->user_interface());
+
+        //
+        // release the gil while rendering
         window->set_render_scope([](std::function<void()> render) {
             py::gil_scoped_release release;
             render();
         });
+
         return window;
     }),
         py::kw_only(),
@@ -64,11 +78,11 @@ void Definition<Window>::apply(py::module& module)
         py::arg("width") = 1024,
         py::arg("height") = 768);
 
+    def_content_property(window, "user_interface", &Window::user_interface, &Window::set_user_interface);
     window.def_property_readonly("monitor", &Window::monitor);
     window.def_property_readonly("primary_monitor", &Window::primary_monitor);
     window.def_property_readonly("framebuffer_size", &Window::framebuffer_size);
     window.def_property_readonly("monitors", &Window::monitors);
-    window.def_property_readonly("user_interface", &Window::user_interface);
     window.def_property_readonly("frames_per_second", &Window::frames_per_second);
     window.def_property_readonly("idle_timer", &Window::time_till_enter_idle_mode);
     window.def_property("video_mode", &Window::video_mode, &Window::set_video_mode);

@@ -33,7 +33,7 @@ void Definition<Slider<ValueType>>::apply(py::module& module)
         return slider;
     }));
 
-    def_property(slider, "on_change", &Slider<ValueType>::on_change, &Slider<ValueType>::set_on_change);
+    def_signal_property(slider, "on_change", &Slider<ValueType>::on_change, &Slider<ValueType>::set_on_change);
     def_property(slider, "format", &Slider<ValueType>::format, &Slider<ValueType>::set_format);
     def_property(slider, "value", &Slider<ValueType>::value, &Slider<ValueType>::set_value);
     def_property(slider, "min", &Slider<ValueType>::min, &Slider<ValueType>::set_min);

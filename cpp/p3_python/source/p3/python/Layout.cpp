@@ -33,11 +33,6 @@ void Definition<Layout>::apply(py::module& m)
         ArgumentParser<Node>()(kwargs, *layout);
         return layout;
     }));
-
-    def_method(layout, "add", &Layout::add);
-    def_method(layout, "insert", &Layout::insert);
-    def_method(layout, "remove", &Layout::remove);
-
     py::class_<Row, Layout, std::shared_ptr<Row>>(m, "Row").def(py::init<>([](py::kwargs kwargs) {
         auto layout = std::make_shared<Row>();
         ArgumentParser<Node>()(kwargs, *layout);

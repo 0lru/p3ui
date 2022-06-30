@@ -43,21 +43,30 @@ struct FunctionGuard {
 };
 
 template <typename... Args, typename Object>
+void assign(py::function f, char const* name, Object& object, void (Object::*setter)(std::function<void(Args...)>))
+{
+    if (!object.user_data())
+        std::runtime_error("gc object not set");
+    auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+    (*user_data)[name] = f;
+    //
+    // remove weak_ref once working
+    (object.*setter)([weak_ref = py::weakref(f)](Args... args) mutable {
+        auto x = weak_ref();
+        if (x != py::none())
+            x(std::move(args)...);
+    });
+}
+
+template <typename... Args, typename Object>
 void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Object::*setter)(std::function<void(Args...)>))
 {
-    if (kwargs.contains(name)) {
-        if (!object.user_data())
-            object.set_user_data(std::make_shared<py::dict>());
-        auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
-        (*user_data)[name] = kwargs[name].cast<py::object>();
-        auto weak_ref = py::weakref(kwargs[name].cast<py::object>(), {});
-        (object.*setter)([weak_ref](Args... args) mutable {
-            // py::gil_scoped_acquire acquire;
-//            py::object f = weak_ref();
-//            if (f != py::none())
-                weak_ref(std::move(args)...);
-        });
-    }
+    if (!kwargs.contains(name))
+        return;
+    if (kwargs[name].is_none())
+        (object.*setter)(nullptr);
+    else
+        assign(kwargs[name].cast<py::function>(), name, object, setter);
 }
 
 template <typename T, typename Object>
@@ -65,16 +74,6 @@ void assign(std::optional<T>& value, Object& object, void (Object::*setter)(T))
 {
     if (value)
         (object.*setter)(value.value());
-}
-
-template <typename... Args, typename Object>
-void assign(std::optional<py::function>& f, Object& object, void (Object::*setter)(std::function<void(Args...)>))
-{
-    if (f)
-        (object.*setter)([f = f.value()](Args... args) {
-            // py::gil_scoped_acquire acquire;
-            f(std::move(args)...);
-        });
 }
 
 template <typename Target, typename F>
@@ -87,6 +86,54 @@ template <typename Target, typename Getter, typename Setter>
 void def_property(Target& target, char const* name, Getter&& getter, Setter setter)
 {
     target.def_property(name, std::forward<Getter>(getter), std::forward<Setter>(setter));
+}
+
+template <typename Target, typename Object, typename... Args>
+void def_signal_property(
+    Target& target,
+    char const* name,
+    std::function<void(Args...)> (Object::*getter)() const,
+    void (Object::*setter)(std::function<void(Args...)>))
+{
+    target.def_property(
+        name,
+        [name = std::string(name)](Object& object) {
+            auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+            return py::object((*user_data)[name.c_str()]);
+        },
+        [setter, name = std::string(name)](Object& object, py::object f) {
+            if (f.is_none()) {
+                auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+                (*user_data)[name.c_str()] = py::none();
+                (object.*setter)(nullptr);
+            } else {
+                assign(py::cast<py::function>(f), name.c_str(), object, setter);
+            }
+        });
+}
+
+template <typename Target, typename Object, typename Content>
+void def_content_property(
+    Target& target,
+    char const* name,
+    Content (Object::*getter)() const,
+    void (Object::*setter)(Content))
+{
+    target.def_property(
+        name,
+        [name = std::string(name)](Object& object) {
+            auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+            if (!user_data)
+                throw std::runtime_error("no user data");
+            return user_data->contains(name.c_str()) ? (*user_data)[name.c_str()] : py::object(py::none());
+        },
+        [setter, name = std::string(name)](Object& object, py::object content) {
+            auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
+            if (!user_data)
+                throw std::runtime_error("no user data");
+            (*user_data)[name.c_str()] = content;
+            (object.*setter)(content.is_none() ? Content() : py::cast<Content>(content));
+        });
 }
 
 template <typename Target, typename Getter>

@@ -23,7 +23,7 @@ namespace p3::python
             return input;
         }), py::kw_only(), py::arg("size")=16);
 
-        def_property(input, "on_change", &InputText::on_change, &InputText::set_on_change);
+        def_signal_property(input, "on_change", &InputText::on_change, &InputText::set_on_change);
         def_property(input, "value", &InputText::value, &InputText::set_value);
     }
 

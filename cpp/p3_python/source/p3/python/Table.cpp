@@ -20,9 +20,6 @@ namespace p3::python
             assign(kwargs, "freezed_rows", *table, &Table::set_freezed_rows);
             return table;
         }));
-        def_method(table, "add", &Table::add);
-        def_method(table, "insert", &Table::insert);
-        def_method(table, "remove", &Table::remove);
         def_property(table, "columns", &Table::columns, &Table::set_columns);
         def_property(table, "resizeable", &Table::resizeable, &Table::set_resizeable);
         def_property(table, "reorderable", &Table::reorderable, &Table::set_reorderable);

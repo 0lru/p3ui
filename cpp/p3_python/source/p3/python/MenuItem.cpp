@@ -31,8 +31,8 @@ namespace p3::python
         def_property(menu_item, "checkable", &MenuItem::checkable, &MenuItem::set_checkable);
         def_property(menu_item, "value", &MenuItem::value, &MenuItem::set_value);
         def_property(menu_item, "enabled", &MenuItem::enabled, &MenuItem::set_enabled);
-        def_property(menu_item, "on_click", &MenuItem::on_click, &MenuItem::set_on_click);
-        def_property(menu_item, "on_change", &MenuItem::on_change, &MenuItem::set_on_change);
+        def_signal_property(menu_item, "on_click", &MenuItem::on_click, &MenuItem::set_on_click);
+        def_signal_property(menu_item, "on_change", &MenuItem::on_change, &MenuItem::set_on_change);
     }
 
 }

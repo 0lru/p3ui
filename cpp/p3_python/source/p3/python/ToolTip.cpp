@@ -10,10 +10,13 @@ namespace p3::python
         tooltip.def(py::init<>([](std::shared_ptr<Node> content, py::kwargs kwargs) {
             auto tooltip = std::make_shared<ToolTip>();
             ArgumentParser<Node>()(kwargs, *tooltip);
-            tooltip->set_content(std::move(content));
+            if (content) {
+                (*std::static_pointer_cast<py::dict>(tooltip->user_data()))["content"] = py::cast(content);
+                tooltip->set_content(std::move(content));
+            }
             return tooltip;
         }), py::kw_only(), py::arg("content")=py::none());
-        def_property(tooltip, "content", &ToolTip::content, &ToolTip::set_content);
+        def_content_property(tooltip, "content", &ToolTip::content, &ToolTip::set_content);
     }
 
 }

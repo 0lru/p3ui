@@ -19,8 +19,8 @@ namespace p3::python
 
         def_method(menu, "add", &Menu::add);
         def_method(menu, "remove", &Menu::remove);
-        def_property(menu, "on_open", &Menu::on_open, &Menu::set_on_open);
-        def_property(menu, "on_close", &Menu::on_close, &Menu::set_on_close);
+        def_signal_property(menu, "on_open", &Menu::on_open, &Menu::set_on_open);
+        def_signal_property(menu, "on_close", &Menu::on_close, &Menu::set_on_close);
     }
 
 }

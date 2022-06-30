@@ -5,6 +5,10 @@ namespace p3::python {
 
 void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
 {
+    auto gc_dict = std::make_shared<py::dict>();
+    (*gc_dict)["children"] = py::list();
+    node.set_user_data(gc_dict);
+
     ArgumentParser<StyleBlock>()(kwargs, *node.style());
     assign(kwargs, "label", node, &Node::set_label);
     assign(kwargs, "visible", node, &Node::set_visible);
@@ -16,6 +20,7 @@ void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
     //
     // TODO: add setter and use assign
     if (kwargs.contains("children")) {
+        (*gc_dict)["children"] = kwargs["children"];
         auto children = kwargs["children"].cast<std::vector<std::shared_ptr<Node>>>();
         for (auto& child : children)
             node.add(child);
@@ -37,14 +42,30 @@ void Definition<Node>::apply(py::module& module)
 
     //
     // Node, synced
-    py::class_<Node, std::shared_ptr<Node>> node(module, "Node");
-    node.def_property_readonly("__user_data__", [](Node& node) {
+    py::class_<Node, std::shared_ptr<Node>> node(module, "Node", py::custom_type_setup([](PyHeapTypeObject* heap_type) {
+        auto* type = &heap_type->ht_type;
+        type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+        type->tp_traverse = [](PyObject* self_base, visitproc visit, void* arg) {
+            auto& self = py::cast<Node&>(py::handle(self_base));
+            if (self.user_data())
+                Py_VISIT(std::static_pointer_cast<py::dict>(self.user_data())->ptr());
+            return 0;
+        };
+        type->tp_clear = [](PyObject* self_base) {
+            auto& self = py::cast<Node&>(py::handle(self_base));
+            self.set_user_data(nullptr);
+            return 0;
+        };
+    }));
+    node.def_property_readonly("user_data", [](Node& node) {
         py::object result = py::none();
         if (node.user_data())
             result = *std::static_pointer_cast<py::dict>(node.user_data());
         return result;
     });
-    node.def_property_readonly("node_count", &Node::node_count);
+    node.def_property_readonly_static("node_count", [](py::object&) {
+        return Node::node_count();
+    });
     def_property_readonly(node, "parent", &Node::shared_parent);
     def_property_readonly(node, "children", &Node::children);
     def_property_readonly(node, "style", &Node::style);
@@ -55,13 +76,32 @@ void Definition<Node>::apply(py::module& module)
     def_property(node, "visible", &Node::visible, &Node::set_visible);
     def_property(node, "disabled", &Node::disabled, &Node::set_disabled);
     def_property(node, "label", &Node::label, &Node::set_label);
-    def_property(node, "on_resize", &Node::on_resize, &Node::set_on_resize);
-    def_property(node, "on_mouse_enter", &Node::on_mouse_enter, &Node::set_on_mouse_enter);
-    def_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
-    def_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
+    def_signal_property(node, "on_resize", &Node::on_resize, &Node::set_on_resize);
+    def_signal_property(node, "on_mouse_enter", &Node::on_mouse_enter, &Node::set_on_mouse_enter);
+    def_signal_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
+    def_signal_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
     def_method(node, "redraw", &Node::redraw);
-    def_method(node, "add", &Node::add);
-    def_method(node, "remove", &Node::remove);
+    def_method(node, "add", [](Node& node, py::object child) {
+        if (child.is_none())
+            return;
+        py::list children = (*std::static_pointer_cast<py::dict>(node.user_data()))["children"];
+        children.append(child);
+        node.add(py::cast<std::shared_ptr<Node>>(child));
+    });
+    def_method(node, "remove", [](Node& node, py::object child) {
+        if (child.is_none())
+            return;
+        py::list children = (*std::static_pointer_cast<py::dict>(node.user_data()))["children"];
+        children.attr("remove")(child);
+        node.remove(py::cast<std::shared_ptr<Node>>(child));
+    });
+    def_method(node, "insert", [](Node& node, std::size_t index, py::object child) {
+        if (child.is_none())
+            return;
+        py::list children = (*std::static_pointer_cast<py::dict>(node.user_data()))["children"];
+        children.attr("insert")(index, child);
+        node.insert(index, py::cast<std::shared_ptr<Node>>(child));
+    });
 }
 
 }

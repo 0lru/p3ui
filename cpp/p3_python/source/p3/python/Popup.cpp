@@ -12,10 +12,13 @@ namespace p3::python
         popup.def(py::init<>([](py::kwargs kwargs) {
             auto popup = std::make_shared<Popup>();
             ArgumentParser<Node>()(kwargs, *popup);
-            assign(kwargs, "content", *popup, &Popup::set_content);
+            if (kwargs.contains("content")) {
+                (*std::static_pointer_cast<py::dict>(popup->user_data()))["content"] = kwargs["content"];
+                assign(kwargs, "content", *popup, &Popup::set_content);
+            }
             return popup;
         }));
-        def_property(popup, "content", &Popup::content, &Popup::set_content);
+        def_content_property(popup, "content", &Popup::content, &Popup::set_content);
     }
 
 }

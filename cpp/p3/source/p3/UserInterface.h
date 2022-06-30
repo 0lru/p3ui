@@ -48,7 +48,7 @@ public:
     std::shared_ptr<Node> content() const;
 
     void set_menu_bar(std::shared_ptr<MenuBar>);
-    std::shared_ptr<MenuBar> const& menu_bar() const;
+    std::shared_ptr<MenuBar> menu_bar() const;
 
     //
     // fonts

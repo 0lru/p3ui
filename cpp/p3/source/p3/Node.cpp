@@ -640,10 +640,10 @@ OnScopeExit Node::_apply_style_compiled()
 
 void Node::dispose()
 {
-    _mouse.enter = nullptr;
-    _mouse.leave = nullptr;
-    _mouse.move = nullptr;
-    _on_resize = nullptr;
+//    _mouse.enter = nullptr;
+//    _mouse.leave = nullptr;
+//    _mouse.move = nullptr;
+//    _on_resize = nullptr;
     for (auto& child : _children)
         child->dispose();
     _disposed = true;

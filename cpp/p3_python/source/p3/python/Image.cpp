@@ -20,7 +20,7 @@ void Definition<Image>::apply(py::module& module)
 
     def_property(image, "texture", &Image::texture, &Image::set_texture);
     def_property(image, "scale", &Image::scale, &Image::set_scale);
-    def_property(image, "on_click", &Image::on_click, &Image::set_on_click);
+    def_signal_property(image, "on_click", &Image::on_click, &Image::set_on_click);
 }
 
 }

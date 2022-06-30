@@ -17,7 +17,7 @@ public:
     void update_content() override;
 
     void set_content(std::shared_ptr<Node>);
-    std::shared_ptr<Node> content();
+    std::shared_ptr<Node> content() const;
 
     void set_on_close(OnClose);
     OnClose on_close() const;

@@ -19,9 +19,14 @@ namespace p3::python
 
         tab_item.def(py::init<>([](std::string name, py::kwargs kwargs) {
             auto tab_item = std::make_shared<Tab::Item>(std::move(name));
-            assign(kwargs, "content", *tab_item, &Tab::Item::set_content);
+            if (kwargs.contains("content")) {
+                (*std::static_pointer_cast<py::dict>(tab_item->user_data()))["content"] = kwargs["content"];
+                assign(kwargs, "content", *tab_item, &Tab::Item::set_content);
+            }
             return tab_item;
         }));
+
+        def_content_property(tab_item, "content", &Tab::Item::content, &Tab::Item::set_content);
     }
 
 }

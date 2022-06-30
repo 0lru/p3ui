@@ -53,7 +53,7 @@ class ImageSurface(ScrollArea):
             self.surface = surface
             self.canvas = canvas
 
-        def draw_rectangle(self, x, y, w, h, color, stroke_width=1.):
+        def draw_rectangle(self, x1, y1, x2, y2, color, stroke_width=1.):
             if not isinstance(color, Color):
                 color = Color(color)
             paint = skia.Paint(
@@ -63,7 +63,7 @@ class ImageSurface(ScrollArea):
                 StrokeWidth=stroke_width
             )
             sx, sy = self.surface.scale_view
-            self.canvas.drawRect(skia.Rect.MakeXYWH(x * sx, y * sy, w * sx, h * sy), paint)
+            self.canvas.drawRect(skia.Rect.MakeXYWH(x1 * sx, y1 * sy, (x2 - x1) * sx, (y2 - y1) * sy), paint)
 
         def draw_line(self, x1, y1, x2, y2, color, *, stroke_width=1.):
             if not isinstance(color, Color):

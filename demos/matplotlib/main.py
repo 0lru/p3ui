@@ -35,7 +35,9 @@ async def main():
 
 
     user_interface = UserInterface(content=Column(
-        width=(font_size_px * 40 | em, 0, 0), height=(font_size_px * 30 | em, 0, 0),
+        padding=(0 | px, 0 | px),
+        width=(font_size_px * 40 | em, 0, 0),
+        height=(font_size_px * 30 | em, 0, 0),
         children=[
             Text(f'ImGui-Text @ {font_size_px}px'),
             Row(

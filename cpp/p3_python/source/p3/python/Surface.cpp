@@ -75,12 +75,12 @@ void Definition<Surface>::apply(py::module& module)
         return surface;
     }));
 
+    def_signal_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
+    def_signal_property(surface, "on_viewport", &Surface::on_viewport_change, &Surface::set_on_viewport_change);
     def_property_readonly(surface, "viewport", &Surface::viewport /*, &Surface::set_on_viewport*/);
-    def_property(surface, "on_click", &Surface::on_click, &Surface::set_on_click);
-    def_property(surface, "on_viewport", &Surface::on_viewport_change, &Surface::set_on_viewport_change);
+    def_property_readonly(surface, "picture", &Surface::picture);
     surface.def("__enter__", &Surface::enter);
     surface.def("__exit__", &Surface::exit);
-    def_property_readonly(surface, "picture", &Surface::picture);
 }
 
 }

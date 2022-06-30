@@ -75,7 +75,7 @@ void ScrollArea::set_content(std::shared_ptr<Node> content)
         Node::add(_content);
 }
 
-std::shared_ptr<Node> const& ScrollArea::content() const
+std::shared_ptr<Node> ScrollArea::content() const
 {
     return _content;
 }

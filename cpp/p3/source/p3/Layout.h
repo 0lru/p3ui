@@ -6,16 +6,14 @@
 #include "Node.h"
 #include <imgui.h>
 
-namespace p3
-{
+namespace p3 {
 
-    class Layout : public Node
-    {
-    public:
-        Layout();
+class Layout : public Node {
+public:
+    Layout();
 
-        void update_content() override;
-        void render_impl(Context&, float width, float height) override;
-    };
+    void update_content() override;
+    void render_impl(Context&, float width, float height) override;
+};
 
 }

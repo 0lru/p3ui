@@ -19,7 +19,7 @@ namespace p3::python
             return combo;
         }));
 
-        def_property(combo, "on_change", &ComboBox::on_change, &ComboBox::set_on_change);
+        def_signal_property(combo, "on_change", &ComboBox::on_change, &ComboBox::set_on_change);
         def_property(combo, "options", &ComboBox::options, &ComboBox::set_options);
         def_property(combo, "selected_index", &ComboBox::selected_index, &ComboBox::set_selected_index);
         def_property(combo, "hint", &ComboBox::hint, &ComboBox::set_hint);

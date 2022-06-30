@@ -12,11 +12,14 @@ namespace p3::python
         collapsible.def(py::init<>([](std::optional<std::shared_ptr<Node>> content, std::optional<bool> collapsed, py::kwargs kwargs) {
             auto collapsible = std::make_shared<Collapsible>("");
             ArgumentParser<Node>()(kwargs, *collapsible);
-            assign(content, *collapsible, &Collapsible::set_content);
+            if (content) {
+                (*std::static_pointer_cast<py::dict>(collapsible->user_data()))["content"] = py::cast(content);
+                assign(content, *collapsible, &Collapsible::set_content);
+            }
             assign(collapsed, *collapsible, &Collapsible::set_collapsed);
             return collapsible;
         }), py::kw_only(), py::arg("content")=py::none(), py::arg("collapsed")=true);
-        def_property(collapsible, "content", &Collapsible::content, &Collapsible::set_content);
+        def_content_property(collapsible, "content", &Collapsible::content, &Collapsible::set_content);
         def_property(collapsible, "collapsed", &Collapsible::collapsed, &Collapsible::set_collapsed);
     }
 

@@ -58,8 +58,8 @@ void Surface::dispose()
     log_debug("dispose surface");
     _skia_picture.reset();
     set_render_layer(nullptr);
-    _on_click = nullptr;
-    _on_viewport_change = nullptr;
+//  _on_click = nullptr;
+//  _on_viewport_change = nullptr;
     Node::dispose();
 }
 

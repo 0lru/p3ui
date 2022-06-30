@@ -15,7 +15,7 @@ namespace p3::python
             assign(kwargs, "on_click", *button, &Button::set_on_click);
             return button;
         }));
-        def_property(button, "on_click", &Button::on_click, &Button::set_on_click);
+        def_signal_property(button, "on_click", &Button::on_click, &Button::set_on_click);
     }
 
 }

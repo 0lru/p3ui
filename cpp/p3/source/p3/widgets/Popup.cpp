@@ -63,7 +63,7 @@ void Popup::set_content(std::shared_ptr<Node> content)
     _content = content;
 }
 
-std::shared_ptr<Node> Popup::content()
+std::shared_ptr<Node> Popup::content() const
 {
     return _content;
 }
