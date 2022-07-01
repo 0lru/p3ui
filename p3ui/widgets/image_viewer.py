@@ -307,13 +307,16 @@ class ImageSurface(ScrollArea):
 
 class ImageViewer(Layout):
 
-    def __init__(self, *, on_repaint=None):
+    def __init__(self, *, on_repaint=None, collapsed=True):
+        self.__collapsed = collapsed
         self._image_surface = ImageSurface(
             padding=(2 | px, 2 | px),
             on_scale_changed=self.__on_scale_changed,
             on_fitting_mode_changed=self.__on_fitting_mode_changed,
-            on_repaint=on_repaint)
+            on_repaint=on_repaint
+        )
         self._scale_x_input = InputDouble(
+            visible=not collapsed,
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             min=0.1,
@@ -323,6 +326,7 @@ class ImageViewer(Layout):
             on_change=lambda v: setattr(self._image_surface, 'scale_x', v),
             step=self._image_surface.scale_step_width)
         self._scale_y_input = InputDouble(
+            visible=not collapsed,
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             min=0.1,
@@ -369,6 +373,7 @@ class ImageViewer(Layout):
             on_click=self._image_surface.zoom_out)
         # self._zoom_out_button.add(make_text_tooltip('zoom out'))
         self._fitting_mode_combo_box = ComboBox(
+            visible=not collapsed,
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             options=['custom scale', 'scale to fill', 'scale to contain', 'scale to cover'],
@@ -376,13 +381,36 @@ class ImageViewer(Layout):
             on_change=lambda index: setattr(self._image_surface, 'fitting_mode', ImageSurface.FittingMode(index))
         )
         self._feature_scaling_combo_box = ComboBox(
+            visible=not collapsed,
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             options=['original colors', 'scale to fit', 'log(x+1)'],
             selected_index=0,
             on_change=lambda index: setattr(self._image_surface, 'feature_scaling', ImageSurface.FeatureScaling(index))
         )
+        self.__collapsed_button = Button(
+            label=f'{Icons.ChevronLeft}',
+            width=(auto, 0, 0),
+            height=(auto, 0, 0),
+            on_click=self.toggle_collapsed)
         self._make_layout()
+        self.collapsed = collapsed
+
+    @property
+    def collapsed(self):
+        return self.__collapsed
+
+    @collapsed.setter
+    def collapsed(self, value):
+        self.__collapsed = value
+        self._fitting_mode_combo_box.visible = not value
+        self._feature_scaling_combo_box.visible = not value
+        self._scale_x_input.visible = not value
+        self._scale_y_input.visible = not value
+        self.__collapsed_button.label = f'{Icons.ChevronRight}' if self.collapsed else f'{Icons.ChevronLeft}'
+
+    def toggle_collapsed(self):
+        self.collapsed = not self.collapsed
 
     def _make_layout(self):
         super().__init__(
@@ -397,18 +425,19 @@ class ImageViewer(Layout):
                     align_items=Alignment.End,
                     height=(auto, 1, 0),
                     children=[
+                        Row(
+                            padding=(0 | px, 0 | px),
+                            width=(100|percent, 0, 0),
+                            height=(auto, 0, 0),
+                            justify_content=Justification.Start,
+                            align_items=Alignment.Start,
+                            children=[self.__collapsed_button]
+                        ),
+                        Text(''),  # force spacing of text height
                         self._feature_scaling_combo_box,
                         Text(''),  # force spacing of text height
-                        Row(
-                            height=(auto, 0, 0),
-                            padding=(0 | px, 0 | px),
-                            children=[
-                                self._scale_to_contain_button,
-                                self._reset_scale_button,
-                                #                                self._scale_fill_button,
-                                #                                self._scale_cover_button
-                            ]
-                        ),
+                        self._scale_to_contain_button,
+                        self._reset_scale_button,
                         self._zoom_in_button,
                         self._zoom_out_button,
                         Row(),
