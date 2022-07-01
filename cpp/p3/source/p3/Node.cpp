@@ -19,6 +19,8 @@ namespace p3 {
 // using default values..
 StyleStrategy Node::DefaultStyleStrategy;
 
+std::function<void(Node&)> NodeInitializer = nullptr;
+
 class NodeRegistry {
 public:
     std::size_t count()
@@ -74,6 +76,8 @@ Node::Node(std::string element_name)
     , _status_flags(ImGuiItemStatusFlags_None)
     , _style(std::make_shared<StyleBlock>())
 {
+    if (NodeInitializer)
+        NodeInitializer(*this);
     _style->add_observer(this);
     _style_guard = OnScopeExit([this, style = _style]() {
         style->remove_observer(this);
@@ -84,7 +88,7 @@ Node::~Node()
 {
     for (auto& child : _children)
         child->_parent = nullptr;
-    log_verbose("~Node: {} {}", this->imgui_label(), element_name());
+    // log_warn("~Node: {} {}", this->imgui_label(), element_name());
     NodeRegistry::instance().release(_imgui_id);
 }
 
@@ -340,8 +344,8 @@ void Node::set_parent(Node* parent)
 
 void Node::before_add(Node& node) const
 {
-    if (node._disposed)
-        throw std::invalid_argument("cannot reuse disposed node");
+//    if (node._disposed)
+//        throw std::invalid_argument("cannot reuse disposed node");
     if (node._parent)
         throw std::invalid_argument("node is already assigned");
 }
@@ -640,10 +644,6 @@ OnScopeExit Node::_apply_style_compiled()
 
 void Node::dispose()
 {
-//    _mouse.enter = nullptr;
-//    _mouse.leave = nullptr;
-//    _mouse.move = nullptr;
-//    _on_resize = nullptr;
     for (auto& child : _children)
         child->dispose();
     _disposed = true;

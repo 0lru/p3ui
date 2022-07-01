@@ -242,4 +242,6 @@ private:
     float _y;
 };
 
+extern std::function<void(Node&)> NodeInitializer;
+
 }

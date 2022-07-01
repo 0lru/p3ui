@@ -52,7 +52,7 @@ void UserInterface::set_theme(std::shared_ptr<Theme> theme)
     set_needs_restyle();
 }
 
-std::shared_ptr<Theme> const& UserInterface::theme() const
+std::shared_ptr<Theme> UserInterface::theme() const
 {
     return _theme;
 }

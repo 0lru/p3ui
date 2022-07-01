@@ -11,9 +11,7 @@ async def main():
     gallery = Gallery(window)
     window.user_interface = gallery
     await window.closed
-
-
-#    await gallery.shutdown()
+    await gallery.shutdown()
 
 
 run(main())

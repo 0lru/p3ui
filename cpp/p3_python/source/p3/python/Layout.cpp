@@ -25,7 +25,7 @@ public:
 void Definition<Layout>::apply(py::module& m)
 {
     py::class_<Layout, Node, std::shared_ptr<Layout>> layout(m, "Layout", R"doc(
-            :py:class:`Layout` Partial Adaption of the CSS flexbox.
+            :py:class:` CSS-flexbox-like container.
         )doc");
 
     layout.def(py::init<>([](py::kwargs kwargs) {

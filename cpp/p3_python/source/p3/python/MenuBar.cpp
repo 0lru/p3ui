@@ -15,8 +15,6 @@ namespace p3::python
             ArgumentParser<Node>()(kwargs, *menu_bar);
             return menu_bar;
         }));
-        def_method(menu_bar, "add", &MenuBar::add);
-        def_method(menu_bar, "remove", &MenuBar::remove);
     }
 
 }

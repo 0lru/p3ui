@@ -1,10 +1,14 @@
 #include "p3ui.h"
-
+#include <p3/Node.h>
 
 PYBIND11_MODULE(native, module)
 {
     using namespace ::p3;
-
+    p3::NodeInitializer = [](Node& node) {
+        auto gc_dict = std::make_shared<py::dict>();
+        (*gc_dict)["children"] = py::list();
+        node.set_user_data(gc_dict);
+    };
     module.doc() =
         R"docstring(
         Object Oriented ImGUI (https://github.com/0lru/p3ui)

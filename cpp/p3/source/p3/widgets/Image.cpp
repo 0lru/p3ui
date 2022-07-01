@@ -96,7 +96,6 @@ void Image::on_texture_resized()
 
 void Image::dispose()
 {
-    _on_click = nullptr;
     Node::dispose();
 }
 

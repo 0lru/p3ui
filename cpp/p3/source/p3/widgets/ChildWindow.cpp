@@ -115,7 +115,6 @@ ChildWindow::OnClose ChildWindow::on_close() const
 
 void ChildWindow::dispose()
 {
-    _on_close = nullptr;
     Node::dispose();
 }
 

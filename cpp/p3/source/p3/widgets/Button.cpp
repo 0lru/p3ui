@@ -42,7 +42,6 @@ void Button::set_attribute(std::string const& name, std::string const& value)
 
 void Button::dispose()
 {
-    _on_click = nullptr;
     Node::dispose();
 }
 

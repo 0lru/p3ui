@@ -107,7 +107,6 @@ int InputText::Callback(ImGuiInputTextCallbackData* data)
 
 void InputText::dispose()
 {
-    _on_change = nullptr;
     Node::dispose();
 }
 

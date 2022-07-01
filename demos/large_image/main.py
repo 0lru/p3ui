@@ -34,7 +34,7 @@ class ImageViewer(Layout):
             ] + [Button(label=f'button {i}') for i in range(10)]
         )
 
-        #with self._picture as canvas:
+        # with self._picture as canvas:
         #    canvas.save()
         #    canvas.drawImage(image, 0, 0)
 
@@ -90,6 +90,7 @@ async def main():
     t = asyncio.create_task(iw.update())
     await window.closed
     t.cancel()
+    await t
 
 
 if __name__ == "__main__":

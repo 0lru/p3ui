@@ -26,24 +26,22 @@ namespace p3::python
         user_interface.def(py::init<>([](std::shared_ptr<MenuBar> menu_bar, std::shared_ptr<Node> content, py::kwargs kwargs)
         {
             auto user_interface = std::make_shared<UserInterface>();
-            auto dict = std::make_shared<py::dict>();
-            (*dict)["children"] = py::list();
-            user_interface->set_user_data(dict);
-
-            (*dict)["menu_bar"] = py::cast(menu_bar);
-            user_interface->set_menu_bar(std::move(menu_bar));
+            auto dict = std::static_pointer_cast<py::dict>(user_interface->user_data());
 
             (*dict)["content"] = py::cast(content);
-            user_interface->set_content(std::move(content));
+            user_interface->set_content(content);
+
+            (*dict)["menu_bar"] = py::cast(menu_bar);
+            user_interface->set_menu_bar(menu_bar);
 
             return user_interface;
         }), py::kw_only(), py::arg("menu_bar") = py::none(), py::arg("content") = py::none());
 
         def_content_property(user_interface, "content", &UserInterface::content, &UserInterface::set_content);
-        def_method(user_interface, "load_font", &UserInterface::load_font);
-        def_method(user_interface, "merge_font", &UserInterface::merge_font);
         def_content_property(user_interface, "menu_bar", &UserInterface::menu_bar, &UserInterface::set_menu_bar);
         def_property(user_interface, "theme", &UserInterface::theme, &UserInterface::set_theme);
+        def_method(user_interface, "load_font", &UserInterface::load_font);
+        def_method(user_interface, "merge_font", &UserInterface::merge_font);
         def_property(user_interface, "default_font", &UserInterface::default_font, &UserInterface::set_default_font);
         def_property(user_interface, "mouse_cursor_scale", &UserInterface::mouse_cursor_scale, &UserInterface::set_mouse_cursor_scale);
         def_property(user_interface, "anti_aliased_lines", &UserInterface::anti_aliased_lines, &UserInterface::set_anti_aliased_lines);

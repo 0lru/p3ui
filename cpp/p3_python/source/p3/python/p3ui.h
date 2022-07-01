@@ -124,13 +124,13 @@ void def_content_property(
         [name = std::string(name)](Object& object) {
             auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
             if (!user_data)
-                throw std::runtime_error("no user data");
+                log_fatal("no user data");
             return user_data->contains(name.c_str()) ? (*user_data)[name.c_str()] : py::object(py::none());
         },
         [setter, name = std::string(name)](Object& object, py::object content) {
             auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
             if (!user_data)
-                throw std::runtime_error("no user data");
+                log_fatal("no user data");
             (*user_data)[name.c_str()] = content;
             (object.*setter)(content.is_none() ? Content() : py::cast<Content>(content));
         });

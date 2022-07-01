@@ -39,7 +39,7 @@ public:
     //
     // theme / styling
     void set_theme(std::shared_ptr<Theme>);
-    std::shared_ptr<Theme> const& theme() const;
+    std::shared_ptr<Theme> theme() const;
     void on_theme_changed() final override;
 
     //

@@ -62,7 +62,6 @@ inline void InputScalar<DataType>::set_value(DataType value)
 template <typename DataType>
 inline void InputScalar<DataType>::dispose()
 {
-    _on_change = nullptr;
     Node::dispose();
 }
 

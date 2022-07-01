@@ -5,10 +5,6 @@ namespace p3::python {
 
 void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
 {
-    auto gc_dict = std::make_shared<py::dict>();
-    (*gc_dict)["children"] = py::list();
-    node.set_user_data(gc_dict);
-
     ArgumentParser<StyleBlock>()(kwargs, *node.style());
     assign(kwargs, "label", node, &Node::set_label);
     assign(kwargs, "visible", node, &Node::set_visible);
@@ -20,7 +16,8 @@ void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
     //
     // TODO: add setter and use assign
     if (kwargs.contains("children")) {
-        (*gc_dict)["children"] = kwargs["children"];
+        auto dict = std::static_pointer_cast<py::dict>(node.user_data());
+        (*dict)["children"] = kwargs["children"];
         auto children = kwargs["children"].cast<std::vector<std::shared_ptr<Node>>>();
         for (auto& child : children)
             node.add(child);
@@ -46,10 +43,23 @@ void Definition<Node>::apply(py::module& module)
         auto* type = &heap_type->ht_type;
         type->tp_flags |= Py_TPFLAGS_HAVE_GC;
         type->tp_traverse = [](PyObject* self_base, visitproc visit, void* arg) {
-            auto& self = py::cast<Node&>(py::handle(self_base));
-            if (self.user_data())
-                Py_VISIT(std::static_pointer_cast<py::dict>(self.user_data())->ptr());
-            return 0;
+            py::handle handle(self_base);
+            if (handle.is_none())
+                return 0;
+
+            //
+            // the cast can fail if the holder is not initialized yet
+            // currently it throws "Unable to cast from non-held to held instance (T& to Holder<T>) (compile in debug mode for type information)"
+            // TODO: check if holder is initialized to avoid the exception
+            try {
+                auto& self = py::cast<std::shared_ptr<Node>>(handle);
+                if (!self->user_data())
+                    return 0;
+                auto ptr = std::static_pointer_cast<py::dict>(self->user_data());
+                Py_VISIT(ptr->ptr());
+            } catch (std::exception& e) {
+                return 0;
+            }
         };
         type->tp_clear = [](PyObject* self_base) {
             auto& self = py::cast<Node&>(py::handle(self_base));

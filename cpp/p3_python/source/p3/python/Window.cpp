@@ -53,17 +53,8 @@ void Definition<Window>::apply(py::module& module)
 
     window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
         auto window = std::make_shared<Window>(std::move(title), width, height);
-
-        auto window_dict = std::make_shared<py::dict>();
-        (*window_dict)["children"] = py::list();
-        window->set_user_data(std::make_shared<py::dict>());
-
-        auto user_interface_dict = std::make_shared<py::dict>();
-        (*user_interface_dict)["children"] = py::list();
-        window->user_interface()->set_user_data(std::make_shared<py::dict>());
-
-        (*std::static_pointer_cast<py::dict>(window->user_data()))["content"] = py::cast(window->user_interface());
-
+        auto dict = std::static_pointer_cast<py::dict>(window->user_data());
+        (*dict)["user_interface"] = window->user_interface();
         //
         // release the gil while rendering
         window->set_render_scope([](std::function<void()> render) {
