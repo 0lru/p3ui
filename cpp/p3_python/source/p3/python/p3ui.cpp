@@ -1,9 +1,22 @@
 #include "p3ui.h"
 #include <p3/Node.h>
 
+namespace p3::python::modules {
+py::module_ asyncio;
+py::module_ inspect;
+}
+
 PYBIND11_MODULE(native, module)
 {
     using namespace ::p3;
+
+    python::modules::asyncio = py::module_::import("asyncio");
+    python::modules::inspect = py::module_::import("inspect");
+    module.add_object("_cleanup", py::capsule([]() {
+        python::modules::asyncio.release();
+        python::modules::inspect.release();
+    }));
+
     p3::NodeInitializer = [](Node& node) {
         auto gc_dict = std::make_shared<py::dict>();
         (*gc_dict)["children"] = py::list();

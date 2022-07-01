@@ -16,6 +16,11 @@ namespace py = pybind11;
 
 namespace p3::python {
 
+namespace modules {
+    extern py::module_ asyncio;
+    extern py::module_ inspect;
+}
+
 class Builder;
 class Surface;
 
@@ -26,22 +31,6 @@ void assign(py::kwargs const& kwargs, const char* name, Object& object, void (Ob
         (object.*setter)(kwargs[name].cast<T>());
 }
 
-//
-// bit hacky.. revise later
-struct FunctionGuard {
-    py::function f;
-    FunctionGuard(py::function f)
-        : f(std::move(f))
-    {
-    }
-
-    ~FunctionGuard()
-    {
-        // py::gil_scoped_acquire acquire;
-        f = py::function();
-    }
-};
-
 template <typename... Args, typename Object>
 void assign(py::function f, char const* name, Object& object, void (Object::*setter)(std::function<void(Args...)>))
 {
@@ -49,12 +38,14 @@ void assign(py::function f, char const* name, Object& object, void (Object::*set
         std::runtime_error("gc object not set");
     auto user_data = std::static_pointer_cast<py::dict>(object.user_data());
     (*user_data)[name] = f;
-    //
-    // remove weak_ref once working
-    (object.*setter)([weak_ref = py::weakref(f)](Args... args) mutable {
-        auto x = weak_ref();
-        if (x != py::none())
-            x(std::move(args)...);
+    (object.*setter)([&, weak_ref = py::weakref(f)](Args... args) mutable {
+        auto strong = weak_ref();
+        if (strong == py::none())
+            return;
+        if (modules::inspect.attr("iscoroutinefunction")(strong).cast<bool>())
+            modules::asyncio.attr("get_event_loop")().attr("create_task")(strong(std::move(args)...));
+        else
+            strong(std::move(args)...);
     });
 }
 

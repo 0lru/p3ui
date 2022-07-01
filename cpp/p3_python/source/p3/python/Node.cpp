@@ -47,19 +47,19 @@ void Definition<Node>::apply(py::module& module)
             if (handle.is_none())
                 return 0;
 
-            //
-            // the cast can fail if the holder is not initialized yet
-            // currently it throws "Unable to cast from non-held to held instance (T& to Holder<T>) (compile in debug mode for type information)"
-            // TODO: check if holder is initialized to avoid the exception
             try {
                 auto& self = py::cast<std::shared_ptr<Node>>(handle);
                 if (!self->user_data())
                     return 0;
                 auto ptr = std::static_pointer_cast<py::dict>(self->user_data());
                 Py_VISIT(ptr->ptr());
-            } catch (std::exception& e) {
-                return 0;
+            } catch (std::exception&) {
+                //
+                // the cast can fail if the holder is not initialized yet
+                // currently it throws "Unable to cast from non-held to held instance (T& to Holder<T>) (compile in debug mode for type information)"
+                // TODO: check if holder is initialized to avoid the exception
             }
+            return 0;
         };
         type->tp_clear = [](PyObject* self_base) {
             auto& self = py::cast<Node&>(py::handle(self_base));
