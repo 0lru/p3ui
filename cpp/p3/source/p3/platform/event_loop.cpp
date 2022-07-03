@@ -26,8 +26,13 @@ struct event_comparator {
 
 namespace p3 {
 
+std::function<void(std::function<void()>)> run_in_external_scope = [](std::function<void()> callback) {
+    callback();
+};
+
 namespace {
     thread_local EventLoop* thread_local_event_loop = nullptr;
+    thread_local std::thread::id thread_id;
 }
 
 std::shared_ptr<EventLoop> EventLoop::current()
@@ -40,6 +45,7 @@ std::shared_ptr<EventLoop> EventLoop::current()
 EventLoop::EventLoop()
 {
     thread_local_event_loop = this;
+    thread_id = std::this_thread::get_id();
     //
     // assumes that the event loop belongs to the current thread
     if (!glfwInit())
@@ -53,8 +59,7 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    //
-    // terminate after any window has been destroyed
+    close();
     glfwTerminate();
 }
 
@@ -81,48 +86,60 @@ std::unique_ptr<Event> Event::create(std::function<void()> function)
 
 void EventLoop::run_forever()
 {
+    {
+        std::lock_guard<std::mutex> l(_mutex);
+        if (_closed)
+            throw std::runtime_error("loop was closed already");
+        _stopped = false;
+    }
     while (true) {
         EventLoop::Work work;
         double timeout = 0.5;
         {
-            //
-            // locked..
             std::lock_guard<std::mutex> l(_mutex);
-            if (_closed)
-                _queue.clear();
             if (_stopped)
                 break;
-            while (!_queue.empty() && _queue.front().first - Clock::now() <= Duration::zero()) {
-                work.push_back(std::move(_queue.front().second));
-                std::pop_heap(_queue.begin(), _queue.end(), event_comparator());
-                _queue.pop_back();
+            auto now = Clock::now();
+            while (!_queue.empty()) {
+                auto diff = _queue.front().first - now;
+                if (diff <= Duration::zero()) {
+                    work.push_back(std::move(_queue.front().second));
+                    std::pop_heap(_queue.begin(), _queue.end(), event_comparator());
+                    _queue.pop_back();
+                } else {
+                    auto duration = _queue.front().first - now;
+                    auto seconds = std::chrono::duration<double>(duration).count();
+                    timeout = std::max(0., std::min(timeout, seconds));
+                    break;
+                }
             }
         }
-
         //
-        // at this point glfw events are already pushed
-        for (auto& w : work) {
-            w->operator()();
+        // without lock do..
+        if (work.empty()) {
+            //
+            // wait for 500ms or less time
+            std::cout << "wait" << timeout << std::endl;
+            glfwWaitEventsTimeout(timeout);
+        } else {
+            //
+            // (for python we need to acquire the gil)
+            run_in_external_scope([&] {
+                for (auto& item : work) {
+                    try {
+                        (*item)();
+                    } catch (std::exception& e) {
+                        log_error("exception was caught: ", e.what());
+                    }
+                }
+                work.clear();
+            });
+            glfwPollEvents();
         }
-        work.clear();
-
         //
-        // glfw updated and work is done.. render
+        // render..
         for (auto observer : _observer)
             observer->on_work_processed(*this);
-
-        //
-        // probably optimizable... (only one lock required)
-        {
-            std::lock_guard<std::mutex> l(_mutex);
-            if (!_queue.empty() && _queue.front().first - Clock::now() > Duration::zero()) {
-                auto duration = _queue.front().first - Clock::now();
-                auto seconds = std::chrono::duration<double>(duration).count();
-                timeout = std::max(0., std::min(timeout, seconds));
-            }
-        }
-
-        glfwWaitEventsTimeout(timeout);
     }
 }
 
@@ -130,25 +147,34 @@ void EventLoop::call_at(TimePoint time_point, std::unique_ptr<Event> event)
 {
     {
         std::lock_guard<std::mutex> l(_mutex);
-        if (_stopped || _closed)
-            return;
+        if (_closed)
+            throw std::runtime_error("cannot schedule task on a closed loop");
         _queue.emplace_back(time_point, std::move(event));
         std::push_heap(_queue.begin(), _queue.end(), event_comparator());
     }
     //
     // https://stackoverflow.com/questions/17101922/do-i-have-to-acquire-lock-before-calling-condition-variable-notify-one
     glfwPostEmptyEvent();
+    // auto tid = std::this_thread::get_id();
 }
 
 void EventLoop::close()
 {
+    EventLoop::Queue temp;
     log_debug("closing event loop");
     {
         std::lock_guard<std::mutex> l(_mutex);
-        _stopped = true;
+        if (!_stopped)
+            log_fatal("cannot close a running loop");
+        std::swap(_queue, temp);
         _closed = true;
     }
-    glfwPostEmptyEvent();
+    if (!temp.empty()) 
+    { 
+        run_in_external_scope([&] {
+            temp.clear();
+        });
+    }
 }
 
 void EventLoop::stop()
@@ -157,6 +183,8 @@ void EventLoop::stop()
         std::lock_guard<std::mutex> l(_mutex);
         _stopped = true;
     }
+    //
+    // make sure thread will process the change of the flag
     glfwPostEmptyEvent();
 }
 

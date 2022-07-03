@@ -12,6 +12,8 @@
 
 namespace p3 {
 
+extern std::function<void(std::function<void()>)> run_in_external_scope;
+
 class Event {
 public:
     virtual ~Event() { }
@@ -47,9 +49,19 @@ public:
     ~EventLoop();
 
     void call_at(TimePoint, std::unique_ptr<Event>);
+
+    ///
+    /// If stop() is called while run_forever() is running, the loop will 
+    /// run the current batch of callbacks and then exit.void stop();
     void stop();
+
+    ///
+    // the loop must not be running when this function is called.
+    /// Any pending callbacks will be discarded.
     void close();
 
+    /// 
+    /// run until stopped / closed
     void run_forever();
 
     Queue const& queue() const { return _queue; }
@@ -59,8 +71,10 @@ public:
 private:
     std::mutex _mutex;
     Queue _queue;
+
+    bool _stopped = true;
     bool _closed = false;
-    bool _stopped = false;
+
     std::vector<Observer*> _observer;
 };
 

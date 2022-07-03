@@ -85,54 +85,47 @@ Window::~Window()
     _glfw_window.reset();
 }
 
-void Window::set_render_scope(RenderScope render_scope)
-{
-    _render_scope = std::move(render_scope);
-}
-
 void Window::on_work_processed(EventLoop&)
 {
-    _render_scope([&] {
-        if (!_user_interface)
+    if (!_user_interface)
+        return;
+    ImGui::SetCurrentContext(&_user_interface->im_gui_context());
+    ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
+
+    MousePosition mouse_position;
+    glfwGetCursorPos(_glfw_window.get(), &(mouse_position[0]), &mouse_position[1]);
+    Context::MouseMove mouse_move = std::nullopt;
+    if (_window_state.mouse[0] != mouse_position[0] || _window_state.mouse[1] != mouse_position[1]) {
+        mouse_move = std::array<float, 2> {
+            float(mouse_position[0] - _window_state.mouse[0]),
+            float(mouse_position[1] - _window_state.mouse[1])
+        };
+        std::swap(_window_state.mouse, mouse_position);
+    }
+    if (mouse_move)
+        _idle_timer.reset();
+
+    if (_idle_timeout) {
+        if (_idle_timer.time() > _idle_timeout.value() && _frame_timer.time() < _idle_frame_time) {
             return;
-        ImGui::SetCurrentContext(&_user_interface->im_gui_context());
-        ImPlot::SetCurrentContext(&_user_interface->im_plot_context());
-
-        MousePosition mouse_position;
-        glfwGetCursorPos(_glfw_window.get(), &(mouse_position[0]), &mouse_position[1]);
-        Context::MouseMove mouse_move = std::nullopt;
-        if (_window_state.mouse[0] != mouse_position[0] || _window_state.mouse[1] != mouse_position[1]) {
-            mouse_move = std::array<float, 2> {
-                float(mouse_position[0] - _window_state.mouse[0]),
-                float(mouse_position[1] - _window_state.mouse[1])
-            };
-            std::swap(_window_state.mouse, mouse_position);
         }
-        if (mouse_move)
-            _idle_timer.reset();
-
-        if (_idle_timeout) {
-            if (_idle_timer.time() > _idle_timeout.value() && _frame_timer.time() < _idle_frame_time) {
-                return;
-            }
+    }
+    _frame_timer.reset();
+    if (_user_interface) {
+        _render_backend->new_frame();
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplGlfw_NewFrame();
+        {
+            _render_backend->gc(); // needs to be locked/synchonized
+            Context context(*_user_interface, *_render_backend, mouse_move);
+            _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
         }
-        _frame_timer.reset();
-        if (_user_interface) {
-            _render_backend->new_frame();
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui_ImplGlfw_NewFrame();
-            {
-                _render_backend->gc(); // needs to be locked/synchonized
-                Context context(*_user_interface, *_render_backend, mouse_move);
-                _user_interface->render(context, float(_window_state.framebuffer_size.width), float(_window_state.framebuffer_size.height), false);
-            }
-            glViewport(0, 0, _window_state.framebuffer_size.width, _window_state.framebuffer_size.height);
-            if (_user_interface)
-                _render_backend->render(*_user_interface);
-            glFlush();
-            glfwSwapBuffers(_glfw_window.get());
-        }
-    });
+        glViewport(0, 0, _window_state.framebuffer_size.width, _window_state.framebuffer_size.height);
+        if (_user_interface)
+            _render_backend->render(*_user_interface);
+        glFlush();
+        glfwSwapBuffers(_glfw_window.get());
+    }
     if (!_key_release_events.empty()) {
         for (auto& e : _key_release_events)
             ImGui_ImplGlfw_KeyCallback(_glfw_window.get(), e.key, e.scancode, GLFW_RELEASE, e.modifications);
@@ -299,7 +292,7 @@ void Window::GlfwWindowCloseCallback(GLFWwindow* window)
     auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
     log_debug("closing window");
     if (self->_close_callback) {
-        self->_close_callback();
+        self->_event_loop->call_at(EventLoop::Clock::now(), Event::create(self->_close_callback));
     }
 }
 

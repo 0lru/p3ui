@@ -55,13 +55,6 @@ void Definition<Window>::apply(py::module& module)
         auto window = std::make_shared<Window>(std::move(title), width, height);
         auto dict = std::static_pointer_cast<py::dict>(window->user_data());
         (*dict)["user_interface"] = window->user_interface();
-        //
-        // release the gil while rendering
-        window->set_render_scope([](std::function<void()> render) {
-            py::gil_scoped_release release;
-            render();
-        });
-
         return window;
     }),
         py::kw_only(),

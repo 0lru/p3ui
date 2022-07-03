@@ -88,7 +88,7 @@ void UserInterface::merge_font(std::string const& filename, float size)
     ImFontConfig config;
     config.MergeMode = true;
     config.PixelSnapH = true;
-    config.GlyphOffset.y = size / 4.0f;
+    config.GlyphOffset.y = size / 5.0f;
     // config.OversampleH = 4;
     // config.OversampleV = 4;
     static const ImWchar icon_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
@@ -230,7 +230,9 @@ void UserInterface::render(Context& context, float width, float height, bool)
         flags = flags | ImGuiWindowFlags_MenuBar;
     ImGui::SetNextWindowPos(ImVec2(.0f, .0f), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(static_cast<float>(width), static_cast<float>(height)), ImGuiCond_Always);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("Window", 0, flags);
+    ImGui::PopStyleVar();
 
     //
     // draw optional menu bar

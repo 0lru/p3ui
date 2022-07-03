@@ -321,7 +321,7 @@ private:
     std::vector<Observer*> _observer;
 
     float _alpha = 1.f;
-    Length2 _window_padding { .35f | em, 0.35 | em };
+    Length2 _window_padding { 0 | em, 0 | em };
     Length _window_rounding { 2 | px };
     Length _window_border_size { 1 | px };
     Length2 _window_min_size { 2 | em, 2 | em };

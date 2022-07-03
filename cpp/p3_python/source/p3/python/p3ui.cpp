@@ -1,5 +1,6 @@
 #include "p3ui.h"
 #include <p3/Node.h>
+#include <p3/platform/event_loop.h>
 
 namespace p3::python::modules {
 py::module_ asyncio;
@@ -9,6 +10,11 @@ py::module_ inspect;
 PYBIND11_MODULE(native, module)
 {
     using namespace ::p3;
+
+    p3::run_in_external_scope = [](std::function<void()> callback) {
+        py::gil_scoped_acquire acquire;
+        callback();
+    };
 
     python::modules::asyncio = py::module_::import("asyncio");
     python::modules::inspect = py::module_::import("inspect");

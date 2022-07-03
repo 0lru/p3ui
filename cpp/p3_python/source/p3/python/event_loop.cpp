@@ -36,7 +36,7 @@ void Definition<EventLoop>::apply(py::module& module)
     }));
 
     event_loop.def("run_forever", [](EventLoop& event_loop) {
-        // py::gil_scoped_release release;
+        py::gil_scoped_release release;
         event_loop.run_forever();
     });
     event_loop.def("push", [](EventLoop& event_loop, double delay, py::object handle) {

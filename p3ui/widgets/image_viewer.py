@@ -6,6 +6,7 @@ from ..native import *
 from .. import skia
 from .icons import Icons
 import math
+import cv2 as cv
 
 
 def make_text_tooltip(text):
@@ -24,12 +25,12 @@ def make_skia_image(image):
             if image.dtype == np.uint8:
                 return skia.Image.fromarray(image, skia.ColorType.kGray_8_ColorType)
         if len(image.shape) == 3:
-            if len(image.shape[2]) == 3:
+            if image.shape[2] == 3:
                 if image.dtype == np.uint8:
                     return skia.Image.fromarray(image.astype(np.uint8),
-                                                skia.ColorType.kRGBA_888_ColorType)
-            if len(data.shape[2]) == 4:
-                if data.dtype == np.uint8:
+                                                skia.ColorType.kRGB_888x_ColorType)
+            if image.shape[2] == 4:
+                if image.dtype == np.uint8:
                     return skia.Image.fromarray(image.astype(np.uint8),
                                                 skia.ColorType.kRGBA_8888_ColorType)
     raise RuntimeError('unknown image data format')
@@ -145,6 +146,7 @@ class ImageSurface(ScrollArea):
         elif self.__feature_scaling is ImageSurface.FeatureScaling.Logarithmic:
             image = np.log(self.__image + 1.)
             image_min, image_max = image.min(), image.max()
+            # image_min, image_max, _, _ = cv.minMaxLoc(image)
             n = image_max - image_min
             if n != 0:
                 image = ((image - image_min) / n * 255.)
@@ -427,7 +429,7 @@ class ImageViewer(Layout):
                     children=[
                         Row(
                             padding=(0 | px, 0 | px),
-                            width=(100|percent, 0, 0),
+                            width=(100 | percent, 0, 0),
                             height=(auto, 0, 0),
                             justify_content=Justification.Start,
                             align_items=Alignment.Start,

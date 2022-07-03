@@ -96,11 +96,7 @@ public:
     using CloseCallback = std::function<void()>;
     void set_close_callback(CloseCallback);
 
-    using RenderScope = std::function<void(std::function<void()>)>;
-    void set_render_scope(RenderScope);
-
 private:
-    RenderScope _render_scope = [](std::function<void()> f) { f(); };
     bool _vsync = true;
     std::string _title;
 
