@@ -124,8 +124,8 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="p3ui",
-    version="1.0.1",
-    author="Martin Rudoff",
+    version="1.0.2",
+    author="0lru",
     url='https://github.com/0lru/p3ui',
     #    author_email="dean0x7d@gmail.com",
     description="Async Python User Interface Library",
