@@ -349,11 +349,15 @@ public:
     void set_inverted(bool);
     bool inverted() const;
 
+    void set_opposite(bool);
+    bool opposite() const;
+
 private:
     Type _type = Type::Numeric;
     bool _auto_fit = true;
     bool _fixed = false;
     bool _inverted = false;
+    bool _opposite = true;
     Label _label;
     Limits _limits;
     std::optional<Ticks> _ticks = std::nullopt;

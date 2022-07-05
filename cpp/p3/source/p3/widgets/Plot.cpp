@@ -59,6 +59,8 @@ void Plot::render_impl(Context&, float width, float height)
     ImPlotAxisFlags y_flags = 0;
     if (_x_axis->inverted())
         x_flags |= ImPlotAxisFlags_Invert;
+    if (_x_axis->opposite())
+        x_flags |= ImPlotAxisFlags_Opposite;
     if (_x_axis->auto_fit())
         x_flags |= ImPlotAxisFlags_AutoFit;
     else if (_x_axis->fixed() && _x_axis->limits())
@@ -68,6 +70,8 @@ void Plot::render_impl(Context&, float width, float height)
 
     if (_y_axis->inverted())
         y_flags |= ImPlotAxisFlags_Invert;
+    if (_y_axis->opposite())
+        y_flags |= ImPlotAxisFlags_Opposite;
     if (_y_axis->auto_fit())
         y_flags |= ImPlotAxisFlags_AutoFit;
     else if (_y_axis->fixed() && _y_axis->limits())
@@ -232,6 +236,16 @@ void Plot::Axis::set_inverted(bool inverted)
 bool Plot::Axis::inverted() const
 {
     return _inverted;
+}
+
+void Plot::Axis::set_opposite(bool opposite)
+{
+    _opposite = opposite;
+}
+
+bool Plot::Axis::opposite() const
+{
+    return _opposite;
 }
 
 void Plot::Axis::set_auto_fit(bool auto_fit)

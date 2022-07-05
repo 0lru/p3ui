@@ -67,6 +67,7 @@ namespace {
         assign(kwargs, (prefix + "_ticks").c_str(), axis, &Plot::Axis::set_ticks);
         assign(kwargs, (prefix + "_inverted").c_str(), axis, &Plot::Axis::set_inverted);
         assign(kwargs, (prefix + "_fixed").c_str(), axis, &Plot::Axis::set_fixed);
+        assign(kwargs, (prefix + "_opposite").c_str(), axis, &Plot::Axis::set_opposite);
         assign(kwargs, (prefix + "_auto_fit").c_str(), axis, &Plot::Axis::set_auto_fit);
         if (kwargs.contains(prefix + "_ticks")) {
             auto x_ticks = kwargs[(prefix + "_ticks").c_str()].cast<std::optional<py::array_t<double>>>();
@@ -233,6 +234,7 @@ void Definition<Plot>::apply(py::module& module)
     def_property(axis, "label", &Plot::Axis::label, &Plot::Axis::set_label);
     def_property(axis, "limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
     def_property(axis, "fixed", &Plot::Axis::fixed, &Plot::Axis::set_fixed);
+    def_property(axis, "opposite", &Plot::Axis::opposite, &Plot::Axis::set_opposite);
     def_property(axis, "inverted", &Plot::Axis::inverted, &Plot::Axis::set_inverted);
     def_property(axis, "auto_fit", &Plot::Axis::auto_fit, &Plot::Axis::set_auto_fit);
 
