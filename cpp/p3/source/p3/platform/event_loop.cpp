@@ -119,7 +119,6 @@ void EventLoop::run_forever()
         if (work.empty()) {
             //
             // wait for 500ms or less time
-            std::cout << "wait" << timeout << std::endl;
             glfwWaitEventsTimeout(timeout);
         } else {
             //
@@ -129,7 +128,7 @@ void EventLoop::run_forever()
                     try {
                         (*item)();
                     } catch (std::exception& e) {
-                        log_error("exception was caught: ", e.what());
+                        log_error("{}", e.what());
                     }
                 }
                 work.clear();
