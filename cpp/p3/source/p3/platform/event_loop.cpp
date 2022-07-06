@@ -97,6 +97,7 @@ void EventLoop::run_forever()
         double timeout = 0.5;
         {
             std::lock_guard<std::mutex> l(_mutex);
+
             if (_stopped)
                 break;
             auto now = Clock::now();
@@ -128,7 +129,7 @@ void EventLoop::run_forever()
                     try {
                         (*item)();
                     } catch (std::exception& e) {
-                        log_error("{}", e.what());
+                        log_error("error: {}", e.what());
                     }
                 }
                 work.clear();

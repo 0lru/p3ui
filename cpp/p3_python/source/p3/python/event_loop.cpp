@@ -39,7 +39,7 @@ void Definition<EventLoop>::apply(py::module& module)
         py::gil_scoped_release release;
         event_loop.run_forever();
     });
-    event_loop.def("push", [](EventLoop& event_loop, double delay, py::object handle) {
+    event_loop.def("call_at", [](EventLoop& event_loop, double delay, py::object handle) {
         auto now = EventLoop::Clock::now();
         auto d = std::chrono::duration<double>(delay);
         auto task = std::make_unique<PythonTask>(std::move(handle));

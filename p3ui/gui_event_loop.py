@@ -4,7 +4,7 @@ import concurrent
 import traceback
 import logging
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger('p3ui')
 
 
 class GuiEventLoop(asyncio.AbstractEventLoop):
@@ -18,7 +18,6 @@ class GuiEventLoop(asyncio.AbstractEventLoop):
         self._current_handle = None
 
     def get_debug(self):
-        """ leftover?! """
         return False
 
     @property
@@ -53,41 +52,34 @@ class GuiEventLoop(asyncio.AbstractEventLoop):
     def shutdown_asyncgens(self):
         pass
 
-    def call_soon(self, callback, *args, **kwargs):
-        handle = asyncio.Handle(callback, args, loop=self)  # , context=kwargs.pop('context', None))
-        self.__native_event_loop.push(0, handle)
+    def call_soon(self, callback, *args, context=None):
+        handle = asyncio.Handle(callback, args, self, context)
+        self.__native_event_loop.call_at(0, handle)
         return handle
 
-    def call_soon_threadsafe(self, callback, *args, **kwargs):
-        return self.call_soon(callback, *args, **kwargs)
+    def call_soon_threadsafe(self, callback, *args, context=None):
+        handle = asyncio.Handle(callback, args, self, context)
+        self.__native_event_loop.call_at(0, handle)
+        return handle
 
-    def call_later(self, delay, callback, *args):
+    def call_later(self, delay, callback, *args, context=None):
         #
         # TODO: use more decent time representation
-        return self.call_at(self.time + delay, callback, *args)
+        return self.call_at(self.time + delay, callback, *args, context=None)
 
-    def call_at(self, when, callback, *args, **kwargs):
-        h = asyncio.TimerHandle(when, callback, args, loop=self)  # , context=context)
-        self.__native_event_loop.push(when, h)
+    def call_at(self, when, callback, *args, context=None):
+        h = asyncio.TimerHandle(when, callback, args, self, context)
+        self.__native_event_loop.call_at(when, h)
         h._scheduled = True
         return h
 
-    def run(self, callback, *args):
-        try:
-            callback(*args)
-        except:
-            print('Exception')
-
     def create_task(self, coro):
-        task = asyncio.Task(coro, loop=self)
-        return task
+        return asyncio.Task(coro, loop=self)
 
     def create_future(self):
         return asyncio.Future(loop=self)
 
     def run_in_executor(self, executor, func, *args, **kwargs):
-        # if self.closed:
-        #    raise RuntimeError('...')
         if executor is None:
             executor = self._default_executor
             if executor is None:
