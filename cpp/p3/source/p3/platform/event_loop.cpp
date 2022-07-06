@@ -130,6 +130,7 @@ void EventLoop::run_forever()
                         (*item)();
                     } catch (std::exception& e) {
                         log_error("error: {}", e.what());
+                        throw;
                     }
                 }
                 work.clear();
