@@ -53,7 +53,7 @@ EventLoop::EventLoop()
     //
     // terminate on error
     glfwSetErrorCallback([](int code, char const* text) {
-        log_fatal("glfw error, code={}, text=\"{}\"", code, text);
+        log_warn("glfw error, code={}, text=\"{}\"", code, text);
     });
 }
 
@@ -170,8 +170,7 @@ void EventLoop::close()
         std::swap(_queue, temp);
         _closed = true;
     }
-    if (!temp.empty()) 
-    { 
+    if (!temp.empty()) {
         run_in_external_scope([&] {
             temp.clear();
         });
