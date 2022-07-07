@@ -6,7 +6,6 @@ from ..native import *
 from .. import skia
 from .icons import Icons
 import math
-import cv2 as cv
 
 
 def make_text_tooltip(text):
@@ -78,7 +77,14 @@ class ImageSurface(ScrollArea):
             sx, sy = self.surface.scale_view
             self.canvas.drawLine(x1 * sx, y1 * sy, x2 * sx, y2 * sy, paint)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args,
+                 on_mouse_move=None,
+                 on_mouse_leave=None,
+                 on_mouse_enter=None,
+                 **kwargs):
+        self._on_mouse_move = on_mouse_move
+        self._on_mouse_leave = on_mouse_leave
+        self._on_mouse_enter = on_mouse_enter
         self.__on_scale_changed = kwargs.pop('on_scale_changed', None)
         self.__on_fitting_mode_changed = kwargs.pop('on_fitting_mode_changed', None)
         self.__on_feature_scaling_changed = kwargs.pop('on_feature_scaling_changed', None)
@@ -90,7 +96,7 @@ class ImageSurface(ScrollArea):
         self.__scale_y_view_start = 1.
         self.__scale_y_view_current = 1.
         self.__scale_animation_start_time = None
-        self.__scale_animation_duration = 0.2
+        self.__scale_animation_duration = 0.38
         self.__scale_step_width = 0.1
         self.__animation_task_instance = None
 
@@ -101,7 +107,14 @@ class ImageSurface(ScrollArea):
         self.__feature_scaling = ImageSurface.FeatureScaling.Original
 
         self.__content_region = None
-        self.__surface = Surface()
+        self.__surface = Surface(
+            on_mouse_enter=self.__on_mouse_enter,
+            on_mouse_move=self.__on_mouse_move,
+            on_mouse_leave=self.__on_mouse_leave
+        )
+        self.__mouse_x = None
+        self.__mouse_y = None
+
         super().__init__(*args, **kwargs,
                          content=self.__surface,
                          on_content_region_changed=self.__on_viewport_changed)
@@ -125,6 +138,40 @@ class ImageSurface(ScrollArea):
         self.__scale_animation_start_time = time.time()
         if self.__animation_task_instance is None:
             self.__animation_task_instance = asyncio.get_event_loop().create_task(self.__animation_task())
+
+    def __on_mouse_enter(self, e):
+        self.__mouse_x = e.x
+        self.__mouse_y = e.y
+        if self._on_mouse_enter:
+            self._on_mouse_enter(self.mouse_x, self.mouse_y)
+
+    def __on_mouse_move(self, e):
+        self.__mouse_x = e.x
+        self.__mouse_y = e.y
+        if self._on_mouse_move:
+            self._on_mouse_move(self.mouse_x, self.mouse_y)
+
+    def __on_mouse_leave(self, e):
+        self.__mouse_x = None
+        self.__mouse_y = None
+        if self._on_mouse_leave:
+            self._on_mouse_leave(self.mouse_x, self.mouse_y)
+
+    @property
+    def mouse_x(self):
+        if self.__mouse_x is None:
+            return None
+        if self.__scale_x_view_current == 0:
+            return 0
+        return self.__mouse_x / self.__scale_x_view_current
+
+    @property
+    def mouse_y(self):
+        if self.__mouse_y is None:
+            return None
+        if self.__scale_y_view_current == 0:
+            return 0
+        return self.__mouse_y / self.__scale_y_view_current
 
     #
     # tier 1: update the numpy image
@@ -309,9 +356,18 @@ class ImageSurface(ScrollArea):
 
 class ImageViewer(Layout):
 
-    def __init__(self, *, on_repaint=None, collapsed=True):
+    def __init__(self, *,
+                 on_repaint=None,
+                 collapsed=True,
+                 on_mouse_move=None,
+                 on_mouse_leave=None,
+                 on_mouse_enter=None,
+                 **kwargs):
         self.__collapsed = collapsed
         self._image_surface = ImageSurface(
+            on_mouse_enter=on_mouse_enter,
+            on_mouse_move=on_mouse_move,
+            on_mouse_leave=on_mouse_leave,
             padding=(2 | px, 2 | px),
             on_scale_changed=self.__on_scale_changed,
             on_fitting_mode_changed=self.__on_fitting_mode_changed,
@@ -395,27 +451,9 @@ class ImageViewer(Layout):
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             on_click=self.toggle_collapsed)
-        self._make_layout()
         self.collapsed = collapsed
-
-    @property
-    def collapsed(self):
-        return self.__collapsed
-
-    @collapsed.setter
-    def collapsed(self, value):
-        self.__collapsed = value
-        self._fitting_mode_combo_box.visible = not value
-        self._feature_scaling_combo_box.visible = not value
-        self._scale_x_input.visible = not value
-        self._scale_y_input.visible = not value
-        self.__collapsed_button.label = f'{Icons.ChevronRight}' if self.collapsed else f'{Icons.ChevronLeft}'
-
-    def toggle_collapsed(self):
-        self.collapsed = not self.collapsed
-
-    def _make_layout(self):
         super().__init__(
+            **kwargs,
             direction=Direction.Horizontal,
             justify_content=Justification.Start,
             align_items=Alignment.Stretch,
@@ -451,12 +489,40 @@ class ImageViewer(Layout):
             ])
 
     @property
+    def mouse_x(self):
+        return self._image_surface.mouse_x
+
+    @property
+    def mouse_y(self):
+        return self._image_surface.mouse_y
+
+    @property
+    def collapsed(self):
+        return self.__collapsed
+
+    @collapsed.setter
+    def collapsed(self, value):
+        self.__collapsed = value
+        self._fitting_mode_combo_box.visible = not value
+        self._feature_scaling_combo_box.visible = not value
+        self._scale_x_input.visible = not value
+        self._scale_y_input.visible = not value
+        self.__collapsed_button.label = f'{Icons.ChevronRight}' if self.collapsed else f'{Icons.ChevronLeft}'
+
+    def toggle_collapsed(self):
+        self.collapsed = not self.collapsed
+
+    @property
     def image(self):
         return self._image_surface.image
 
     @image.setter
     def image(self, image):
         self._image_surface.image = image
+
+    @property
+    def scale_view(self):
+        return self._image_surface.scale_view
 
     def __on_scale_changed(self, scale):
         self._scale_x_input.value, self._scale_y_input.value = scale
