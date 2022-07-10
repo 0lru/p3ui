@@ -51,16 +51,21 @@ void Definition<Window>::apply(py::module& module)
         .def_readwrite("height", &Window::Size::height);
     py::implicitly_convertible<py::tuple, Window::Size>();
 
-    window.def(py::init<>([](std::string title, std::size_t width, std::size_t height, py::kwargs kwargs) {
-        auto window = std::make_shared<Window>(std::move(title), width, height);
+    window.def(py::init<>([](std::string title, Window::Size size, py::kwargs kwargs) {
+        auto window = std::make_shared<Window>(std::move(title), size.width, size.height);
         auto dict = std::static_pointer_cast<py::dict>(window->user_data());
         (*dict)["user_interface"] = window->user_interface();
+        assign(kwargs, "video_mode", *window, &Window::set_video_mode);
+        assign(kwargs, "position", *window, &Window::set_position);
+        assign(kwargs, "vsync", *window, &Window::set_vsync);
+        assign(kwargs, "idle_timeout", *window, &Window::set_idle_timeout);
+        assign(kwargs, "idle_frame_time", *window, &Window::set_idle_frame_time);
         return window;
     }),
         py::kw_only(),
         py::arg("title") = "p3",
-        py::arg("width") = 1024,
-        py::arg("height") = 768);
+        py::arg("size") = Window::Size {1024, 768}
+        );
 
     def_content_property(window, "user_interface", &Window::user_interface, &Window::set_user_interface);
     window.def_property_readonly("monitor", &Window::monitor);
