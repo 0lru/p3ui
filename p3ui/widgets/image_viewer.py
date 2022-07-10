@@ -89,15 +89,22 @@ class ImageSurface(ScrollArea):
         self.__on_fitting_mode_changed = kwargs.pop('on_fitting_mode_changed', None)
         self.__on_feature_scaling_changed = kwargs.pop('on_feature_scaling_changed', None)
         self.__on_repaint = kwargs.pop('on_repaint', None)
+
+        self.__fix_x = 0.
+        self.__fix_y = 0.
+
         self.__scale_x = 1.
         self.__scale_x_view_start = 1.
         self.__scale_x_view_current = 1.
+
         self.__scale_y = 1.
         self.__scale_y_view_start = 1.
         self.__scale_y_view_current = 1.
+
         self.__scale_animation_start_time = None
-        self.__scale_animation_duration = 0.38
-        self.__scale_step_width = 0.1
+        self.__scale_animation_duration = 0.2
+        self.__scale_step_width = 0.5
+
         self.__animation_task_instance = None
 
         self.__skia_image = None
@@ -123,15 +130,24 @@ class ImageSurface(ScrollArea):
         now = time.time()
         while now - self.__scale_animation_start_time < self.__scale_animation_duration:
             time_delta = now - self.__scale_animation_start_time
-            f = math.log((time_delta / self.__scale_animation_duration) + 1.)
             f = time_delta / self.__scale_animation_duration
+            x, y, w, h, bar = self.__content_region
+            w2 = (w - bar) / 2
+            h2 = (h - bar) / 2
             self.__scale_x_view_current = self.__scale_x_view_start + (self.__scale_x - self.__scale_x_view_start) * f
             self.__scale_y_view_current = self.__scale_y_view_start + (self.__scale_y - self.__scale_y_view_start) * f
+#            self.scroll_x = self.__scale_x_view_current * self.__fix_x - w2
+#            self.scroll_y = self.__scale_y_view_current * self.__fix_y - h2
             self.__update_surface()
             await asyncio.sleep(0)
             now = time.time()
+        x, y, w, h, bar = self.__content_region
+        w2 = (w - bar) / 2
+        h2 = (h - bar) / 2
         self.__scale_x_view_current = self.__scale_x
         self.__scale_y_view_current = self.__scale_y
+#        self.scroll_x = self.__scale_x_view_current * self.__fix_x - w2
+#        self.scroll_y = self.__scale_y_view_current * self.__fix_y - h2
         self.__animation_task_instance = None
 
     def __run_animation(self):
@@ -253,10 +269,13 @@ class ImageSurface(ScrollArea):
         self.__update_image()
 
     def zoom_in(self):
-        self.scale = self.__scale_x + self.__scale_step_width, self.__scale_y + self.__scale_step_width
+        if self.content_region is None:
+            return
+        self.scale = self.__scale_x + self.__scale_x * self.__scale_step_width, self.__scale_y + self.__scale_y * self.__scale_step_width
 
     def zoom_out(self):
-        self.scale = self.__scale_x - self.__scale_step_width, self.__scale_y - self.__scale_step_width
+        s = (self.__scale_step_width/(1+self.__scale_step_width))
+        self.scale = self.__scale_x - self.__scale_x * s, self.__scale_y - self.__scale_y * s
 
     def set_scale_to_contain(self):
         self.fitting_mode = ImageSurface.FittingMode.Contain
@@ -290,6 +309,11 @@ class ImageSurface(ScrollArea):
 
     @scale.setter
     def scale(self, scale):
+        x, y, w, h, bar = self.content_region
+        if w * h > 0:
+            self.__fix_x = (x + ((w - bar) / 2)) / self.__scale_x_view_current
+            self.__fix_y = (y + ((h - bar) / 2)) / self.__scale_y_view_current
+
         self.__scale_x_view_start = self.__scale_x_view_current
         self.__scale_y_view_start = self.__scale_y_view_current
         self.__scale_x, self.__scale_y = scale

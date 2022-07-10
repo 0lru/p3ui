@@ -36,6 +36,8 @@ void Definition<ScrollArea>::apply(py::module& module)
     def_content_property(scroll_area, "content", &ScrollArea::content, &ScrollArea::set_content);
     scroll_area.def_property("vertical_scroll_autohide", &ScrollArea::vertical_scroll_autohide, &ScrollArea::set_vertical_scroll_autohide);
     scroll_area.def_property("horizontal_scroll_autohide", &ScrollArea::horizontal_scroll_autohide, &ScrollArea::set_horizontal_scroll_autohide);
+    def_property(scroll_area, "scroll_x", &ScrollArea::scroll_x, &ScrollArea::set_scroll_x);
+    def_property(scroll_area, "scroll_y", &ScrollArea::scroll_y, &ScrollArea::set_scroll_y);
     def_property_readonly(scroll_area, "content_region", &ScrollArea::content_region);
 }
 

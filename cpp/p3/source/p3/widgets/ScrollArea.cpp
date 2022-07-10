@@ -31,9 +31,16 @@ void ScrollArea::render_impl(Context& context, float width, float height)
     style.WindowPadding = style.FramePadding;
 
     ImVec2 size(width, height);
+    if (_set_scroll_x || _set_scroll_y) {
+        ImVec2 scroll(scroll_x(), scroll_y());
+        ImGui::SetNextWindowScroll(scroll);
+        _set_scroll_x.reset();
+        _set_scroll_y.reset();
+    }
     ImGui::BeginChild(imgui_label().c_str(), size, true, flags);
-    // auto content_min = ImGui::GetWindowContentRegionMin();
-    // auto content_max = ImGui::GetWindowContentRegionMax();
+    _scroll_x_max = ImGui::GetScrollMaxX();
+    _scroll_y_max = ImGui::GetScrollMaxY();
+
     auto clip_rect = ImGui::GetCurrentWindow()->ClipRect;
     auto& window = *ImGui::GetCurrentWindow();
     auto content_width = width - window.WindowBorderSize * 2.f - window.WindowPadding.x * 2.f;
@@ -134,7 +141,9 @@ bool ScrollArea::vertical_scroll_autohide() const
 
 float ScrollArea::scroll_x() const
 {
-    return _scroll_x;
+    if (_set_scroll_x)
+        return _set_scroll_x.value();
+    return _content_region[0];
 }
 
 float ScrollArea::scroll_x_max() const
@@ -144,12 +153,14 @@ float ScrollArea::scroll_x_max() const
 
 void ScrollArea::set_scroll_x(float scroll_x)
 {
-    _scroll_x = scroll_x;
+    _set_scroll_x = scroll_x;
 }
 
 float ScrollArea::scroll_y() const
 {
-    return _scroll_y;
+    if (_set_scroll_y)
+        return _set_scroll_y.value();
+    return _content_region[1];
 }
 
 float ScrollArea::scroll_y_max() const
@@ -159,7 +170,7 @@ float ScrollArea::scroll_y_max() const
 
 void ScrollArea::set_scroll_y(float scroll_y)
 {
-    _scroll_y = _scroll_y;
+    _set_scroll_y = scroll_y;
 }
 
 }

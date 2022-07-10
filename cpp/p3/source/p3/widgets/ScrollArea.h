@@ -47,11 +47,9 @@ public:
     void set_scroll_y(float);
 
 private:
-    float _scroll_x = 0.;
     std::optional<float> _set_scroll_x;
     float _scroll_x_max = 0.;
 
-    float _scroll_y = 0.;
     std::optional<float> _set_scroll_y;
     float _scroll_y_max = 0.;
 
