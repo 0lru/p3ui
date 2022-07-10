@@ -44,10 +44,25 @@ void InputText::render_impl(Context&, float width, float height)
             if (_on_change)
                 postpone(_on_change);
     } else {
-        if (ImGui::InputText(imgui_label().c_str(), _value.data(), _value.capacity(),
-                ImGuiInputTextFlags_CallbackResize, InputText::Callback, this))
-            if (_on_change)
-                postpone(_on_change);
+        if (_multi_line) {
+            ImVec2 size(width, height);
+            if (ImGui::InputTextMultiline(
+                    imgui_label().c_str(),
+                    _value.data(),
+                    _value.capacity(),
+                    size,
+                    ImGuiInputTextFlags_CallbackResize,
+                    InputText::Callback,
+                    this)) {
+                if (_on_change)
+                    postpone(_on_change);
+            }
+        } else {
+            if (ImGui::InputText(imgui_label().c_str(), _value.data(), _value.capacity(),
+                    ImGuiInputTextFlags_CallbackResize, InputText::Callback, this))
+                if (_on_change)
+                    postpone(_on_change);
+        }
     }
     update_status();
 }
@@ -93,6 +108,16 @@ void InputText::set_value(std::string value)
 std::string const& InputText::value() const
 {
     return _value;
+}
+
+void InputText::set_multi_line(bool multi_line)
+{
+    _multi_line = multi_line;
+}
+
+bool InputText::multi_line() const
+{
+    return _multi_line;
 }
 
 int InputText::Callback(ImGuiInputTextCallbackData* data)
