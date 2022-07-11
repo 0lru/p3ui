@@ -27,6 +27,11 @@ void ScrollArea::render_impl(Context& context, float width, float height)
     if (!_vertical_scroll_autohide)
         flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
 
+    if (_content_size) {
+        ImVec2 size(_content_size.value()[0], _content_size.value()[1]);
+        ImGui::SetNextWindowContentSize(size);
+    }
+
     auto& style = ImGui::GetStyle();
     style.WindowPadding = style.FramePadding;
 
@@ -171,6 +176,16 @@ float ScrollArea::scroll_y_max() const
 void ScrollArea::set_scroll_y(float scroll_y)
 {
     _set_scroll_y = scroll_y;
+}
+
+std::optional<std::array<float, 2>> const& ScrollArea::content_size() const
+{
+    return _content_size;
+}
+
+void ScrollArea::set_content_size(std::optional<std::array<float, 2>> content_size)
+{
+    _content_size = std::move(content_size);
 }
 
 }

@@ -46,7 +46,11 @@ public:
     float scroll_y_max() const;
     void set_scroll_y(float);
 
+    std::optional<std::array<float, 2>> const& content_size() const;
+    void set_content_size(std::optional<std::array<float, 2>>);
+
 private:
+    std::optional<std::array<float, 2>> _content_size;
     std::optional<float> _set_scroll_x;
     float _scroll_x_max = 0.;
 
