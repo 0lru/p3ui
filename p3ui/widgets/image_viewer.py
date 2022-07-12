@@ -43,7 +43,7 @@ class ImageViewer(Layout):
             value=1,
             format='x=%g',
             on_change=self.__scale_to_x,
-            step=self._image_surface.scale_step_width)
+            step=0.3)
         self._scale_y_input = InputDouble(
             visible=not collapsed,
             width=(auto, 0, 0),
@@ -53,7 +53,7 @@ class ImageViewer(Layout):
             value=1,
             format='y=%g',
             on_change=self.__scale_to_y,
-            step=self._image_surface.scale_step_width)
+            step=0.3)
         self._scale_to_contain_button = Button(
             label=f'{Icons.AspectRatio}',
             width=(auto, 0, 0),
@@ -182,10 +182,10 @@ class ImageViewer(Layout):
         self._image_surface.image = image
 
     def __scale_to_x(self, x):
-        self._image_surface.scale_to(x, self._image_surface.scale[1])
+        self._image_surface.scale = (x, self._image_surface.scale[1])
 
     def __scale_to_y(self, y):
-        self._image_surface.scale_to(self._image_surface.scale[0], y)
+        self._image_surface.scale = (self._image_surface.scale[0], y)
 
     def __on_scale_changed(self, x, y):
         self._scale_x_input.value, self._scale_y_input.value = x, y
@@ -218,9 +218,6 @@ class ImageViewer(Layout):
     def scale_y(self, y):
         self.scale = self.scale[0], y
 
-    def scale_to(self, x, y):
-        self._image_surface.scale_to(x, y)
-
     @property
     def scroll(self):
         return self._image_surface.scroll
@@ -228,6 +225,3 @@ class ImageViewer(Layout):
     @scroll.setter
     def scroll(self, scroll):
         self._image_surface.scroll = scroll
-
-    def scroll_to(self, x, y):
-        self._image_surface.scroll_to(x, y)

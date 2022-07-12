@@ -101,7 +101,8 @@ class ImageSurface(ScrollArea):
         self.__surface = Surface(
             on_mouse_enter=self.__on_mouse_enter,
             on_mouse_move=self.__on_mouse_move,
-            on_mouse_leave=self.__on_mouse_leave
+            on_mouse_leave=self.__on_mouse_leave,
+            on_mouse_wheel=self.__on_mouse_wheel
         )
         self.__mouse_x = None
         self.__mouse_y = None
@@ -119,6 +120,7 @@ class ImageSurface(ScrollArea):
     def scroll(self, scroll):
         """ get current scroll coordinates """
         self.scroll_x, self.scroll_y = scroll
+        self.__update_surface()
 
     @property
     def scale(self):
@@ -126,7 +128,11 @@ class ImageSurface(ScrollArea):
 
     @scale.setter
     def scale(self, scale):
-        self.__scale = scale
+        e = 0.000001
+        self.__scale = max(e, scale[0]), max(e, scale[1])
+        self.__update_surface()
+        if self.__on_scale_changed:
+            self.__on_scale_changed(*scale)
 
     def scroll_to(self, x, y):
         """ run animation from current scroll coordinates to target coordinates """
@@ -168,6 +174,7 @@ class ImageSurface(ScrollArea):
             self.__scale = self.__scale_target
             self.__scale_target = None
         self.__animation_task_instance = None
+        self.content_size = None
         if self.__on_scale_changed:
             self.__on_scale_changed(*self.__scale)
 
@@ -193,6 +200,9 @@ class ImageSurface(ScrollArea):
         self.__mouse_y = None
         if self._on_mouse_leave:
             self._on_mouse_leave(self.mouse_x, self.mouse_y)
+
+    def __on_mouse_wheel(self, amount):
+        print(amount)
 
     @property
     def mouse_x(self):
@@ -269,6 +279,7 @@ class ImageSurface(ScrollArea):
             canvas.restore()
             if self.__on_repaint is not None:
                 self.__on_repaint(ImageSurface.Painter(self, canvas))
+        self.content_size = self.scaled_image_width, self.scaled_image_height
 
     @property
     def image(self):
@@ -279,24 +290,90 @@ class ImageSurface(ScrollArea):
         self.__image = image
         self.__update_image()
 
-    def zoom_in(self):
-        if self.content_region is None:
-            return
-        sx = self.__scale[0] + self.__scale[0] * self.__scale_step_width
-        sy = self.__scale[1] + self.__scale[1] * self.__scale_step_width
-        self.scale_to(sx, sy)
+    def scale_to(self, target_x, target_y):
+        self.__scale_start = self.__scale[0], self.__scale[1]
+        self.__scale_target = target_x, target_y
+        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
+            self.__fitting_mode = ImageSurface.FittingMode.Custom
+            if self.__on_fitting_mode_changed:
+                self.__on_fitting_mode_changed(self.__fitting_mode)
+        self.__run_animation()
 
-    def zoom_out(self):
-        s = (self.__scale_step_width / (1 + self.__scale_step_width))
-        sx = self.__scale[0] - self.__scale[0] * s
-        sy = self.__scale[1] - self.__scale[1] * s
-        self.scale_to(sx, sy)
+    async def __animate_task(self, scroll_start, scale_start, scroll_target, scale_target):
+        now = time.time()
+        start_time = now
+        while now - start_time < self.__animation_duration:
+            time_delta = now - start_time
+            f = time_delta / self.__animation_duration
+            self.__scale = (scale_start[0] + (scale_target[0] - scale_start[0]) * f,
+                            scale_start[1] + (scale_target[1] - scale_start[1]) * f)
+            self.scroll_x = scroll_start[0] + (scroll_target[0] - scroll_start[0]) * f
+            self.scroll_y = scroll_start[1] + (scroll_target[1] - scroll_start[1]) * f
+            self.__update_surface()
+            if self.__on_scale_changed:
+                self.__on_scale_changed(*self.__scale)
+            await asyncio.sleep(0)
+            now = time.time()
+
+    def zoom_in(self, fx=None, fy=None):
+        if fx is None:
+            fx = self.__scale_step_width
+        if fy is None:
+            fy = self.__scale_step_width
+        if self.__content_region is None:
+            return
+        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
+            self.__fitting_mode = ImageSurface.FittingMode.Custom
+            if self.__on_fitting_mode_changed:
+                self.__on_fitting_mode_changed(self.__fitting_mode)
+        scroll_x, scroll_y = self.scroll
+        scale_x, scale_y = self.__scale
+        scale_x_target = scale_x + scale_x * fx
+        scale_y_target = scale_y + scale_y * fy
+        _, _, w, h, bar = self.__content_region
+        w = min(self.image_width * scale_x, w - bar)
+        h = min(self.image_height * scale_y, h - bar)
+        scroll_x_target = (scroll_x + w / 2) / scale_x * scale_x_target - w / 2
+        scroll_y_target = (scroll_y + h / 2) / scale_y * scale_y_target - h / 2
+        self.scroll = scroll_x_target, scroll_y_target
+        self.scale = scale_x_target, scale_y_target
+
+    # factor 2, 2x2 bild:
+    # *--*--*
+    #    x x+w
+
+    def zoom_out(self, fx=None, fy=None):
+        if fx is None:
+            fx = self.__scale_step_width
+        if fy is None:
+            fy = self.__scale_step_width
+        if self.__content_region is None:
+            return
+        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
+            self.__fitting_mode = ImageSurface.FittingMode.Custom
+            if self.__on_fitting_mode_changed:
+                self.__on_fitting_mode_changed(self.__fitting_mode)
+        scroll_x, scroll_y = self.scroll
+        scale_x, scale_y = self.__scale
+        scale_x_target = scale_x - scale_x * (fx / (1 + fx))
+        scale_y_target = scale_y - scale_y * (fy / (1 + fy))
+        _, _, w, h, bar = self.__content_region
+        w = min(self.image_width * scale_x, w)
+        h = min(self.image_height * scale_y, h)
+        scroll_x_target = (scroll_x + w / 2) / scale_x * scale_x_target - w / 2
+        scroll_y_target = (scroll_y + h / 2) / scale_y * scale_y_target - h / 2
+        self.scroll = scroll_x_target, scroll_y_target
+        self.scale = scale_x_target, scale_y_target
 
     def set_scale_to_contain(self):
         self.fitting_mode = ImageSurface.FittingMode.Contain
 
     def set_no_scale(self):
-        self.scale_to(1., 1.)
+        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
+            self.__fitting_mode = ImageSurface.FittingMode.Custom
+            if self.__on_fitting_mode_changed:
+                self.__on_fitting_mode_changed(self.__fitting_mode)
+        self.scale = (1., 1.)
 
     @property
     def fitting_mode(self):
