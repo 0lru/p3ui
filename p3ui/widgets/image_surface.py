@@ -83,6 +83,7 @@ class ImageSurface(ScrollArea):
         self.__scroll_target = None
 
         self.__scale = (1., 1.)
+        self.scale_min = (0.1, 0.1)
         self.__scale_start = None
         self.__scale_target = None
         self.__scale_step_width = 0.5
@@ -128,7 +129,11 @@ class ImageSurface(ScrollArea):
 
     @scale.setter
     def scale(self, scale):
-        e = 0.000001
+        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
+            self.__fitting_mode = ImageSurface.FittingMode.Custom
+            if self.__on_fitting_mode_changed:
+                self.__on_fitting_mode_changed(self.__fitting_mode)
+        e = 0.100001
         self.__scale = max(e, scale[0]), max(e, scale[1])
         self.__update_surface()
         if self.__on_scale_changed:
@@ -202,7 +207,10 @@ class ImageSurface(ScrollArea):
             self._on_mouse_leave(self.mouse_x, self.mouse_y)
 
     def __on_mouse_wheel(self, amount):
-        print(amount)
+        #
+        # __mouse_x/y is in view coordinates
+        x, y = self.__mouse_x - self.scroll_x, self.__mouse_y - self.scroll_y
+        self.zoom(amount * 0.5, amount * 0.5, point=(x, y))
 
     @property
     def mouse_x(self):
@@ -270,8 +278,12 @@ class ImageSurface(ScrollArea):
         self.__scale = self.__derive_scale()
         if self.__on_scale_changed and (previous_scale[0] != self.__scale[0] or previous_scale[1] != self.__scale[1]):
             self.__on_scale_changed(*self.scale)
-        self.__surface.style.width = (int(self.image_width * self.__scale[0]) | px, 0, 0)
-        self.__surface.style.height = (int(self.image_height * self.__scale[1]) | px, 0, 0)
+        surface_width = int(self.image_width * self.__scale[0])
+        surface_height = int(self.image_height * self.__scale[1])
+        surface_width = max(surface_width, self.__content_region[2])
+        surface_height = max(surface_height, self.__content_region[3])
+        self.__surface.style.width = (surface_width | px, 0, 0)
+        self.__surface.style.height = (surface_height | px, 0, 0)
         with self.__surface as canvas:
             canvas.save()
             canvas.scale(self.__scale[0], self.__scale[1])
@@ -315,6 +327,34 @@ class ImageSurface(ScrollArea):
             await asyncio.sleep(0)
             now = time.time()
 
+    def zoom(self, fx=None, fy=None, *, point=None):
+        if self.__content_region is None:
+            return
+        scroll_x, scroll_y = self.scroll
+        scale_x, scale_y = self.__scale
+        if fx == -1.:
+            fx = 0
+        elif fx < 0:
+            fx = fx / (1 + abs(fx))
+        if fy == -1.:
+            fy = 0
+        elif fy < 0:
+            fy = fy / (1 + abs(fy))
+        scale_x_target, scale_y_target = scale_x + scale_x * fx, scale_y + scale_y * fy
+        if scale_x_target < self.scale_min[0] or scale_y_target < self.scale_min[1]:
+            return
+        if point is None:
+            _, _, w, h, bar = self.__content_region
+            w = min(self.image_width * scale_x, w - bar)
+            h = min(self.image_height * scale_y, h - bar)
+            point = (w / 2, h / 2)
+        #
+        # TODO: no scroll, use fix-point
+        scroll_x_target = (scroll_x + point[0]) / scale_x * scale_x_target - point[0]
+        scroll_y_target = (scroll_y + point[1]) / scale_y * scale_y_target - point[1]
+        self.scroll = scroll_x_target, scroll_y_target
+        self.scale = scale_x_target, scale_y_target
+
     def zoom_in(self, fx=None, fy=None):
         if fx is None:
             fx = self.__scale_step_width
@@ -322,10 +362,6 @@ class ImageSurface(ScrollArea):
             fy = self.__scale_step_width
         if self.__content_region is None:
             return
-        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
-            self.__fitting_mode = ImageSurface.FittingMode.Custom
-            if self.__on_fitting_mode_changed:
-                self.__on_fitting_mode_changed(self.__fitting_mode)
         scroll_x, scroll_y = self.scroll
         scale_x, scale_y = self.__scale
         scale_x_target = scale_x + scale_x * fx
@@ -349,10 +385,6 @@ class ImageSurface(ScrollArea):
             fy = self.__scale_step_width
         if self.__content_region is None:
             return
-        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
-            self.__fitting_mode = ImageSurface.FittingMode.Custom
-            if self.__on_fitting_mode_changed:
-                self.__on_fitting_mode_changed(self.__fitting_mode)
         scroll_x, scroll_y = self.scroll
         scale_x, scale_y = self.__scale
         scale_x_target = scale_x - scale_x * (fx / (1 + fx))
@@ -369,10 +401,6 @@ class ImageSurface(ScrollArea):
         self.fitting_mode = ImageSurface.FittingMode.Contain
 
     def set_no_scale(self):
-        if self.__fitting_mode is not ImageSurface.FittingMode.Custom:
-            self.__fitting_mode = ImageSurface.FittingMode.Custom
-            if self.__on_fitting_mode_changed:
-                self.__on_fitting_mode_changed(self.__fitting_mode)
         self.scale = (1., 1.)
 
     @property
