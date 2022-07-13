@@ -78,6 +78,7 @@ void Definition<Node>::apply(py::module& module)
         return Node::node_count();
     });
     def_property_readonly(node, "parent", &Node::shared_parent);
+    def_property_readonly(node, "size", &Node::size);
     def_property_readonly(node, "children", &Node::children);
     def_property_readonly(node, "style", &Node::style);
     node.def_property_readonly("foo", [](std::shared_ptr<Node>& self) {
