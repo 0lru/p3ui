@@ -206,6 +206,7 @@ private:
     {
         bool tracking_enabled = false;
         bool hovered = false;
+        float x, y;
         MouseEventHandler enter;
         MouseEventHandler leave;
         MouseEventHandler move;

@@ -13,6 +13,7 @@ void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
     assign(kwargs, "on_mouse_enter", node, &Node::set_on_mouse_enter);
     assign(kwargs, "on_mouse_move", node, &Node::set_on_mouse_move);
     assign(kwargs, "on_mouse_leave", node, &Node::set_on_mouse_leave);
+    assign(kwargs, "on_mouse_wheel", node, &Node::set_on_mouse_wheel);
     //
     // TODO: add setter and use assign
     if (kwargs.contains("children")) {
@@ -90,6 +91,7 @@ void Definition<Node>::apply(py::module& module)
     def_signal_property(node, "on_mouse_enter", &Node::on_mouse_enter, &Node::set_on_mouse_enter);
     def_signal_property(node, "on_mouse_move", &Node::on_mouse_move, &Node::set_on_mouse_move);
     def_signal_property(node, "on_mouse_leave", &Node::on_mouse_leave, &Node::set_on_mouse_leave);
+    def_signal_property(node, "on_mouse_wheel", &Node::on_mouse_wheel, &Node::set_on_mouse_wheel);
     def_method(node, "redraw", &Node::redraw);
     def_method(node, "add", [](Node& node, py::object child) {
         if (child.is_none())

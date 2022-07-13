@@ -123,12 +123,23 @@ void Node::update_status()
     ImGuiWindow const& window = *GImGui->CurrentWindow;
     auto const status_flags = GImGui->LastItemData.StatusFlags;
     if (status_flags == _status_flags) {
-        if (_mouse.hovered && _mouse.move && Context::current().mouse_move())
-            postpone([f = _mouse.move, e = MouseEvent(this)]() mutable { f(std::move(e)); });
+        if (_mouse.hovered && _mouse.move) {
+            MouseEvent e(this);
+            if ((e.x() != _mouse.x) || (e.y() != _mouse.y)) {
+                _mouse.x = e.x();
+                _mouse.y = e.y();
+                postpone([f = _mouse.move, e = std::move(e)]() mutable { f(std::move(e)); });
+            }
+        }
     } else if ((status_flags & ImGuiItemStatusFlags_HoveredRect) && !(_status_flags & ImGuiItemStatusFlags_HoveredRect)) {
         _mouse.hovered = true;
-        if (_mouse.enter)
-            postpone([f = _mouse.enter, e = MouseEvent(this)]() mutable { f(std::move(e)); });
+        if (_mouse.enter || _mouse.hovered) {
+            MouseEvent e(this);
+            _mouse.x = e.x();
+            _mouse.y = e.y();
+            if (_mouse.enter)
+                postpone([f = _mouse.enter, e = std::move(e)]() mutable { f(std::move(e)); });
+        }
     } else if (_status_flags & ImGuiItemStatusFlags_HoveredRect) {
         _mouse.hovered = false;
         if (_mouse.leave)
