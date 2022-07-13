@@ -225,3 +225,11 @@ class ImageViewer(Layout):
     @scroll.setter
     def scroll(self, scroll):
         self._image_surface.scroll = scroll
+
+    @property
+    def displayed_image_y_range(self):
+        return self._image_surface.displayed_image_y_range
+
+    @property
+    def displayed_image_x_range(self):
+        return self._image_surface.displayed_image_x_range

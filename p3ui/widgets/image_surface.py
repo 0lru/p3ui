@@ -110,7 +110,7 @@ class ImageSurface(ScrollArea):
 
         super().__init__(*args, **kwargs,
                          content=self.__surface,
-                         on_content_region_changed=self.__on_viewport_changed)
+                         on_content_region_changed=self.__on_content_region_changed)
 
     @property
     def scroll(self):
@@ -451,6 +451,35 @@ class ImageSurface(ScrollArea):
 
     #
     # scaling..
-    def __on_viewport_changed(self, viewport):
+    def __on_content_region_changed(self, viewport):
         self.__content_region = viewport
         self.__update_surface()
+        print('x', self.displayed_image_x_range)
+        print('y', self.displayed_image_y_range)
+
+    #
+    @property
+    def displayed_image_x_range(self):
+        """ returns min, max - tuple of image coordinates """
+        if self.__image is None or self.__content_region is None:
+            return 0, 0
+        start, _, w, _, _ = self.__content_region
+        end = start + w
+        start /= self.scale[0]
+        end /= self.scale[0]
+        if end - start > self.image_width:
+            return 0, self.image_width
+        return start, end
+
+    @property
+    def displayed_image_y_range(self):
+        """ returns min, max - tuple of image coordinates """
+        if self.__image is None or self.__content_region is None:
+            return 0, 0
+        _, start, _, h, _ = self.__content_region
+        end = start + h
+        start /= self.scale[0]
+        end /= self.scale[0]
+        if end - start > self.image_height:
+            return 0, self.image_height
+        return start, end
