@@ -65,6 +65,7 @@ namespace {
         assign(kwargs, (prefix + "_limits").c_str(), axis, &Plot::Axis::set_limits);
         assign(kwargs, (prefix + "_tick_labels").c_str(), axis, &Plot::Axis::set_tick_labels);
         assign(kwargs, (prefix + "_ticks").c_str(), axis, &Plot::Axis::set_ticks);
+        assign(kwargs, (prefix + "_ticks_visible").c_str(), axis, &Plot::Axis::set_ticks_visible);
         assign(kwargs, (prefix + "_inverted").c_str(), axis, &Plot::Axis::set_inverted);
         assign(kwargs, (prefix + "_fixed").c_str(), axis, &Plot::Axis::set_fixed);
         assign(kwargs, (prefix + "_opposite").c_str(), axis, &Plot::Axis::set_opposite);
@@ -231,6 +232,7 @@ void Definition<Plot>::apply(py::module& module)
     axis.def_property("ticks", wrap(&Plot::Axis::ticks), wrap(&Plot::Axis::set_ticks));
     def_property(axis, "type", &Plot::Axis::type, &Plot::Axis::set_type);
     def_property(axis, "tick_labels", &Plot::Axis::tick_labels, &Plot::Axis::set_tick_labels);
+    def_property(axis, "ticks_visible", &Plot::Axis::ticks_visible, &Plot::Axis::set_ticks_visible);
     def_property(axis, "label", &Plot::Axis::label, &Plot::Axis::set_label);
     def_property(axis, "limits", &Plot::Axis::limits, &Plot::Axis::set_limits);
     def_property(axis, "fixed", &Plot::Axis::fixed, &Plot::Axis::set_fixed);
