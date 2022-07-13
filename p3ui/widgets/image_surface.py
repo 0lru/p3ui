@@ -483,3 +483,10 @@ class ImageSurface(ScrollArea):
         if end - start > self.image_height:
             return 0, self.image_height
         return start, end
+
+    @property
+    def viewport(self):
+        """ returns x, y, w, h where x, y is the amount of scroll in [px]"""
+        if self.__content_region is None:
+            return None
+        return self.__content_region[0:4]

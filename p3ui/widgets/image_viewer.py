@@ -25,7 +25,7 @@ class ImageViewer(Layout):
                  on_mouse_enter=None,
                  **kwargs):
         self.__collapsed = collapsed
-        self._image_surface = ImageSurface(
+        self.image_surface = ImageSurface(
             on_mouse_enter=on_mouse_enter,
             on_mouse_move=on_mouse_move,
             on_mouse_leave=on_mouse_leave,
@@ -58,46 +58,46 @@ class ImageViewer(Layout):
             label=f'{Icons.AspectRatio}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.set_scale_to_contain,
+            on_click=self.image_surface.set_scale_to_contain,
             disabled=True)
         # self._scale_to_contain_button.add(make_text_tooltip('scale image to be contained'))
         self._reset_scale_button = Button(
             label=f'{Icons.Filter}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.set_no_scale)
+            on_click=self.image_surface.set_no_scale)
         # self._reset_scale_button.add(make_text_tooltip('reset scale'))
         self._scale_cover_button = Button(
             label=f'{Icons.PhotoAlbum}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.set_no_scale)
+            on_click=self.image_surface.set_no_scale)
         # self._scale_cover_button.add(make_text_tooltip('scale to cover frame'))
         self._scale_fill_button = Button(
             label=f'{Icons.Photo}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.set_no_scale)
+            on_click=self.image_surface.set_no_scale)
         # self._scale_fill_button.add(make_text_tooltip('scale to fill frame'))
         self._zoom_in_button = Button(
             label=f'{Icons.ZoomIn}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.zoom_in)
+            on_click=self.image_surface.zoom_in)
         # self._zoom_in_button.add(make_text_tooltip('zoom in'))
         self._zoom_out_button = Button(
             label=f'{Icons.ZoomOut}',
             width=(auto, 0, 0),
             height=(auto, 0, 0),
-            on_click=self._image_surface.zoom_out)
+            on_click=self.image_surface.zoom_out)
         # self._zoom_out_button.add(make_text_tooltip('zoom out'))
         self._fitting_mode_combo_box = ComboBox(
             visible=not collapsed,
             width=(auto, 0, 0),
             height=(auto, 0, 0),
             options=['custom scale', 'scale to fill', 'scale to contain', 'scale to cover'],
-            selected_index=int(self._image_surface.fitting_mode),
-            on_change=lambda index: setattr(self._image_surface, 'fitting_mode', ImageSurface.FittingMode(index))
+            selected_index=int(self.image_surface.fitting_mode),
+            on_change=lambda index: setattr(self.image_surface, 'fitting_mode', ImageSurface.FittingMode(index))
         )
         self._feature_scaling_combo_box = ComboBox(
             visible=not collapsed,
@@ -105,7 +105,7 @@ class ImageViewer(Layout):
             height=(auto, 0, 0),
             options=['original colors', 'scale to fit', 'log(x+1)'],
             selected_index=0,
-            on_change=lambda index: setattr(self._image_surface, 'feature_scaling', ImageSurface.FeatureScaling(index))
+            on_change=lambda index: setattr(self.image_surface, 'feature_scaling', ImageSurface.FeatureScaling(index))
         )
         self.__collapsed_button = Button(
             label=f'{Icons.ChevronLeft}',
@@ -146,16 +146,16 @@ class ImageViewer(Layout):
                         self._scale_x_input,
                         self._scale_y_input
                     ]),
-                self._image_surface
+                self.image_surface
             ])
 
     @property
     def mouse_x(self):
-        return self._image_surface.mouse_x
+        return self.image_surface.mouse_x
 
     @property
     def mouse_y(self):
-        return self._image_surface.mouse_y
+        return self.image_surface.mouse_y
 
     @property
     def collapsed(self):
@@ -175,17 +175,17 @@ class ImageViewer(Layout):
 
     @property
     def image(self):
-        return self._image_surface.image
+        return self.image_surface.image
 
     @image.setter
     def image(self, image):
-        self._image_surface.image = image
+        self.image_surface.image = image
 
     def __scale_to_x(self, x):
-        self._image_surface.scale = (x, self._image_surface.scale[1])
+        self.image_surface.scale = (x, self.image_surface.scale[1])
 
     def __scale_to_y(self, y):
-        self._image_surface.scale = (self._image_surface.scale[0], y)
+        self.image_surface.scale = (self.image_surface.scale[0], y)
 
     def __on_scale_changed(self, x, y):
         self._scale_x_input.value, self._scale_y_input.value = x, y
@@ -196,11 +196,11 @@ class ImageViewer(Layout):
 
     @property
     def scale(self):
-        return self._image_surface.scale
+        return self.image_surface.scale
 
     @scale.setter
     def scale(self, scale):
-        self._image_surface.scale = scale
+        self.image_surface.scale = scale
 
     @property
     def scale_x(self):
@@ -220,16 +220,20 @@ class ImageViewer(Layout):
 
     @property
     def scroll(self):
-        return self._image_surface.scroll
+        return self.image_surface.scroll
 
     @scroll.setter
     def scroll(self, scroll):
-        self._image_surface.scroll = scroll
+        self.image_surface.scroll = scroll
 
     @property
     def displayed_image_y_range(self):
-        return self._image_surface.displayed_image_y_range
+        return self.image_surface.displayed_image_y_range
 
     @property
     def displayed_image_x_range(self):
-        return self._image_surface.displayed_image_x_range
+        return self.image_surface.displayed_image_x_range
+
+    @property
+    def viewport(self):
+        return self.image_surface.viewport
