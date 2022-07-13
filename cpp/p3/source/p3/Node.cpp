@@ -186,6 +186,7 @@ void Node::_cascade_styles_from_parent(Context& context)
     _style_computation.color = cascade(*this, combined.color, &StyleComputation::color, context.theme().text_color());
     static Length const bw = 1 | px;
     _style_computation.border_width = cascade(*this, combined.border_width, &StyleComputation::border_width, bw);
+    _style_computation.border_color = cascade(*this, combined.border_color, &StyleComputation::border_color, Color());
     _style_computation.border_radius = cascade(*this, combined.border_radius, &StyleComputation::border_radius, bw);
     _style_computation.padding = cascade(*this, combined.padding, &StyleComputation::padding, context.theme().frame_padding());
     _style_computation.spacing = cascade(*this, combined.spacing, &StyleComputation::spacing, context.theme().item_spacing());
@@ -244,6 +245,7 @@ void Node::_compile_style_computation(Context& context)
         log_verbose("-style- <{}>\"{}\" changes padding to ({}, {})", _element_name, _label ? _label.value() : "", padding.x, padding.y);
         _style_compiled.push_back([padding { std::move(padding) }]() mutable {
             std::swap(padding, GImGui->Style.FramePadding);
+            ImPlot::GetStyle().PlotPadding = GImGui->Style.FramePadding;
         });
     }
 }
@@ -355,8 +357,8 @@ void Node::set_parent(Node* parent)
 
 void Node::before_add(Node& node) const
 {
-//    if (node._disposed)
-//        throw std::invalid_argument("cannot reuse disposed node");
+    //    if (node._disposed)
+    //        throw std::invalid_argument("cannot reuse disposed node");
     if (node._parent)
         throw std::invalid_argument("node is already assigned");
 }
