@@ -344,6 +344,9 @@ public:
     void set_tick_labels(std::optional<TickLabels>);
     std::optional<TickLabels> const& tick_labels() const;
 
+    void set_ticks_visible(bool);
+    bool ticks_visible() const;
+
     bool check_behavior();
 
     void set_inverted(bool);
@@ -357,11 +360,12 @@ private:
     bool _auto_fit = true;
     bool _fixed = false;
     bool _inverted = false;
-    bool _opposite = true;
+    bool _opposite = false;
     Label _label;
     Limits _limits;
     std::optional<Ticks> _ticks = std::nullopt;
     std::optional<TickLabels> _tick_labels = std::nullopt;
+    bool _ticks_visible = true;
     bool _check_behavior = true;
 };
 

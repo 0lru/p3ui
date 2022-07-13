@@ -52,13 +52,15 @@ Plot::Plot()
     Node::add(_legend);
 }
 
-void Plot::render_impl(Context&, float width, float height)
+void Plot::render_impl(Context& context, float width, float height)
 {
     ImVec2 size(width, height);
     ImPlotAxisFlags x_flags = 0;
     ImPlotAxisFlags y_flags = 0;
     if (_x_axis->inverted())
         x_flags |= ImPlotAxisFlags_Invert;
+    if (!_x_axis->ticks_visible())
+        x_flags |= ImPlotAxisFlags_NoTickLabels;
     if (_x_axis->opposite())
         x_flags |= ImPlotAxisFlags_Opposite;
     if (_x_axis->auto_fit())
@@ -67,9 +69,10 @@ void Plot::render_impl(Context&, float width, float height)
         ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
     else if (!_x_axis->fixed() && _x_axis->check_behavior() && _x_axis->limits())
         ImPlot::SetNextAxisLimits(ImAxis_X1, _x_axis->limits().value()[0], _x_axis->limits().value()[1], ImGuiCond_Always);
-
     if (_y_axis->inverted())
         y_flags |= ImPlotAxisFlags_Invert;
+    if (!_y_axis->ticks_visible())
+        y_flags |= ImPlotAxisFlags_NoTickLabels;
     if (_y_axis->opposite())
         y_flags |= ImPlotAxisFlags_Opposite;
     if (_y_axis->auto_fit())
@@ -82,6 +85,10 @@ void Plot::render_impl(Context&, float width, float height)
     ImPlotFlags plot_flags = ImPlotFlags_None;
     if (!legend()->visible())
         plot_flags |= ImPlotFlags_NoLegend;
+
+    auto& style = ImPlot::GetStyle();
+    ImGui::GetStyle().FrameBorderSize = context.to_actual(style_computation().border_width);
+    assign(style.Colors[ImPlotCol_PlotBorder], style_computation().border_color);
 
     if (!ImPlot::BeginPlot(
             imgui_label().c_str(),
@@ -336,6 +343,16 @@ void Plot::Axis::set_tick_labels(std::optional<TickLabels> tick_labels)
 std::optional<Plot::TickLabels> const& Plot::Axis::tick_labels() const
 {
     return _tick_labels;
+}
+
+void Plot::Axis::set_ticks_visible(bool ticks_visible)
+{
+    _ticks_visible = ticks_visible;
+}
+
+bool Plot::Axis::ticks_visible() const
+{
+    return _ticks_visible;
 }
 
 void Plot::Annotation::render()
