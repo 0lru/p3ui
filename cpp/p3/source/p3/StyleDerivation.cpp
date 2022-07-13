@@ -9,11 +9,11 @@ namespace p3
         if (block.position()) position = block.position().value();
         if (block.color()) color = block.color().value();
         if (block.border_width()) border_width = block.border_width().value();
+        if (block.border_color()) border_color = block.border_color().value();
         if (block.border_radius()) border_radius = block.border_radius().value();
         if (block.item_spacing()) item_spacing = block.item_spacing().value();
         if (block.spacing()) spacing = block.spacing().value();
         if (block.padding()) padding = block.padding().value();
-        if (block.border_color()) border_color = block.border_color().value();
         if (block.border_shadow_color()) border_shadow_color = block.border_shadow_color().value();
         if (block.background_color()) background_color = block.background_color().value();
         if (block.visible()) visible = block.visible().value();

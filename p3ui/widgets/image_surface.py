@@ -110,7 +110,8 @@ class ImageSurface(ScrollArea):
 
         super().__init__(*args, **kwargs,
                          content=self.__surface,
-                         on_content_region_changed=self.__on_content_region_changed)
+                         on_content_region_changed=self.__on_content_region_changed,
+                         mouse_scroll_enabled=False)
 
     @property
     def scroll(self):

@@ -46,6 +46,9 @@ public:
     float scroll_y_max() const;
     void set_scroll_y(float);
 
+    void set_mouse_scroll_enabled(bool);
+    bool mouse_scroll_enabled() const;
+
     std::optional<std::array<float, 2>> const& content_size() const;
     void set_content_size(std::optional<std::array<float, 2>>);
 
@@ -63,6 +66,7 @@ private:
     bool _horizontal_scroll_enabled = true;
     bool _horizontal_scroll_autohide = true;
     bool _vertical_scroll_autohide = true;
+    bool _mouse_scroll_enabled = true;
 };
 
 }

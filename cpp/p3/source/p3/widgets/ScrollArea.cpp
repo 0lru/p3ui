@@ -26,7 +26,8 @@ void ScrollArea::render_impl(Context& context, float width, float height)
         flags |= ImGuiWindowFlags_AlwaysHorizontalScrollbar;
     if (!_vertical_scroll_autohide)
         flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
-
+    if (!_mouse_scroll_enabled)
+        flags |= ImGuiWindowFlags_NoScrollWithMouse;
     if (_content_size) {
         ImVec2 size(_content_size.value()[0], _content_size.value()[1]);
         ImGui::SetNextWindowContentSize(size);
@@ -176,6 +177,16 @@ float ScrollArea::scroll_y_max() const
 void ScrollArea::set_scroll_y(float scroll_y)
 {
     _set_scroll_y = scroll_y;
+}
+
+void ScrollArea::set_mouse_scroll_enabled(bool mouse_scroll_enabled)
+{
+    _mouse_scroll_enabled = mouse_scroll_enabled;
+}
+
+bool ScrollArea::mouse_scroll_enabled() const
+{
+    return _mouse_scroll_enabled;
 }
 
 std::optional<std::array<float, 2>> const& ScrollArea::content_size() const
