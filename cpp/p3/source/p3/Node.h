@@ -43,6 +43,31 @@ class Node
     : public std::enable_shared_from_this<Node>,
       public StyleBlock::Observer {
 public:
+    /** style attributes that can be applied to any node **/
+    class Style {
+    public:
+        template <typename T>
+        using optional = std::optional<T>;
+
+        bool const& visible() const;
+        void set_visible(bool);
+
+        LayoutLength const& width() const;
+        void set_width(LayoutLength);
+        LayoutLength const& height() const;
+        void set_height(LayoutLength);
+
+        optional<Color> const& color() const;
+        void set_color(optional<Color>);
+
+    private:
+        //        Position position = Position::Static;
+        bool _visible;
+        optional<Color> _color = std::nullopt;
+        LayoutLength _width = LayoutLength { std::nullopt, 1, 1 };
+        LayoutLength _height = LayoutLength { std::nullopt, 1, 1 };
+    };
+
     virtual ~Node();
 
     std::string const& element_name() const;
@@ -146,7 +171,7 @@ protected:
     virtual void before_add(Node&) const;
 
     //
-    // layers will only be created on demand for user interfaces, 
+    // layers will only be created on demand for user interfaces,
     // scrolls areas, popups and child windows.
     virtual bool is_layered() const { return false; }
 

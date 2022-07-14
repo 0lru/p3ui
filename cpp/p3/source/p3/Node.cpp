@@ -441,8 +441,6 @@ void Node::render(Context& context, float width, float height, bool adjust_works
         std::swap(size, _size);
     }
 
-    //
-    // hacky "disabled"
     float disabled_alpha = 0.2f;
     if (_disabled)
         std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
@@ -465,8 +463,6 @@ void Node::render(Context& context, float width, float height, bool adjust_works
         render_impl(context, width, height);
     }
 
-    //
-    // hacky disabled
     if (_disabled)
         std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
 }

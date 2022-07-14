@@ -29,16 +29,17 @@ public:
     void set_border_width(Item<Length>);
     Item<Length> const& border_radius() const;
     void set_border_radius(Item<Length>);
+    Item<Color> const& border_color() const;
+    void set_border_color(Item<Color>);
+    Item<Color> const& border_shadow_color() const;
+    void set_border_shadow_color(Item<Color>);
+
     Item<Length2> const& spacing() const;
     void set_spacing(Item<Length2>);
     Item<Length2> const& item_spacing() const;
     void set_item_spacing(Item<Length2>);
     Item<Length2> const& padding() const;
     void set_padding(Item<Length2>);
-    Item<Color> const& border_color() const;
-    void set_border_color(Item<Color>);
-    Item<Color> const& border_shadow_color() const;
-    void set_border_shadow_color(Item<Color>);
 
     Item<Color> const& background_color() const;
     void set_background_color(Item<Color>);
