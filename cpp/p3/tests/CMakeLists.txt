@@ -1,4 +1,4 @@
-add_executable(p3_tests "source/TestBuilder.cpp" "source/test_event_loop.cpp")
+add_executable(p3_tests  "source/test_event_loop.cpp")
 target_link_libraries(p3_tests PRIVATE p3 Catch2 Catch2::Catch2WithMain)
 
 add_custom_command(

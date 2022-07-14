@@ -82,6 +82,5 @@ PYBIND11_MODULE(native, module)
     python::Definition<UserInterface>::apply(module);
     python::Definition<Window>::apply(module);
 
-    python::Definition<python::Builder>::apply(module);
     python::Definition<python::Surface>::apply(module);
 }
