@@ -80,7 +80,6 @@ void Definition<Node>::apply(py::module& module)
     def_property_readonly(node, "parent", &Node::shared_parent);
     def_property_readonly(node, "size", &Node::size);
     def_property_readonly(node, "children", &Node::children);
-    def_property_readonly(node, "style", &Node::style);
     node.def_property_readonly("foo", [](std::shared_ptr<Node>& self) {
         auto s = py::cast(self);
         return s.attr("__foo");
@@ -115,6 +114,11 @@ void Definition<Node>::apply(py::module& module)
         children.attr("insert")(index, child);
         node.insert(index, py::cast<std::shared_ptr<Node>>(child));
     });
+
+    node.def_property("color", &Node::color, &Node::set_color);
+    node.def_property("width", &Node::width, &Node::set_width);
+    node.def_property("height", &Node::height, &Node::set_height);
+    node.def_property("visible", &Node::visible, &Node::set_visible);
 }
 
 }

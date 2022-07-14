@@ -32,7 +32,7 @@ void Layout::update_content()
                 if (!first)
                     _automatic_height += ImGui::GetStyle().ItemSpacing.y;
                 first = false;
-                _automatic_height += child->height(0);
+                _automatic_height += child->contextual_height(0);
             }
             _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
         }
@@ -41,7 +41,7 @@ void Layout::update_content()
             for (auto& child : children()) {
                 if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
-                _automatic_width = std::max(_automatic_width, child->width(0));
+                _automatic_width = std::max(_automatic_width, child->contextual_width(0));
             }
             _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
         }
@@ -55,7 +55,7 @@ void Layout::update_content()
                 if (!first)
                     _automatic_width += ImGui::GetStyle().ItemSpacing.y;
                 first = false;
-                _automatic_width += child->width(0);
+                _automatic_width += child->contextual_width(0);
             }
             _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
         }
@@ -64,7 +64,7 @@ void Layout::update_content()
             for (auto& child : children()) {
                 if (!child->visible() || child->style_computation().position == Position::Absolute)
                     continue;
-                _automatic_height = std::max(_automatic_height, child->height(0));
+                _automatic_height = std::max(_automatic_height, child->contextual_height(0));
             }
             _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
         }
@@ -100,7 +100,7 @@ void Layout::render_impl(Context& context, float w, float h)
             first = false;
             //
             // fallback to 0.0, although this should be the natively computed size
-            occupied += child->width(w);
+            occupied += child->contextual_width(w);
             grow_total += child->style_computation().width_grow();
         }
         auto remaining = content - occupied;
@@ -110,7 +110,7 @@ void Layout::render_impl(Context& context, float w, float h)
                 continue;
             //
             // fallback to 0.0, although this should be the natively computed size
-            float width = child->width(content);
+            float width = child->contextual_width(content);
             float height;
             if (remaining >= 0. && child->style_computation().width_grow() != 0.f)
                 width += remaining * (child->style_computation().width_grow() / grow_total);
@@ -124,19 +124,19 @@ void Layout::render_impl(Context& context, float w, float h)
                 height = h;
                 break;
             case Alignment::Center:
-                height = child->height(h);
+                height = child->contextual_height(h);
                 y = (h - height) / 2.0f;
                 break;
             case Alignment::Baseline:
-                height = child->height(h);
+                height = child->contextual_height(h);
                 ImGui::AlignTextToFramePadding();
                 break;
             case Alignment::Start:
-                height = child->height(h);
+                height = child->contextual_height(h);
                 y = 0.0f;
                 break;
             case Alignment::End:
-                height = child->height(h);
+                height = child->contextual_height(h);
                 y = h - height;
                 break;
             }
@@ -185,7 +185,7 @@ void Layout::render_impl(Context& context, float w, float h)
                 continue;
             first = false;
             ++visible_count;
-            occupied += child->height(content);
+            occupied += child->contextual_height(content);
             grow_total += child->style_computation().height_grow();
         }
         if (visible_count > 1)
@@ -195,7 +195,7 @@ void Layout::render_impl(Context& context, float w, float h)
         for (auto& child : children()) {
             if (!child->visible() || child->style_computation().position == Position::Absolute)
                 continue;
-            float height = child->height(content);
+            float height = child->contextual_height(content);
             float width = 0.f;
             if (remaining >= 0.f && child->style_computation().height_grow() != 0.f)
                 height += remaining * (child->style_computation().height_grow() / grow_total);
@@ -207,15 +207,15 @@ void Layout::render_impl(Context& context, float w, float h)
                 width = w;
                 break;
             case Alignment::Center:
-                width = child->width(w);
+                width = child->contextual_width(w);
                 x = (w - width) / 2.0f;
                 break;
             case Alignment::Start:
-                width = child->width(w);
+                width = child->contextual_width(w);
                 x = 0.0f;
                 break;
             case Alignment::End:
-                width = child->width(w);
+                width = child->contextual_width(w);
                 x = w - width;
                 break;
             }

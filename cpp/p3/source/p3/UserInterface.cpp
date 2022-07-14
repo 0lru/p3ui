@@ -263,8 +263,8 @@ void UserInterface::render(Context& context, float width, float height, bool)
         if (std::dynamic_pointer_cast<ChildWindow>(child_window))
             child_window->render(
                 context,
-                child_window->width(content_size.x),
-                child_window->height(content_size.y));
+                child_window->contextual_width(content_size.x),
+                child_window->contextual_height(content_size.y));
 
     //
     // draw popups

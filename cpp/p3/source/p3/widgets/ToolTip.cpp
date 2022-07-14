@@ -28,8 +28,8 @@ namespace p3
         ImGui::BeginTooltip();
         auto avail = ImGui::GetContentRegionAvail();
         _content->render(context, 
-            _content->width(avail.x), 
-            _content->height(avail.y));
+            _content->contextual_width(avail.x), 
+            _content->contextual_height(avail.y));
         ImGui::EndTooltip();
         std::swap(alpha, style.Alpha);
     }
@@ -51,8 +51,8 @@ namespace p3
     void ToolTip::update_content()
     {
         auto& style = ImGui::GetCurrentContext()->Style;
-        _automatic_width = _content->automatic_width() + 2 * style.FramePadding.x + style.FrameBorderSize;
-        _automatic_height = _content->automatic_height() + 2 * style.FramePadding.y + style.FrameBorderSize;
+        _automatic_width = _content->contextual_minimum_content_width() + 2 * style.FramePadding.x + style.FrameBorderSize;
+        _automatic_height = _content->contextual_minimum_content_height() + 2 * style.FramePadding.y + style.FrameBorderSize;
     }
 
 }

@@ -448,7 +448,7 @@ void Node::render(Context& context, float width, float height, bool adjust_works
     //
     // apply style
     auto compiled_guard = _apply_style_compiled();
-
+    push_style();
     if (adjust_worksrect) {
         //
         // this needs to be done after style was applied and is only used by Layout.cpp
@@ -462,6 +462,7 @@ void Node::render(Context& context, float width, float height, bool adjust_works
     } else {
         render_impl(context, width, height);
     }
+    pop_style();
 
     if (_disabled)
         std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
@@ -472,7 +473,7 @@ void Node::render_absolute(Context& context)
     for (auto& child : _children)
         if (child->style_computation().position == Position::Absolute) {
             auto avail = ImGui::GetContentRegionAvail();
-            child->render(context, child->width(avail.x), child->height(avail.y));
+            child->render(context, child->contextual_width(avail.x), child->contextual_height(avail.y));
         }
 }
 
@@ -563,7 +564,7 @@ bool Node::visible() const
     return _visible;
 }
 
-float Node::width(float content) const
+float Node::contextual_width(float content) const
 {
     if (!style_computation().width_basis())
         return _automatic_width;
@@ -574,7 +575,7 @@ float Node::width(float content) const
         return Context::current().to_actual(std::get<Length>(lp));
 }
 
-float Node::height(float content) const
+float Node::contextual_height(float content) const
 {
     if (!style_computation().height_basis())
         return _automatic_height;
@@ -585,12 +586,12 @@ float Node::height(float content) const
         return Context::current().to_actual(std::get<Length>(lp));
 }
 
-float Node::automatic_width() const
+float Node::contextual_minimum_content_width() const
 {
     return _automatic_width;
 }
 
-float Node::automatic_height() const
+float Node::contextual_minimum_content_height() const
 {
     return _automatic_height;
 }
@@ -681,6 +682,55 @@ void Node::set_on_resize(OnResize on_resize)
 Node::OnResize Node::on_resize() const
 {
     return _on_resize;
+}
+
+LayoutLength const& Node::width() const
+{
+    return _width;
+}
+
+void Node::set_width(LayoutLength width)
+{
+    _width = std::move(width);
+    set_needs_restyle();
+}
+
+LayoutLength const& Node::height() const
+{
+    return _height;
+}
+
+void Node::set_height(LayoutLength width)
+{
+    _width = std::move(width);
+    set_needs_restyle();
+}
+
+std::optional<Color> const& Node::color() const
+{
+    return _color;
+}
+
+void Node::set_color(std::optional<Color> color)
+{
+    _color = std::move(color);
+    redraw();
+}
+
+void Node::push_style()
+{
+    if (_color) {
+        ImVec4 imgui_color;
+        assign(imgui_color, _color.value());
+        ImGui::PushStyleColor(ImGuiCol_Text, imgui_color);
+    }
+}
+
+void Node::pop_style()
+{
+    if (_color) {
+        ImGui::PopStyleColor();
+    }
 }
 
 }

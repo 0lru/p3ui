@@ -57,7 +57,6 @@ void ColorEdit::render_impl(Context&, float width, float height)
 
 void ColorEdit::update_content()
 {
-
     auto const& context = *ImGui::GetCurrentContext();
     auto const font_size = context.FontSize;
     _automatic_height = font_size + 2 * context.Style.FramePadding.y;

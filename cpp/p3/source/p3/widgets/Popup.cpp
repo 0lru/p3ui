@@ -41,7 +41,7 @@ void Popup::render_impl(Context& context, float width, float height)
         _opened = true;
     }
     if (ImGui::BeginPopup(imgui_label().c_str())) {
-        _content->render(context, this->width(0), this->height(0));
+        _content->render(context, this->contextual_width(0), this->contextual_height(0));
         ImGui::EndPopup();
     } else {
         _opened = false;
@@ -54,8 +54,8 @@ void Popup::render_impl(Context& context, float width, float height)
 void Popup::update_content()
 {
     _content->update_content();
-    _automatic_width = _content->automatic_width();
-    _automatic_height = _content->automatic_height();
+    _automatic_width = _content->contextual_minimum_content_width();
+    _automatic_height = _content->contextual_minimum_content_height();
 }
 
 void Popup::set_content(std::shared_ptr<Node> content)

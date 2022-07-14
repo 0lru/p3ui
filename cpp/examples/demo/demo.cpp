@@ -3,7 +3,7 @@
 #include <p3/Window.h>
 #include <p3/ChildWindow.h>
 #include <p3/Layout.h>
-#include <p3/Button.h>
+#include <p3/button.h>
 #include <p3/Collapsible.h>
 #include <p3/ScrollArea.h>
 

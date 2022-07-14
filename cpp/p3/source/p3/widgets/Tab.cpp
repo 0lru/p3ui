@@ -69,8 +69,8 @@ void Tab::Item::update_content()
 {
     if (_content) {
         _content->update_content();
-        _automatic_width = _content->automatic_width();
-        _automatic_height = _content->automatic_height();
+        _automatic_width = _content->contextual_minimum_content_width();
+        _automatic_height = _content->contextual_minimum_content_height();
     } else {
         _automatic_width = _automatic_height = 0.f;
     }

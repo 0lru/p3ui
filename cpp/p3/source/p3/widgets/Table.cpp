@@ -117,7 +117,7 @@ void Table::Row::render(Context& context, float width, float height, bool)
     for (int column = 0; column < ch.size(); ++column) {
         ImGui::TableSetColumnIndex(column);
         auto const& item = *ch[column];
-        ch[column]->render(context, item.automatic_width(), item.automatic_height(), false);
+        ch[column]->render(context, item.contextual_minimum_content_width(), item.contextual_minimum_content_height(), false);
     }
 }
 

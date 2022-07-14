@@ -1,4 +1,4 @@
-#include "CheckBox.h"
+#include "check_box.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>

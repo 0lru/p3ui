@@ -30,44 +30,10 @@ std::shared_ptr<T> make(Args&&... args)
     return std::make_shared<T>(std::forward<Args>(args)...);
 }
 
-/**
- * node are state-descriptions. concerning styling and sizing, the
- * node can be in the state of
- * - needs restyling (needs to perform a style cascade)
- * - needs update (some sizing changed)
- * - needs a redraw
- * or it's "clean", which means, that it is in sync with the visual
- * appearance.
- **/
 class Node
     : public std::enable_shared_from_this<Node>,
       public StyleBlock::Observer {
 public:
-    /** style attributes that can be applied to any node **/
-    class Style {
-    public:
-        template <typename T>
-        using optional = std::optional<T>;
-
-        bool const& visible() const;
-        void set_visible(bool);
-
-        LayoutLength const& width() const;
-        void set_width(LayoutLength);
-        LayoutLength const& height() const;
-        void set_height(LayoutLength);
-
-        optional<Color> const& color() const;
-        void set_color(optional<Color>);
-
-    private:
-        //        Position position = Position::Static;
-        bool _visible;
-        optional<Color> _color = std::nullopt;
-        LayoutLength _width = LayoutLength { std::nullopt, 1, 1 };
-        LayoutLength _height = LayoutLength { std::nullopt, 1, 1 };
-    };
-
     virtual ~Node();
 
     std::string const& element_name() const;
@@ -100,14 +66,21 @@ public:
     /// computed style (state after style cascade)
     StyleComputation const& style_computation() const;
 
-    float width(float content) const;
-    float height(float content) const;
+    float contextual_width(float available_width) const;
+    float contextual_height(float available_height) const;
+    float contextual_minimum_content_width() const;
+    float contextual_minimum_content_height() const;
 
-    float automatic_width() const;
-    float automatic_height() const;
-
-    void set_visible(bool);
     bool visible() const;
+    void set_visible(bool);
+
+    LayoutLength const& width() const;
+    void set_width(LayoutLength);
+    LayoutLength const& height() const;
+    void set_height(LayoutLength);
+
+    std::optional<Color> const& color() const;
+    void set_color(std::optional<Color>);
 
     using Size = std::array<float, 2>;
     using OnResize = std::function<void(Size)>;
@@ -206,6 +179,10 @@ protected:
     void set_tooltip(std::shared_ptr<Node>);
     std::shared_ptr<Node> const& tooltip() const;
 
+protected:
+    virtual void push_style();
+    virtual void pop_style();
+
 private:
     std::string _element_name;
     std::optional<std::string> _class_name;
@@ -221,6 +198,9 @@ private:
 
     bool _visible = true; // NOTE: style..
     bool _disabled = false;
+    LayoutLength _width = LayoutLength { std::nullopt, 1, 1 };
+    LayoutLength _height = LayoutLength { std::nullopt, 1, 1 };
+    std::optional<Color> _color = std::nullopt;
 
     // nodes can't be reused a.t.m. once node is removed, it's marked "disposed"
     bool _disposed = false;

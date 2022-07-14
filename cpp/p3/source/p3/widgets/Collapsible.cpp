@@ -83,8 +83,8 @@ void Collapsible::update_content()
     _automatic_height = font_size + 2 * frame_padding.y;
     _child_offset = _automatic_height + context.Style.ItemSpacing.y;
     if (_content && !this->collapsed()) {
-        _automatic_width = std::max(_automatic_width, _content->automatic_width());
-        _automatic_height += _content->height(0) + context.Style.ItemSpacing.y;
+        _automatic_width = std::max(_automatic_width, _content->contextual_minimum_content_width());
+        _automatic_height += _content->contextual_height(0) + context.Style.ItemSpacing.y;
     }
 }
 

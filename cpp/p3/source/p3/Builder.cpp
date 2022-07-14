@@ -10,8 +10,8 @@
 #include "UserInterface.h"
 #include "DataSuffix.h"
 
-#include <p3/widgets/Button.h>
-#include <p3/widgets/CheckBox.h>
+#include <p3/widgets/button.h>
+#include <p3/widgets/check_box.h>
 #include <p3/widgets/ChildWindow.h>
 #include <p3/widgets/Collapsible.h>
 #include <p3/widgets/ColorEdit.h>

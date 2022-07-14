@@ -73,12 +73,12 @@ void ChildWindow::update_content()
     auto const frame_padding = context_ptr->Style.FramePadding;
     _automatic_height = _automatic_height = DefaultItemWidthEm * font_size;
     if (_content) {
-        _automatic_height = _content->automatic_height()
+        _automatic_height = _content->contextual_minimum_content_height()
             + font_size
             + 2 * frame_padding.y
             + GImGui->Style.ItemInnerSpacing.y
             + GImGui->Style.WindowPadding.y * 2;
-        _automatic_width = _content->automatic_width()
+        _automatic_width = _content->contextual_minimum_content_width()
             + GImGui->Style.WindowPadding.x * 2;
     }
 }
