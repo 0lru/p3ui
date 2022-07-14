@@ -87,8 +87,8 @@ void Plot::render_impl(Context& context, float width, float height)
         plot_flags |= ImPlotFlags_NoLegend;
 
     auto& style = ImPlot::GetStyle();
-    ImGui::GetStyle().FrameBorderSize = context.to_actual(style_computation().border_width);
-    assign(style.Colors[ImPlotCol_PlotBorder], style_computation().border_color);
+    // TODO ImGui::GetStyle().FrameBorderSize = context.to_actual(style_computation().border_width);
+    // TODO assign(style.Colors[ImPlotCol_PlotBorder], style_computation().border_color);
 
     if (!ImPlot::BeginPlot(
             imgui_label().c_str(),
@@ -137,7 +137,7 @@ void Plot::render_impl(Context& context, float width, float height)
         }
     }
     if (legend()->visible()) {
-        ImPlotLegendFlags legend_flags = legend()->style_computation().direction == Direction::Vertical
+        ImPlotLegendFlags legend_flags = legend()->direction() == Direction::Vertical
             ? ImPlotLegendFlags_None
             : ImPlotLegendFlags_Horizontal;
         if (legend()->outside())
@@ -495,6 +495,16 @@ bool Plot::Legend::outside() const
     return _outside;
 }
 
+void Plot::Legend::set_direction(Direction direction)
+{
+    _direction;
+}
+
+Direction Plot::Legend::direction() const
+{
+    return _direction;
+}
+
 void Plot::Legend::set_location(Location location)
 {
     _location = location;
@@ -517,6 +527,35 @@ Plot::Colormap::Colormap(std::string const& name, std::vector<Color> colors, boo
         return convert(color);
     });
     _index = ImPlot::AddColormap(name.c_str(), native_colors.data(), int(native_colors.size()), interpolated);
+}
+
+std::optional<Length2> const& Plot::padding() const
+{
+    return _padding;
+}
+
+void Plot::set_padding(std::optional<Length2> padding)
+{
+    _padding = std::move(padding);
+    set_needs_update();
+}
+
+void Plot::push_style()
+{
+    Node::push_style();
+    if (_padding) {
+        ImVec2 padding(
+            Context::current().to_actual(_padding.value()[0]),
+            Context::current().to_actual(_padding.value()[1]));
+        ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, padding);
+    }
+}
+
+void Plot::pop_style()
+{
+    if (_padding)
+        ImPlot::PopStyleVar();
+    Node::pop_style();
 }
 
 }

@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 
-#include <p3/Color.h>
+#include <p3/color.h>
 #include <p3/Node.h>
 
 namespace p3 {
@@ -14,7 +14,6 @@ public:
 
     ColorEdit();
 
-    StyleStrategy& style_strategy() const override;
     void render_impl(Context&, float width, float height) override;
     void update_content() override;
 

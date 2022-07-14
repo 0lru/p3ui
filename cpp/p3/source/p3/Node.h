@@ -1,12 +1,10 @@
 
 #pragma once
 
-#include "on_scope_exit.h"
+#include "color.h"
 #include "RenderBackend.h"
-#include "StyleBlock.h"
-#include "StyleComputation.h"
-#include "StyleStrategy.h"
 #include "StyleTypes.h"
+#include "on_scope_exit.h"
 
 #include <array>
 #include <cstdint>
@@ -31,8 +29,7 @@ std::shared_ptr<T> make(Args&&... args)
 }
 
 class Node
-    : public std::enable_shared_from_this<Node>,
-      public StyleBlock::Observer {
+    : public std::enable_shared_from_this<Node> {
 public:
     virtual ~Node();
 
@@ -55,16 +52,8 @@ public:
 
     // #### style ##########################################################
 
-    static StyleStrategy DefaultStyleStrategy;
-    virtual StyleStrategy& style_strategy() const;
-
-    std::shared_ptr<StyleBlock> const& style() const;
-
     /// do update/restyle pass for the whole tree
     virtual void update_restyle(Context& context, bool force);
-
-    /// computed style (state after style cascade)
-    StyleComputation const& style_computation() const;
 
     float contextual_width(float available_width) const;
     float contextual_height(float available_height) const;
@@ -78,6 +67,22 @@ public:
     void set_width(LayoutLength);
     LayoutLength const& height() const;
     void set_height(LayoutLength);
+
+    OptionalLengthPercentage const& width_basis() const;
+    float width_grow() const;
+    float width_shrink() const;
+    OptionalLengthPercentage const& height_basis() const;
+    float height_grow() const;
+    float height_shrink() const;
+
+    Position position() const;
+    void set_position(Position);
+
+    LengthPercentage left() const;
+    void set_left(LengthPercentage);
+
+    LengthPercentage top() const;
+    void set_top(LengthPercentage);
 
     std::optional<Color> const& color() const;
     void set_color(std::optional<Color>);
@@ -172,8 +177,6 @@ protected:
     // node specific render implementation
     virtual void render_impl(Context&, float width, float height);
 
-    [[nodiscard]] on_scope_exit _apply_style_compiled();
-
     virtual void dispose();
 
     void set_tooltip(std::shared_ptr<Node>);
@@ -198,8 +201,12 @@ private:
 
     bool _visible = true; // NOTE: style..
     bool _disabled = false;
+    LengthPercentage _left = 10|px;
+    LengthPercentage _top = 10|px;
     LayoutLength _width = LayoutLength { std::nullopt, 1, 1 };
     LayoutLength _height = LayoutLength { std::nullopt, 1, 1 };
+
+    Position _position = Position::Static;
     std::optional<Color> _color = std::nullopt;
 
     // nodes can't be reused a.t.m. once node is removed, it's marked "disposed"
@@ -211,27 +218,24 @@ private:
     {
         bool tracking_enabled = false;
         bool hovered = false;
-        float x, y;
         MouseEventHandler enter;
         MouseEventHandler leave;
         MouseEventHandler move;
+        float x, y;
         std::function<void(float)> wheel;
     } _mouse;
 
     bool _needs_update = true;
     bool _needs_restyle = true;
-    void on_style_changed();
-    std::optional<on_scope_exit> _style_guard;
-    std::shared_ptr<StyleBlock> _style = nullptr;
-    StyleComputation _style_computation;
-    std::vector<std::function<void()>> _style_compiled;
-
-    void _cascade_styles_from_parent(Context&);
-    void _compile_style_computation(Context&);
 };
 
 class Node::MouseEvent {
 public:
+    enum class Button : std::uint8_t {
+        Left=0,
+        Middle=1,
+        Right=2
+    };
     MouseEvent(Node* source);
     Node* source() const;
 
@@ -240,12 +244,19 @@ public:
     float x() const;
     float y() const;
 
+    bool left_button_down() const;
+    bool right_button_down() const;
+    bool middle_button_down() const;
+
 private:
     Node* _source;
     float _global_x;
     float _global_y;
     float _x;
     float _y;
+    bool _left_button_down;
+    bool _middle_button_down;
+    bool _right_button_down;
 };
 
 extern std::function<void(Node&)> NodeInitializer;

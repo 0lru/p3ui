@@ -17,7 +17,6 @@ public:
     Image();
     ~Image();
 
-    StyleStrategy& style_strategy() const override;
     void render_impl(Context&, float width, float height) override;
     void update_content() override;
 

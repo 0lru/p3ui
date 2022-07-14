@@ -109,6 +109,7 @@ class ImageSurface(ScrollArea):
         self.__mouse_y = None
 
         super().__init__(*args, **kwargs,
+                         padding=(0 | px, 0 | px),
                          content=self.__surface,
                          on_content_region_changed=self.__on_content_region_changed,
                          mouse_scroll_enabled=False)
@@ -190,14 +191,21 @@ class ImageSurface(ScrollArea):
             self.__animation_task_instance = asyncio.get_event_loop().create_task(self.__animation_task())
 
     def __on_mouse_enter(self, e):
-        self.__mouse_x = e.x
-        self.__mouse_y = e.y
+        self.__mouse_x = e.x - self.scroll_x
+        self.__mouse_y = e.y - self.scroll_y
         if self._on_mouse_enter:
             self._on_mouse_enter(self.mouse_x, self.mouse_y)
 
     def __on_mouse_move(self, e):
-        self.__mouse_x = e.x
-        self.__mouse_y = e.y
+        lx = self.__mouse_x
+        ly = self.__mouse_y
+        self.__mouse_x = e.x - self.scroll_x
+        self.__mouse_y = e.y - self.scroll_y
+        dx = self.__mouse_x - lx
+        dy = self.__mouse_y - ly
+        #        print(dx, dy)
+        if e.left_button_down:
+            self.scroll = self.scroll_x - dx, self.scroll_y - dy
         if self._on_mouse_move:
             self._on_mouse_move(self.mouse_x, self.mouse_y)
 
@@ -205,25 +213,26 @@ class ImageSurface(ScrollArea):
         self.__mouse_x = None
         self.__mouse_y = None
         if self._on_mouse_leave:
-            self._on_mouse_leave(self.mouse_x, self.mouse_y)
+            self._on_mouse_leave(e.x, e.y)
 
     def __on_mouse_wheel(self, amount):
-        #
-        # __mouse_x/y is in view coordinates
-        x, y = self.__mouse_x - self.scroll_x, self.__mouse_y - self.scroll_y
-        self.zoom(amount * 0.5, amount * 0.5, point=(x, y))
+        self.zoom(amount * 0.5, amount * 0.5, point=(self.__mouse_x, self.__mouse_y))
 
     @property
     def mouse_x(self):
         if self.__mouse_x is None:
             return None
-        return self.__mouse_x / self.__scale[0]
+        if self.scale[0] == 0:
+            return None
+        return (self.__mouse_x + self.scroll_x) / self.scale[0]
 
     @property
     def mouse_y(self):
         if self.__mouse_y is None:
             return None
-        return self.__mouse_y / self.__scale[1]
+        if self.scale[1] == 0:
+            return None
+        return (self.__mouse_y + self.scroll_y) / self.scale[1]
 
     #
     # tier 1: update the numpy image
@@ -283,8 +292,8 @@ class ImageSurface(ScrollArea):
         surface_height = int(self.image_height * self.__scale[1])
         surface_width = max(surface_width, self.__content_region[2])
         surface_height = max(surface_height, self.__content_region[3])
-        self.__surface.style.width = (surface_width | px, 0, 0)
-        self.__surface.style.height = (surface_height | px, 0, 0)
+        self.__surface.width = (surface_width | px, 0, 0)
+        self.__surface.height = (surface_height | px, 0, 0)
         with self.__surface as canvas:
             canvas.save()
             canvas.scale(self.__scale[0], self.__scale[1])
@@ -349,12 +358,10 @@ class ImageSurface(ScrollArea):
             w = min(self.image_width * scale_x, w - bar)
             h = min(self.image_height * scale_y, h - bar)
             point = (w / 2, h / 2)
-        #
-        # TODO: no scroll, use fix-point
-        scroll_x_target = (scroll_x + point[0]) / scale_x * scale_x_target - point[0]
-        scroll_y_target = (scroll_y + point[1]) / scale_y * scale_y_target - point[1]
-        self.scroll = scroll_x_target, scroll_y_target
+        scroll_x_target = (scroll_x + point[0]) / scale_x * scale_x_target - point[0] + 0.5
+        scroll_y_target = (scroll_y + point[1]) / scale_y * scale_y_target - point[1] + 0.5
         self.scale = scale_x_target, scale_y_target
+        self.scroll = scroll_x_target, scroll_y_target
 
     def zoom_in(self, fx=None, fy=None):
         if fx is None:
@@ -455,8 +462,6 @@ class ImageSurface(ScrollArea):
     def __on_content_region_changed(self, viewport):
         self.__content_region = viewport
         self.__update_surface()
-        print('x', self.displayed_image_x_range)
-        print('y', self.displayed_image_y_range)
 
     #
     @property

@@ -5,8 +5,13 @@ namespace p3::python {
 
 void ArgumentParser<Node>::operator()(py::kwargs const& kwargs, Node& node)
 {
-    ArgumentParser<StyleBlock>()(kwargs, *node.style());
+    assign(kwargs, "position", node, &Node::set_position);
+    assign(kwargs, "left", node, &Node::set_left);
+    assign(kwargs, "top", node, &Node::set_top);
     assign(kwargs, "label", node, &Node::set_label);
+    assign(kwargs, "color", node, &Node::set_color);
+    assign(kwargs, "width", node, &Node::set_width);
+    assign(kwargs, "height", node, &Node::set_height);
     assign(kwargs, "visible", node, &Node::set_visible);
     assign(kwargs, "disabled", node, &Node::set_disabled);
     assign(kwargs, "on_resize", node, &Node::set_on_resize);
@@ -37,6 +42,9 @@ void Definition<Node>::apply(py::module& module)
     mouse_event.def_property_readonly("y", &Node::MouseEvent::y);
     mouse_event.def_property_readonly("global_x", &Node::MouseEvent::global_x);
     mouse_event.def_property_readonly("global_y", &Node::MouseEvent::global_y);
+    mouse_event.def_property_readonly("left_button_down", &Node::MouseEvent::left_button_down);
+    mouse_event.def_property_readonly("middle_button_down", &Node::MouseEvent::middle_button_down);
+    mouse_event.def_property_readonly("right_button_down", &Node::MouseEvent::right_button_down);
 
     //
     // Node, synced
@@ -84,6 +92,9 @@ void Definition<Node>::apply(py::module& module)
         auto s = py::cast(self);
         return s.attr("__foo");
     });
+    def_property(node, "position", &Node::position, &Node::set_position);
+    def_property(node, "left", &Node::left, &Node::set_left);
+    def_property(node, "top", &Node::top, &Node::set_top);
     def_property(node, "visible", &Node::visible, &Node::set_visible);
     def_property(node, "disabled", &Node::disabled, &Node::set_disabled);
     def_property(node, "label", &Node::label, &Node::set_label);
@@ -118,7 +129,11 @@ void Definition<Node>::apply(py::module& module)
     node.def_property("color", &Node::color, &Node::set_color);
     node.def_property("width", &Node::width, &Node::set_width);
     node.def_property("height", &Node::height, &Node::set_height);
-    node.def_property("visible", &Node::visible, &Node::set_visible);
+
+    // TODO: remove this later
+    node.def_property_readonly("style", [](std::shared_ptr<Node> node) {
+        return node;
+    });
 }
 
 }

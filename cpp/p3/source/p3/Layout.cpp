@@ -1,5 +1,7 @@
 
 #include "Layout.h"
+#include "Context.h"
+#include "convert.h"
 
 #include <numeric>
 #include <optional>
@@ -22,61 +24,78 @@ Layout::Layout()
 
 void Layout::update_content()
 {
-    if (style_computation().direction == Direction::Vertical) {
-        if (!style_computation().height_basis()) {
+    auto padding = ImGui::GetStyle().FramePadding;
+    if (_padding) {
+        padding.x = Context::current().to_actual(std::get<0>(_padding.value()));
+        padding.y = Context::current().to_actual(std::get<1>(_padding.value()));
+    }
+    if (_direction == Direction::Vertical) {
+        if (!height_basis()) {
             _automatic_height = 0.0f;
             auto first = true;
             for (auto& child : children()) {
-                if (!child->visible() || child->style_computation().position == Position::Absolute)
+                if (!child->visible() || child->position() == Position::Absolute)
                     continue;
                 if (!first)
-                    _automatic_height += ImGui::GetStyle().ItemSpacing.y;
+                    _automatic_height += _spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y;
                 first = false;
                 _automatic_height += child->contextual_height(0);
             }
             _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
         }
-        if (!style_computation().width_basis()) {
+        if (!width_basis()) {
             _automatic_width = 0.0f;
             for (auto& child : children()) {
-                if (!child->visible() || child->style_computation().position == Position::Absolute)
+                if (!child->visible() || child->position() == Position::Absolute)
                     continue;
                 _automatic_width = std::max(_automatic_width, child->contextual_width(0));
             }
-            _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
+            _automatic_width += padding.x * 2.f;
         }
     } else {
-        if (!style_computation().width_basis()) {
+        if (!width_basis()) {
             _automatic_width = 0.0f;
             auto first = true;
             for (auto& child : children()) {
-                if (!child->visible() || child->style_computation().position == Position::Absolute)
+                if (!child->visible() || child->position() == Position::Absolute)
                     continue;
                 if (!first)
-                    _automatic_width += ImGui::GetStyle().ItemSpacing.y;
+                    _automatic_width += _spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.y;
                 first = false;
                 _automatic_width += child->contextual_width(0);
             }
-            _automatic_width += ImGui::GetStyle().FramePadding.x * 2.f;
+            _automatic_width += padding.x * 2.f;
         }
-        if (!style_computation().height_basis()) {
+        if (!height_basis()) {
             _automatic_height = 0.0f;
             for (auto& child : children()) {
-                if (!child->visible() || child->style_computation().position == Position::Absolute)
+                if (!child->visible() || child->position() == Position::Absolute)
                     continue;
                 _automatic_height = std::max(_automatic_height, child->contextual_height(0));
             }
-            _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
+            _automatic_height += padding.y * 2.f;
         }
     }
 }
 
 void Layout::render_impl(Context& context, float w, float h)
 {
+    if (_background_color) {
+        auto& window = *ImGui::GetCurrentWindow();
+        auto p1 = ImGui::GetCursorPos();
+        auto p2 = ImVec2(p1.x + w, p1.y + h);
+        auto color = ImColor(convert(_background_color.value()));
+        window.DrawList->AddRectFilled(p1, p2, color);
+    }
     auto initial_cursor = ImGui::GetCursorPos();
     auto p1 = initial_cursor;
 
-    auto const& frame_padding = ImGui::GetStyle().FramePadding;
+    auto frame_padding = ImGui::GetStyle().FramePadding;
+    if (_padding) {
+        frame_padding.x = Context::current().to_actual(std::get<0>(_padding.value()));
+        frame_padding.y = Context::current().to_actual(std::get<1>(_padding.value()));
+    }
+
     initial_cursor.x += frame_padding.x;
     w -= frame_padding.x * 2.f;
     initial_cursor.y += frame_padding.y;
@@ -85,41 +104,41 @@ void Layout::render_impl(Context& context, float w, float h)
     ImGui::SetCursorPos(initial_cursor);
 
     auto cursor = initial_cursor;
-    if (style_computation().direction == Direction::Horizontal) {
+    if (_direction == Direction::Horizontal) {
         auto content = w;
         auto occupied = 0.0f;
         auto grow_total = 0.0f;
         bool first = true;
         std::size_t visible_count = 0;
         for (auto const& child : children()) {
-            if (!child->visible() || child->style_computation().position == Position::Absolute)
+            if (!child->visible() || child->position() == Position::Absolute)
                 continue;
             ++visible_count;
             if (!first)
-                occupied += ImGui::GetStyle().ItemSpacing.x;
+                occupied += _spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.x;
             first = false;
             //
             // fallback to 0.0, although this should be the natively computed size
             occupied += child->contextual_width(w);
-            grow_total += child->style_computation().width_grow();
+            grow_total += child->width_grow();
         }
         auto remaining = content - occupied;
         first = true;
         for (auto& child : children()) {
-            if (!child->visible() || child->style_computation().position == Position::Absolute)
+            if (!child->visible() || child->position() == Position::Absolute)
                 continue;
             //
             // fallback to 0.0, although this should be the natively computed size
             float width = child->contextual_width(content);
             float height;
-            if (remaining >= 0. && child->style_computation().width_grow() != 0.f)
-                width += remaining * (child->style_computation().width_grow() / grow_total);
-            else if (remaining < 0.f && child->style_computation().width_shrink() != 0.f)
-                width -= std::max(.1f, remaining * (child->style_computation().width_shrink() / grow_total));
+            if (remaining >= 0. && child->width_grow() != 0.f)
+                width += remaining * (child->width_grow() / grow_total);
+            else if (remaining < 0.f && child->width_shrink() != 0.f)
+                width -= std::max(.1f, remaining * (child->width_shrink() / grow_total));
             if (!first)
                 ImGui::SameLine();
             std::optional<float> y = std::nullopt;
-            switch (style_computation().align_items) {
+            switch (_align_items) {
             case Alignment::Stretch:
                 height = h;
                 break;
@@ -142,7 +161,7 @@ void Layout::render_impl(Context& context, float w, float h)
             }
             std::optional<float> x;
             if (grow_total == 0.f && remaining > 0.f)
-                switch (style_computation().justify_content) {
+                switch (_justify_content) {
                 case Justification::Start:
                     x = 0.f;
                     break;
@@ -169,7 +188,7 @@ void Layout::render_impl(Context& context, float w, float h)
             window->DC.CursorPosPrevLine.y = window->DC.CursorPos.y;
             float backup = 0.f;
             child->render(context, width, height, true);
-            cursor.x += width + ImGui::GetStyle().ItemSpacing.x;
+            cursor.x += width + (_spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.x);
             cursor.y = initial_cursor.y;
             first = false;
         }
@@ -181,28 +200,28 @@ void Layout::render_impl(Context& context, float w, float h)
         auto first = true;
         std::size_t visible_count = 0;
         for (auto const& child : children()) {
-            if (!child->visible() || child->style_computation().position == Position::Absolute)
+            if (!child->visible() || child->position() == Position::Absolute)
                 continue;
             first = false;
             ++visible_count;
             occupied += child->contextual_height(content);
-            grow_total += child->style_computation().height_grow();
+            grow_total += child->height_grow();
         }
         if (visible_count > 1)
-            occupied += (visible_count - 1) * ImGui::GetStyle().ItemSpacing.y;
+            occupied += (visible_count - 1) * (_spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
         auto remaining = content - occupied;
         first = true;
         for (auto& child : children()) {
-            if (!child->visible() || child->style_computation().position == Position::Absolute)
+            if (!child->visible() || child->position() == Position::Absolute)
                 continue;
             float height = child->contextual_height(content);
             float width = 0.f;
-            if (remaining >= 0.f && child->style_computation().height_grow() != 0.f)
-                height += remaining * (child->style_computation().height_grow() / grow_total);
-            else if (remaining < 0.f && child->style_computation().height_shrink() != 0.f)
-                height -= std::max(0.0001f, remaining * (child->style_computation().height_shrink() / grow_total));
+            if (remaining >= 0.f && child->height_grow() != 0.f)
+                height += remaining * (child->height_grow() / grow_total);
+            else if (remaining < 0.f && child->height_shrink() != 0.f)
+                height -= std::max(0.0001f, remaining * (child->height_shrink() / grow_total));
             std::optional<float> x;
-            switch (style_computation().align_items) {
+            switch (_align_items) {
             case Alignment::Stretch:
                 width = w;
                 break;
@@ -221,7 +240,7 @@ void Layout::render_impl(Context& context, float w, float h)
             }
             std::optional<float> y;
             if (grow_total == 0.f && remaining > 0.f)
-                switch (style_computation().justify_content) {
+                switch (_justify_content) {
                 case Justification::Start:
                     y = 0.f;
                     break;
@@ -247,7 +266,7 @@ void Layout::render_impl(Context& context, float w, float h)
             window->DC.CurrLineTextBaseOffset = 0;
             float backup = 0.f;
             child->render(context, width, height, true);
-            cursor.y += height + ImGui::GetStyle().ItemSpacing.y;
+            cursor.y += height + (_spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
             cursor.x = initial_cursor.x;
             first = false;
         }
@@ -301,26 +320,36 @@ void Layout::set_align_items(Alignment align_items)
     set_needs_update();
 }
 
-Length2 const& Layout::spacing() const 
+std::optional<Length> const& Layout::spacing() const
 { 
     return _spacing; 
 }
 
-void Layout::set_spacing(Length2 spacing)
+void Layout::set_spacing(std::optional<Length> spacing)
 {
     _spacing = std::move(spacing);
     set_needs_update();
 }
 
-Length2 const& Layout::padding() const 
+std::optional<Length2> const& Layout::padding() const
 { 
     return _padding; 
 }
 
-void Layout::set_padding(Length2 padding)
+void Layout::set_padding(std::optional<Length2> padding)
 {
     _padding = std::move(padding);
     set_needs_update();
+}
+
+std::optional<Color> const& Layout::background_color() const
+{
+    return _background_color;
+}
+
+void Layout::set_background_color(std::optional<Color> background_color)
+{
+    _background_color = std::move(background_color);
 }
 
 }

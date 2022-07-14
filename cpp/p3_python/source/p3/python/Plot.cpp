@@ -85,7 +85,7 @@ void ArgumentParser<Plot>::operator()(py::kwargs const& kwargs, Plot& plot)
     assign(kwargs, "legend_visible", static_cast<Node&>(*plot.legend()), &Node::set_visible);
     assign(kwargs, "legend_location", *plot.legend(), &Plot::Legend::set_location);
     assign(kwargs, "legend_outside", *plot.legend(), &Plot::Legend::set_outside);
-    assign(kwargs, "legend_direction", *plot.legend()->style(), &StyleBlock::set_direction);
+    assign(kwargs, "legend_direction", *plot.legend(), &Plot::Legend::set_direction);
 }
 
 void ArgumentParser<Plot::Item>::operator()(py::kwargs const& kwargs, Plot::Item& item)
@@ -219,11 +219,13 @@ void Definition<Plot>::apply(py::module& module)
     plot.def(py::init<>([](py::kwargs kwargs) {
         auto plot = std::make_shared<Plot>();
         ArgumentParser<Plot>()(kwargs, *plot);
+        assign(kwargs, "padding", *plot, &Plot::set_padding);
         return plot;
     }));
     def_method(plot, "add", &Plot::add);
     def_method(plot, "remove", &Plot::remove);
     def_method(plot, "clear", &Plot::clear);
+    plot.def_property("padding", &Plot::padding, &Plot::set_padding);
     plot.def_property_readonly("x_axis", &Plot::x_axis);
     plot.def_property_readonly("y_axis", &Plot::y_axis);
     plot.def_property_readonly("legend", &Plot::legend);

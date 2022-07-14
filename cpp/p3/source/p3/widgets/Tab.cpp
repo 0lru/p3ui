@@ -57,12 +57,13 @@ void Tab::Item::render(Context& context, float width, float height, bool)
     // ImGuiTabItemFlags_SetSelected
     if (!ImGui::BeginTabItem(label() ? label().value().c_str() : ""))
         return;
-    auto compiled_guard = _apply_style_compiled();
+    push_style();
     if (_content) {
         auto region = ImGui::GetContentRegionAvail();
         _content->render(context, region.x, region.y);
     }
     ImGui::EndTabItem();
+    pop_style();
 }
 
 void Tab::Item::update_content()

@@ -11,9 +11,11 @@ void Definition<Button>::apply(py::module& module)
         auto button = std::make_shared<Button>();
         ArgumentParser<Node>()(kwargs, *button);
         assign(kwargs, "on_click", *button, &Button::set_on_click);
+        assign(kwargs, "background_color", *button, &Button::set_background_color);
         return button;
     }));
     def_signal_property(button, "on_click", &Button::on_click, &Button::set_on_click);
+    button.def_property("background_color", &Button::background_color, &Button::set_background_color);
 }
 
 }

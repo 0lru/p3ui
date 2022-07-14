@@ -20,25 +20,6 @@ protected:
     std::optional<py::object> _recorder;
 };
 
-namespace {
-    //
-    // declare the surface to a non-shrink nor growing rectangle per default.
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_width() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
 py::object Surface::enter()
 {
     auto skia = py::module::import("p3ui.skia");

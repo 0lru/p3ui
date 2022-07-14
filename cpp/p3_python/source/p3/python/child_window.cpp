@@ -1,6 +1,6 @@
 #include "p3ui.h"
 
-#include <p3/widgets/ChildWindow.h>
+#include <p3/widgets/child_window.h>
 
 
 namespace p3::python

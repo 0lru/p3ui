@@ -52,6 +52,13 @@ public:
     std::optional<std::array<float, 2>> const& content_size() const;
     void set_content_size(std::optional<std::array<float, 2>>);
 
+    std::optional<Length2> const& padding() const;
+    void set_padding(std::optional<Length2> padding);
+
+protected:
+    virtual void push_style() override;
+    virtual void pop_style() override;
+
 private:
     std::optional<std::array<float, 2>> _content_size;
     std::optional<float> _set_scroll_x;
@@ -67,6 +74,7 @@ private:
     bool _horizontal_scroll_autohide = true;
     bool _vertical_scroll_autohide = true;
     bool _mouse_scroll_enabled = true;
+    std::optional<Length2> _padding = std::nullopt;
 };
 
 }

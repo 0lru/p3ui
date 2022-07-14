@@ -9,33 +9,11 @@
 
 namespace p3 {
 
-namespace {
-    //
-    // declare the surface to a non-shrink nor growing rectangle per default.
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_width() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& Surface::style_strategy() const
-{
-    return _style_strategy;
-}
-
 Surface::Surface()
     : Node("Surface")
 {
+    set_width(LayoutLength { std::nullopt, 0.f, 0.f });
+    set_height(LayoutLength { std::nullopt, 0.f, 0.f });
 }
 
 Surface::Viewport const& Surface::viewport() const
@@ -58,8 +36,8 @@ void Surface::dispose()
     log_debug("dispose surface");
     _skia_picture.reset();
     set_render_layer(nullptr);
-//  _on_click = nullptr;
-//  _on_viewport_change = nullptr;
+    //  _on_click = nullptr;
+    //  _on_viewport_change = nullptr;
     Node::dispose();
 }
 
@@ -97,7 +75,7 @@ void Surface::render_impl(Context& context, float fwidth, float fheight)
 
     //
     // TODO: move out of here, specialize
-//    ImGuiWindow& window = *ImGui::GetCurrentWindow();
+    //    ImGuiWindow& window = *ImGui::GetCurrentWindow();
     auto const id = window.GetID(this->imgui_label().c_str());
     ImVec2 pos(window.DC.CursorPos.x, window.DC.CursorPos.y + window.DC.CurrLineTextBaseOffset);
     auto bb_bottom_right = ImVec2(window.DC.CursorPos.x + fwidth, window.DC.CursorPos.y + fheight);

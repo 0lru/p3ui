@@ -29,7 +29,6 @@ class ImageViewer(Layout):
             on_mouse_enter=on_mouse_enter,
             on_mouse_move=on_mouse_move,
             on_mouse_leave=on_mouse_leave,
-            padding=(2 | px, 2 | px),
             on_scale_changed=self.__on_scale_changed,
             on_fitting_mode_changed=self.__on_fitting_mode_changed,
             on_repaint=on_repaint
@@ -113,6 +112,7 @@ class ImageViewer(Layout):
             height=(auto, 0, 0),
             on_click=self.toggle_collapsed)
         self.collapsed = collapsed
+        self.surface_layout = Column(padding=(0 | px, 0 | px), children=[self.image_surface])
         super().__init__(
             **kwargs,
             direction=Direction.Horizontal,
@@ -146,7 +146,7 @@ class ImageViewer(Layout):
                         self._scale_x_input,
                         self._scale_y_input
                     ]),
-                self.image_surface
+                self.surface_layout
             ])
 
     @property
@@ -183,9 +183,11 @@ class ImageViewer(Layout):
 
     def __scale_to_x(self, x):
         self.image_surface.scale = (x, self.image_surface.scale[1])
+        self._scale_x_input.value = self.image_surface.scale[0]
 
     def __scale_to_y(self, y):
         self.image_surface.scale = (self.image_surface.scale[0], y)
+        self._scale_y_input.value = self.image_surface.scale[1]
 
     def __on_scale_changed(self, x, y):
         self._scale_x_input.value, self._scale_y_input.value = x, y

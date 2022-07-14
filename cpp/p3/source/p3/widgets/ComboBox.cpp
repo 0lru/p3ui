@@ -7,26 +7,11 @@
 
 namespace p3 {
 
-namespace {
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 1.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& ComboBox::style_strategy() const
-{
-    return _style_strategy;
-}
 
 ComboBox::ComboBox()
     : Node("ComboBox")
 {
+    set_height(LayoutLength { std::nullopt, 0.f, 0.f });
 }
 
 void ComboBox::render_impl(Context&, float width, float height)

@@ -7,33 +7,11 @@
 
 namespace p3 {
 
-namespace {
-    //
-    // an image does not grow/shrink per default
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_width() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& Image::style_strategy() const
-{
-    return _style_strategy;
-}
-
 Image::Image()
     : Node("Image")
 {
+    set_width(LayoutLength { std::nullopt, 0.f, 0.f });
+    set_height(LayoutLength { std::nullopt, 0.f, 0.f });
 }
 
 Image::~Image()

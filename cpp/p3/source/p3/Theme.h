@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Color.h"
+#include "color.h"
 #include "on_scope_exit.h"
 #include "StyleTypes.h"
 

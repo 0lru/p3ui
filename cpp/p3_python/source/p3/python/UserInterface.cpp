@@ -4,7 +4,7 @@
 #include <p3/UserInterface.h>
 
 #include <p3/widgets/Popup.h>
-#include <p3/widgets/ChildWindow.h>
+#include <p3/widgets/child_window.h>
 #include <p3/widgets/MenuBar.h>
 
 
@@ -41,7 +41,8 @@ namespace p3::python
         def_content_property(user_interface, "menu_bar", &UserInterface::menu_bar, &UserInterface::set_menu_bar);
         def_property(user_interface, "theme", &UserInterface::theme, &UserInterface::set_theme);
         def_method(user_interface, "load_font", &UserInterface::load_font);
-        def_method(user_interface, "merge_font", &UserInterface::merge_font);
+        user_interface.def("merge_font", &UserInterface::merge_font, 
+            py::arg("filename"), py::arg("size")=16, py::arg("offset")=std::nullopt);
         def_property(user_interface, "default_font", &UserInterface::default_font, &UserInterface::set_default_font);
         def_property(user_interface, "mouse_cursor_scale", &UserInterface::mouse_cursor_scale, &UserInterface::set_mouse_cursor_scale);
         def_property(user_interface, "anti_aliased_lines", &UserInterface::anti_aliased_lines, &UserInterface::set_anti_aliased_lines);

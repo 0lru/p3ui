@@ -25,7 +25,7 @@ class Gallery(UserInterface):
         self.merge_font(assets.joinpath("MaterialIcons-Regular.ttf").as_posix(), 20)
         tab_plots = TabPlots()
         tab_system = TabSystem(window)
-        self.content = Tab(
+        self.content = Row(padding=(1|em, 1|em), children=[Tab(
             padding=(1.5 | em, 0.5 | em),
 
             children=[
@@ -37,6 +37,7 @@ class Gallery(UserInterface):
                 TabItem(f'{MaterialIcons.Settings} System', content=tab_system),
                 TabItem(f'{MaterialIcons.Tab} Tables', content=TabTables())
             ])
+        ])
 
         self.t1 = asyncio.get_event_loop().create_task(tab_system.update())
         self.t2 = asyncio.get_event_loop().create_task(tab_plots.update())

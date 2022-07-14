@@ -8,37 +8,21 @@
 
 namespace p3 {
 
-namespace {
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-        LayoutLength const& initial_width() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& Text::style_strategy() const
-{
-    return _style_strategy;
-}
-
 Text::Text(std::string value, std::optional<std::string> label)
     : Node("Text")
     , _value(std::move(value))
 {
     set_label(std::move(label));
+    set_width(LayoutLength { std::nullopt, 0.f, 0.f });
+    set_height(LayoutLength { std::nullopt, 0.f, 0.f });
 }
 
 void Text::render_impl(Context& context, float width, float height)
 {
+    push_style();
+    on_scope_exit exit([&]() {
+        pop_style();
+    });
     if (label()) {
         ImGui::SetNextItemWidth(label() ? width * GoldenRatio : width);
         ImGui::LabelText(label().value().c_str(), _value.c_str());

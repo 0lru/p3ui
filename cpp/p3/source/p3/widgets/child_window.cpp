@@ -1,4 +1,4 @@
-#include "ChildWindow.h"
+#include "child_window.h"
 
 #include <p3/Context.h>
 #include <p3/RenderLayer.h>
@@ -26,12 +26,12 @@ void ChildWindow::render_impl(Context& context, float width, float height)
     if (!_resizeable)
         flags |= ImGuiWindowFlags_NoResize;
     ImVec2 pos(
-        std::holds_alternative<Percentage>(style_computation().x)
-            ? width * std::get<Percentage>(style_computation().x).value / 100.f
-            : context.to_actual(std::get<Length>(style_computation().x)),
-        std::holds_alternative<Percentage>(style_computation().y)
-            ? width * std::get<Percentage>(style_computation().y).value / 100.f
-            : context.to_actual(std::get<Length>(style_computation().y)));
+        std::holds_alternative<Percentage>(left())
+            ? width * std::get<Percentage>(left()).value / 100.f
+            : context.to_actual(std::get<Length>(left())),
+        std::holds_alternative<Percentage>(top())
+            ? width * std::get<Percentage>(top()).value / 100.f
+            : context.to_actual(std::get<Length>(top())));
     ImGui::SetNextWindowPos(pos, _moveable ? ImGuiCond_Appearing : ImGuiCond_Always);
     ImVec2 size(width, height);
     ImGui::SetNextWindowSize(size, _resizeable ? ImGuiCond_Appearing : ImGuiCond_Always);

@@ -9,24 +9,6 @@
 
 namespace p3 {
 
-namespace {
-
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 1.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& InputText::style_strategy() const
-{
-    return _style_strategy;
-}
-
 InputText::InputText(std::size_t size, std::optional<std::string> label)
     : Node("InputText")
     , _value()
@@ -34,6 +16,7 @@ InputText::InputText(std::size_t size, std::optional<std::string> label)
 {
     _value.reserve(4);
     set_label(std::move(label));
+    set_height(LayoutLength { std::nullopt, 0.f, 1.f });
 }
 
 void InputText::render_impl(Context&, float width, float height)

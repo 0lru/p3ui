@@ -18,8 +18,6 @@ public:
 
     Surface();
 
-    StyleStrategy& style_strategy() const override;
-
     void update_content() override;
     void render_impl(Context&, float width, float height) final override;
     void render(RenderBackend::RenderTarget&) override;

@@ -2,8 +2,8 @@
 
 #define NOMINMAX
 
-#include <p3/Color.h>
 #include <p3/Node.h>
+#include <p3/color.h>
 
 #include <implot.h> // TODO: move to cpp
 
@@ -288,12 +288,20 @@ public:
     void remove(std::shared_ptr<Item>);
     void clear();
 
+    std::optional<Length2> const& padding() const;
+    void set_padding(std::optional<Length2> padding);
+
+protected:
+    virtual void push_style() override;
+    virtual void pop_style() override;
+
 private:
     std::string _title;
     std::shared_ptr<Axis> _x_axis;
     std::shared_ptr<Axis> _y_axis;
     std::shared_ptr<Legend> _legend;
     std::vector<std::shared_ptr<Item>> _items;
+    std::optional<Length2> _padding = std::nullopt;
 };
 
 class Plot::Legend : public Node {
@@ -306,9 +314,13 @@ public:
     void set_outside(bool);
     bool outside() const;
 
+    void set_direction(Direction);
+    Direction direction() const;
+
 private:
     Location _location = Location::NorthWest;
     bool _outside = false;
+    Direction _direction = Direction::Vertical;
 };
 
 class Plot::Axis : public Node {
@@ -375,8 +387,7 @@ void Plot::BarSeries<T>::render()
     auto sample_count = this->values().size();
     if (direction() == Direction::Horizontal) {
         ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift, ImPlotBarsFlags_Horizontal);
-    }
-    else
+    } else
         ImPlot::PlotBars(this->name().c_str(), this->values().data(), int(this->values().size()), _width, _shift);
     for (auto& annotation : this->annotations())
         annotation->render_item_annotation();

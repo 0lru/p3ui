@@ -20,7 +20,7 @@ inline void Slider<DataType>::update_content()
         const ImVec2 label_size = ImGui::CalcTextSize(label().value().c_str(), NULL, true);
         _automatic_width += label_size.x + context_ptr->Style.ItemInnerSpacing.x;
     }
-    if (style_computation().direction == Direction::Vertical)
+    if (_direction == Direction::Vertical)
         std::swap(_automatic_height, _automatic_width);
 }
 
@@ -35,7 +35,7 @@ inline void Slider<DataType>::render_impl(Context&, float width, float height)
     auto vptr = disabled() ? &value : &_value;
 
     bool changed = false;
-    if (style_computation().direction == Direction::Horizontal) {
+    if (_direction == Direction::Horizontal) {
         changed = ImGui::SliderScalar(
             imgui_label().c_str(),
             imgui_datatype<DataType>,

@@ -19,6 +19,7 @@ void Definition<Slider<DataType>>::parse(py::kwargs const& kwargs, Slider<DataTy
     assign(kwargs, "value", slider, &Slider<DataType>::set_value);
     assign(kwargs, "min", slider, &Slider<DataType>::set_min);
     assign(kwargs, "max", slider, &Slider<DataType>::set_max);
+    assign(kwargs, "direction", slider, &Slider<DataType>::set_direction);
     assign(kwargs, "on_change", slider, &Slider<DataType>::set_on_change);
 }
 
@@ -37,6 +38,7 @@ void Definition<Slider<ValueType>>::apply(py::module& module)
     def_property(slider, "format", &Slider<ValueType>::format, &Slider<ValueType>::set_format);
     def_property(slider, "value", &Slider<ValueType>::value, &Slider<ValueType>::set_value);
     def_property(slider, "min", &Slider<ValueType>::min, &Slider<ValueType>::set_min);
+    def_property(slider, "direction", &Slider<ValueType>::direction, &Slider<ValueType>::set_direction);
     def_property(slider, "max", &Slider<ValueType>::max, &Slider<ValueType>::set_max);
 }
 

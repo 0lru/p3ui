@@ -54,7 +54,7 @@ class Icon(Surface):
 class IconBrowser(Column):
 
     def __init__(self, spacing=4, icon_size=72, **kwargs):
-        self.spacing = 4
+        self.spacing = 4 | px
         self.icon_size = icon_size
         self._provider = IconProvider('icons.zip')
 

@@ -1,10 +1,10 @@
 
 #include <p3/Context.h>
 #include <p3/Window.h>
-#include <p3/ChildWindow.h>
+#include <p3/child_window.h>
 #include <p3/layout.h>
 #include <p3/button.h>
-#include <p3/Collapsible.h>
+#include <p3/collapsible.h>
 #include <p3/ScrollArea.h>
 
 using namespace p3;

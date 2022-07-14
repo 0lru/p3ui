@@ -7,31 +7,11 @@
 
 namespace p3 {
 
-namespace {
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_width() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 0.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& Popup::style_strategy() const
-{
-    return _style_strategy;
-}
-
 Popup::Popup()
     : Node("Popup")
 {
+    set_width(LayoutLength { std::nullopt, 0.f, 0.f });
+    set_height(LayoutLength { std::nullopt, 0.f, 0.f });
 }
 
 void Popup::render_impl(Context& context, float width, float height)

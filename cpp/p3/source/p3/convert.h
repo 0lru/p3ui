@@ -1,4 +1,4 @@
-#include "Color.h"
+#include "color.h"
 
 #include <imgui.h>
 #include <implot.h>

@@ -24,18 +24,22 @@ public:
     Alignment const& align_items() const;
     void set_align_items(Alignment);
 
-    Length2 const& spacing() const;
-    void set_spacing(Length2);
+    std::optional<Length> const& spacing() const;
+    void set_spacing(std::optional<Length>);
 
-    Length2 const& padding() const;
-    void set_padding(Length2);
+    std::optional<Length2> const& padding() const;
+    void set_padding(std::optional<Length2>);
+
+    std::optional<Color> const& background_color() const;
+    void set_background_color(std::optional<Color>);
 
 private:
-    Direction _direction = Direction::Horizontal;
+    Direction _direction = Direction::Vertical;
     Justification _justify_content = Justification::SpaceBetween;
     Alignment _align_items = Alignment::Stretch;
-    Length2 _spacing = Length2 { 0 | px, 0 | px };
-    Length2 _padding = Length2 { .25 | em, .25 | em };
+    std::optional<Length> _spacing = std::nullopt;
+    std::optional<Length2> _padding = Length2 { .25 | em, .25 | em };
+    std::optional<Color> _background_color = std::nullopt;
 };
 
 }

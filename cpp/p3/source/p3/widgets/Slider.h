@@ -16,7 +16,7 @@ public:
     Slider()
         : Node("Slider")
     {
-        style()->set_direction(Direction::Horizontal);
+        set_direction(Direction::Horizontal);
     }
 
     void render_impl(Context&, float width, float height) override;
@@ -38,11 +38,15 @@ public:
     void set_format(std::optional<std::string>);
     std::optional<std::string> const& format() const;
 
+    Direction direction() const;
+    void set_direction(Direction);
+
 private:
     DataType _value = std::numeric_limits<DataType>::lowest();
     DataType _min = std::numeric_limits<DataType>::min();
     DataType _max = std::numeric_limits<DataType>::max();
     OnChange _on_change;
+    Direction _direction = Direction::Horizontal;
     std::optional<std::string> _format = std::nullopt;
 };
 
@@ -104,6 +108,18 @@ template <typename DataType>
 inline std::optional<std::string> const& Slider<DataType>::format() const
 {
     return _format;
+}
+
+template <typename DataType>
+inline Direction Slider<DataType>::direction() const
+{
+    return _direction;
+}
+
+template <typename DataType>
+inline void Slider<DataType>::set_direction(Direction direction)
+{
+    _direction = direction;
 }
 
 }

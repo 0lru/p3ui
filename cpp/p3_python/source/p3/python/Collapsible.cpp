@@ -1,6 +1,6 @@
 #include "p3ui.h"
 
-#include <p3/widgets/Collapsible.h>
+#include <p3/widgets/collapsible.h>
 
 namespace p3::python
 {

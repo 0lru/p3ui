@@ -7,27 +7,12 @@
 
 namespace p3 {
 
-namespace {
-    class LocalStyleStrategy : public StyleStrategy {
-    public:
-        LayoutLength const& initial_height() override
-        {
-            static auto initial = LayoutLength { std::nullopt, 0.f, 1.f };
-            return initial;
-        }
-    };
-    LocalStyleStrategy _style_strategy;
-}
-
-StyleStrategy& CheckBox::style_strategy() const
-{
-    return _style_strategy;
-}
 
 CheckBox::CheckBox(std::optional<std::string> label)
     : Node("CheckBox")
 {
     set_label(std::move(label));
+    set_height(LayoutLength { std::nullopt, 0.f, 1.f });
 }
 
 void CheckBox::render_impl(Context& context, float width, float height)

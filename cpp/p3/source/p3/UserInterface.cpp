@@ -5,7 +5,7 @@
 #include "log.h"
 
 // hm.. move this to widgets?
-#include <p3/widgets/ChildWindow.h>
+#include <p3/widgets/child_window.h>
 #include <p3/widgets/Menu.h>
 #include <p3/widgets/MenuBar.h>
 #include <p3/widgets/Popup.h>
@@ -74,6 +74,8 @@ FontAtlas UserInterface::font_atlas()
 Font UserInterface::load_font(std::string const& filename, float size)
 {
     auto im_gui_font = _im_gui_context->IO.Fonts->AddFontFromFileTTF(filename.c_str(), size);
+    if (im_gui_font == nullptr)
+        log_error("could not load \"{}\"", filename);
     im_gui_font->FontSize = size;
     Font font(std::static_pointer_cast<UserInterface>(shared_from_this()), im_gui_font);
     if (_im_gui_context->IO.FontDefault == nullptr)
@@ -81,14 +83,14 @@ Font UserInterface::load_font(std::string const& filename, float size)
     return font;
 }
 
-void UserInterface::merge_font(std::string const& filename, float size)
+void UserInterface::merge_font(std::string const& filename, float size, std::optional<float> offset)
 {
 #define ICON_MIN_MDI 0xe000
 #define ICON_MAX_MDI 0xeb4c
     ImFontConfig config;
     config.MergeMode = true;
     config.PixelSnapH = true;
-    config.GlyphOffset.y = size / 5.0f;
+    config.GlyphOffset.y = offset ? offset.value() : size / 5.0f;
     // config.OversampleH = 4;
     // config.OversampleV = 4;
     static const ImWchar icon_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };

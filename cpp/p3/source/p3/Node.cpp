@@ -1,7 +1,6 @@
 #include "Node.h"
 #include "Context.h"
 #include "RenderLayer.h"
-#include "StyleDerivation.h"
 #include "Theme.h"
 #include "convert.h"
 #include "log.h"
@@ -15,9 +14,6 @@
 #include <unordered_map>
 
 namespace p3 {
-
-// using default values..
-StyleStrategy Node::DefaultStyleStrategy;
 
 std::function<void(Node&)> NodeInitializer = nullptr;
 
@@ -74,14 +70,9 @@ Node::Node(std::string element_name)
     , _imgui_id(NodeRegistry::instance().add(this))
     , _imgui_label("##" + std::to_string(_imgui_id))
     , _status_flags(ImGuiItemStatusFlags_None)
-    , _style(std::make_shared<StyleBlock>())
 {
     if (NodeInitializer)
         NodeInitializer(*this);
-    _style->add_observer(this);
-    _style_guard = on_scope_exit([this, style = _style]() {
-        style->remove_observer(this);
-    });
 }
 
 Node::~Node()
@@ -96,11 +87,8 @@ void Node::set_attribute(std::string const& name, std::string const& value)
 {
     static auto setter = std::unordered_map<std::string, std::function<void(Node&, std::string const&)>> {
         { "label", [](Node& node, std::string const& value) { node.set_label(value); } },
-        { "width", [](Node& node, std::string const& value) { node.style()->set_width(parser::parse<LayoutLength>(value.c_str())); } },
-        { "height", [](Node& node, std::string const& value) { node.style()->set_height(parser::parse<LayoutLength>(value.c_str())); } },
-        { "direction", [](Node& node, std::string const& value) { node.style()->set_direction(parser::parse<Direction>(value.c_str())); } },
-        { "align-items", [](Node& node, std::string const& value) { node.style()->set_align_items(parser::parse<Alignment>(value.c_str())); } },
-        { "justify-content", [](Node& node, std::string const& value) { node.style()->set_justify_content(parser::parse<Justification>(value.c_str())); } },
+        { "width", [](Node& node, std::string const& value) { node.set_width(parser::parse<LayoutLength>(value.c_str())); } },
+        { "height", [](Node& node, std::string const& value) { node.set_height(parser::parse<LayoutLength>(value.c_str())); } },
     };
     auto it = setter.find(name);
     if (it == setter.end())
@@ -108,35 +96,21 @@ void Node::set_attribute(std::string const& name, std::string const& value)
     it->second(*this, value);
 }
 
-void Node::on_style_changed()
-{
-    set_needs_restyle();
-}
-
-StyleStrategy& Node::style_strategy() const
-{
-    return DefaultStyleStrategy;
-}
-
 void Node::update_status()
 {
     ImGuiWindow const& window = *GImGui->CurrentWindow;
     auto const status_flags = GImGui->LastItemData.StatusFlags;
     if (status_flags == _status_flags) {
-        if (_mouse.hovered && _mouse.move) {
+        if (_mouse.hovered && _mouse.move && Context::current().mouse_move()) {
             MouseEvent e(this);
-            if ((e.x() != _mouse.x) || (e.y() != _mouse.y)) {
-                _mouse.x = e.x();
-                _mouse.y = e.y();
-                postpone([f = _mouse.move, e = std::move(e)]() mutable { f(std::move(e)); });
-            }
+            postpone([f = _mouse.move, e = std::move(e)]() mutable { f(std::move(e)); });
         }
     } else if ((status_flags & ImGuiItemStatusFlags_HoveredRect) && !(_status_flags & ImGuiItemStatusFlags_HoveredRect)) {
         _mouse.hovered = true;
         if (_mouse.enter || _mouse.hovered) {
             MouseEvent e(this);
-            _mouse.x = e.x();
-            _mouse.y = e.y();
+            _mouse.x = e.global_x();
+            _mouse.y = e.global_y();
             if (_mouse.enter)
                 postpone([f = _mouse.enter, e = std::move(e)]() mutable { f(std::move(e)); });
         }
@@ -159,95 +133,9 @@ void Node::postpone(std::function<void()> f)
     EventLoop::current()->call_at(EventLoop::Clock::now(), Event::create(f));
 }
 
-namespace {
-    template <typename T>
-    T cascade(Node const& node, Cascadable<T> const& combined, T StyleComputation::*member, T const& initial)
-    {
-        if (std::holds_alternative<Cascade>(combined))
-            if ((std::get<Cascade>(combined) == Cascade::Inherit) && node.parent())
-                return node.parent()->style_computation().*member;
-            else
-                return initial;
-        return std::get<T>(combined);
-    }
-}
-
 std::string const& Node::element_name() const
 {
     return _element_name;
-}
-
-void Node::_cascade_styles_from_parent(Context& context)
-{
-    StyleDerivation combined;
-    StyleBlock style;
-    if (_style)
-        combined.merge(*_style);
-    _style_computation.color = cascade(*this, combined.color, &StyleComputation::color, context.theme().text_color());
-    static Length const bw = 1 | px;
-    _style_computation.border_width = cascade(*this, combined.border_width, &StyleComputation::border_width, bw);
-    _style_computation.border_color = cascade(*this, combined.border_color, &StyleComputation::border_color, Color());
-    _style_computation.border_radius = cascade(*this, combined.border_radius, &StyleComputation::border_radius, bw);
-    _style_computation.padding = cascade(*this, combined.padding, &StyleComputation::padding, context.theme().frame_padding());
-    _style_computation.spacing = cascade(*this, combined.spacing, &StyleComputation::spacing, context.theme().item_spacing());
-    _style_computation.position = cascade(*this, combined.position, &StyleComputation::position, Position::Static);
-    //
-    // flex..
-    static LengthPercentage initial_position = 0 | px;
-    static Direction initial_direction = Direction::Vertical;
-    static Alignment initial_alignment = Alignment::Stretch;
-    static Justification initial_justification = Justification::Start;
-    bool initial_visibility = true;
-    _style_computation.background_color = cascade(*this, combined.background_color, &StyleComputation::background_color, Color::named::black);
-    _style_computation.visible = cascade(*this, combined.visible, &StyleComputation::visible, initial_visibility);
-    _style_computation.x = cascade(*this, combined.x, &StyleComputation::x, initial_position);
-    _style_computation.y = cascade(*this, combined.y, &StyleComputation::y, initial_position);
-    _style_computation.width = cascade(*this, combined.width, &StyleComputation::width, style_strategy().initial_width());
-    _style_computation.height = cascade(*this, combined.height, &StyleComputation::height, style_strategy().initial_height());
-    _style_computation.direction = cascade(*this, combined.direction, &StyleComputation::direction, initial_direction);
-    _style_computation.justify_content = cascade(*this, combined.justify_content, &StyleComputation::justify_content, initial_justification);
-    _style_computation.align_items = cascade(*this, combined.align_items, &StyleComputation::align_items, initial_alignment);
-}
-
-void Node::_compile_style_computation(Context& context)
-{
-    _style_compiled.clear();
-    //
-    // check if computed color changes the render state
-    ImVec4 color;
-    assign(color, _style_computation.color);
-    if (color != GImGui->Style.Colors[ImGuiCol_Text]) {
-        log_verbose("-style- <{}>\"{}\" changes color to {}", _element_name, _label ? _label.value() : "", to_string(_style_computation.color));
-        _style_compiled.push_back([color { std::move(color) }]() mutable {
-            std::swap(color, GImGui->Style.Colors[ImGuiCol_Text]);
-        });
-    }
-    //
-    // check if spacing
-    ImVec2 spacing(
-        context.to_actual(_style_computation.spacing[0]),
-        context.to_actual(_style_computation.spacing[1]));
-    //
-    // spacing.. between buttons (inside a flex etc.)
-    if (spacing != GImGui->Style.ItemSpacing) {
-        log_verbose("-style- <{}>\"{}\" changes spacing to ({}, {})", _element_name, _label ? _label.value() : "", spacing.x, spacing.y);
-        _style_compiled.push_back([spacing { std::move(spacing) }]() mutable {
-            std::swap(spacing, GImGui->Style.ItemSpacing);
-        });
-    }
-    //
-    // padding (between border and content). note that
-    // this doesn't work for "Windows"
-    ImVec2 padding(
-        context.to_actual(_style_computation.padding[0]),
-        context.to_actual(_style_computation.padding[1]));
-    if (padding != GImGui->Style.FramePadding) {
-        log_verbose("-style- <{}>\"{}\" changes padding to ({}, {})", _element_name, _label ? _label.value() : "", padding.x, padding.y);
-        _style_compiled.push_back([padding { std::move(padding) }]() mutable {
-            std::swap(padding, GImGui->Style.FramePadding);
-            ImPlot::GetStyle().PlotPadding = GImGui->Style.FramePadding;
-        });
-    }
 }
 
 Node* Node::parent() const
@@ -273,10 +161,6 @@ void Node::update_restyle(Context& context, bool force)
         return;
 
     if (_needs_restyle) {
-        _cascade_styles_from_parent(context);
-        //
-        // at this point the anchestor-style is still applied
-        _compile_style_computation(context);
         //
         // force layer to redraw
         if (_render_layer)
@@ -286,21 +170,17 @@ void Node::update_restyle(Context& context, bool force)
     {
         //
         // needs to be done before update_content()
-        auto compiled_guard = _apply_style_compiled();
+        push_style();
         for (auto& child : _children)
             if (child->visible())
                 child->update_restyle(context,
                     _needs_restyle /* force restyle of child if this was restyled*/);
+        pop_style();
         update_content();
     }
     //
     // change state
     _needs_update = _needs_restyle = false;
-}
-
-StyleComputation const& Node::style_computation() const
-{
-    return _style_computation;
 }
 
 void Node::set_needs_restyle()
@@ -445,10 +325,10 @@ void Node::render(Context& context, float width, float height, bool adjust_works
     if (_disabled)
         std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
 
-    //
-    // apply style
-    auto compiled_guard = _apply_style_compiled();
     push_style();
+    on_scope_exit guard([&]() {
+        pop_style();
+    });
     if (adjust_worksrect) {
         //
         // this needs to be done after style was applied and is only used by Layout.cpp
@@ -462,7 +342,6 @@ void Node::render(Context& context, float width, float height, bool adjust_works
     } else {
         render_impl(context, width, height);
     }
-    pop_style();
 
     if (_disabled)
         std::swap(disabled_alpha, ImGui::GetStyle().Alpha);
@@ -470,11 +349,11 @@ void Node::render(Context& context, float width, float height, bool adjust_works
 
 void Node::render_absolute(Context& context)
 {
-    for (auto& child : _children)
-        if (child->style_computation().position == Position::Absolute) {
+    /* for (auto& child : _children)
+        if (child->position == Position::Absolute) {
             auto avail = ImGui::GetContentRegionAvail();
             child->render(context, child->contextual_width(avail.x), child->contextual_height(avail.y));
-        }
+        }*/
 }
 
 void Node::set_label(std::optional<std::string> label)
@@ -555,6 +434,8 @@ bool Node::hovered() const
 
 void Node::set_visible(bool visible)
 {
+    if (_visible == visible)
+        return;
     _visible = visible;
     set_needs_restyle();
 }
@@ -564,26 +445,86 @@ bool Node::visible() const
     return _visible;
 }
 
+OptionalLengthPercentage const& Node::width_basis() const
+{
+    return std::get<0>(_width);
+}
+
+float Node::width_grow() const
+{
+    return std::get<1>(_width);
+}
+
+float Node::width_shrink() const
+{
+    return std::get<2>(_width);
+}
+
+OptionalLengthPercentage const& Node::height_basis() const
+{
+    return std::get<0>(_height);
+}
+
+float Node::height_grow() const
+{
+    return std::get<1>(_height);
+}
+
+float Node::height_shrink() const
+{
+    return std::get<2>(_height);
+}
+
+Position Node::position() const
+{
+    return _position;
+}
+
+void Node::set_position(Position position)
+{
+    _position = position;
+}
+
+LengthPercentage Node::left() const
+{
+    return _left;
+}
+
+void Node::set_left(LengthPercentage left)
+{
+    _left = left;
+}
+
+LengthPercentage Node::top() const
+{
+    return _top;
+}
+
+void Node::set_top(LengthPercentage top)
+{
+    _top = top;
+}
+
 float Node::contextual_width(float content) const
 {
-    if (!style_computation().width_basis())
+    if (!width_basis())
         return _automatic_width;
-    auto const& lp = style_computation().width_basis().value();
-    if (std::holds_alternative<Percentage>(lp))
-        return content * std::get<Percentage>(lp).value / 100.f;
+    auto const& basis = width_basis().value();
+    if (std::holds_alternative<Percentage>(basis))
+        return content * std::get<Percentage>(basis).value / 100.f;
     else
-        return Context::current().to_actual(std::get<Length>(lp));
+        return Context::current().to_actual(std::get<Length>(basis));
 }
 
 float Node::contextual_height(float content) const
 {
-    if (!style_computation().height_basis())
+    if (!height_basis())
         return _automatic_height;
-    auto const& lp = style_computation().height_basis().value();
-    if (std::holds_alternative<Percentage>(lp))
-        return content * std::get<Percentage>(lp).value / 100.f;
+    auto const& basis = height_basis().value();
+    if (std::holds_alternative<Percentage>(basis))
+        return content * std::get<Percentage>(basis).value / 100.f;
     else
-        return Context::current().to_actual(std::get<Length>(lp));
+        return Context::current().to_actual(std::get<Length>(basis));
 }
 
 float Node::contextual_minimum_content_width() const
@@ -605,17 +546,14 @@ Node::MouseEvent::MouseEvent(Node* source)
     auto& last_rect = context.LastItemData.Rect;
     _x = _global_x - last_rect.Min.x;
     _y = _global_y - last_rect.Min.y;
+    _left_button_down = context.IO.MouseDown[0];
+    _right_button_down = context.IO.MouseDown[1];
+    _middle_button_down = context.IO.MouseDown[2];
 }
 
 Node* Node::MouseEvent::source() const
 {
     return _source;
-}
-
-std::shared_ptr<StyleBlock> const& Node::style() const
-{
-    // no lock needed, _style never changes
-    return _style;
 }
 
 float Node::MouseEvent::global_x() const
@@ -638,18 +576,23 @@ float Node::MouseEvent::y() const
     return _y;
 }
 
-void Node::render_impl(Context&, float width, float height)
+bool Node::MouseEvent::left_button_down() const
 {
+    return _left_button_down;
 }
 
-on_scope_exit Node::_apply_style_compiled()
+bool Node::MouseEvent::right_button_down() const
 {
-    auto apply = [this]() {
-        for (auto& f : _style_compiled)
-            f();
-    };
-    apply();
-    return on_scope_exit(apply);
+    return _right_button_down;
+}
+
+bool Node::MouseEvent::middle_button_down() const
+{
+    return _middle_button_down;
+}
+
+void Node::render_impl(Context&, float width, float height)
+{
 }
 
 void Node::dispose()
@@ -691,7 +634,10 @@ LayoutLength const& Node::width() const
 
 void Node::set_width(LayoutLength width)
 {
+    if (_width == width)
+        return;
     _width = std::move(width);
+
     set_needs_restyle();
 }
 
@@ -700,9 +646,11 @@ LayoutLength const& Node::height() const
     return _height;
 }
 
-void Node::set_height(LayoutLength width)
+void Node::set_height(LayoutLength height)
 {
-    _width = std::move(width);
+    if (_height == height)
+        return;
+    _height = std::move(height);
     set_needs_restyle();
 }
 

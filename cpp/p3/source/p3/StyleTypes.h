@@ -23,6 +23,7 @@ using Justification = p3::parser::Justification;
 template <typename T>
 struct UnitType {
 };
+
 inline static UnitType<Px> const px;
 inline static UnitType<Em> const em;
 inline static UnitType<Rem> const rem;

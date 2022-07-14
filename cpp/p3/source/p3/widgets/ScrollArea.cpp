@@ -199,4 +199,32 @@ void ScrollArea::set_content_size(std::optional<std::array<float, 2>> content_si
     _content_size = std::move(content_size);
 }
 
+std::optional<Length2> const& ScrollArea::padding() const
+{
+    return _padding;
+}
+void ScrollArea::set_padding(std::optional<Length2> padding)
+{
+    _padding = std::move(padding);
+    set_needs_update();
+}
+
+void ScrollArea::push_style()
+{
+    Node::push_style();
+    if (_padding) {
+        ImVec2 padding(
+            Context::current().to_actual(_padding.value()[0]),
+            Context::current().to_actual(_padding.value()[1]));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
+    }
+}
+
+void ScrollArea::pop_style()
+{
+    if (_padding)
+        ImGui::PopStyleVar();
+    Node::pop_style();
+}
+
 }

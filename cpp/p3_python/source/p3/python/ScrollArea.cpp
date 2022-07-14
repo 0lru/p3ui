@@ -26,6 +26,7 @@ void Definition<ScrollArea>::apply(py::module& module)
         assign(kwargs, "on_content_region_changed", *scroll_area, &p3::ScrollArea::set_on_content_region_changed);
         assign(kwargs, "content_size", *scroll_area, &p3::ScrollArea::set_content_size);
         assign(kwargs, "mouse_scroll_enabled", *scroll_area, &p3::ScrollArea::set_mouse_scroll_enabled);
+        assign(kwargs, "padding", *scroll_area, &p3::ScrollArea::set_padding);
         return scroll_area;
     }),
         py::kw_only(),
@@ -36,13 +37,14 @@ void Definition<ScrollArea>::apply(py::module& module)
 
     def_signal_property(scroll_area, "on_content_region_changed", &ScrollArea::on_content_region_changed, &ScrollArea::set_on_content_region_changed);
     def_content_property(scroll_area, "content", &ScrollArea::content, &ScrollArea::set_content);
+    def_property_readonly(scroll_area, "content_region", &ScrollArea::content_region);
     scroll_area.def_property("vertical_scroll_autohide", &ScrollArea::vertical_scroll_autohide, &ScrollArea::set_vertical_scroll_autohide);
     scroll_area.def_property("horizontal_scroll_autohide", &ScrollArea::horizontal_scroll_autohide, &ScrollArea::set_horizontal_scroll_autohide);
     def_property(scroll_area, "scroll_x", &ScrollArea::scroll_x, &ScrollArea::set_scroll_x);
     def_property(scroll_area, "scroll_y", &ScrollArea::scroll_y, &ScrollArea::set_scroll_y);
     def_property(scroll_area, "mouse_scroll_enabled", &ScrollArea::mouse_scroll_enabled, &ScrollArea::set_mouse_scroll_enabled);
     def_property(scroll_area, "content_size", &ScrollArea::content_size, &ScrollArea::set_content_size);
-    def_property_readonly(scroll_area, "content_region", &ScrollArea::content_region);
+    def_property(scroll_area, "padding", &ScrollArea::padding, &ScrollArea::set_padding);
 }
 
 }

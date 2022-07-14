@@ -55,7 +55,7 @@ public:
     FontAtlas font_atlas();
     Font load_font(std::string const&, float size);
     Font default_font();
-    void merge_font(std::string const&, float size);
+    void merge_font(std::string const&, float size, std::optional<float> offset = std::nullopt);
     void set_default_font(Font);
 
     //
