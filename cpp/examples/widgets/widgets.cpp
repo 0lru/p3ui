@@ -1,7 +1,7 @@
 
 #include <p3/Context.h>
 #include <p3/check_box.h>
-#include <p3/Layout.h>
+#include <p3/layout.h>
 #include <p3/button.h>
 #include <p3/Window.h>
 

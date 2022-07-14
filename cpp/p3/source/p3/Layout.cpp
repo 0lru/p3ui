@@ -271,4 +271,56 @@ void Layout::render_impl(Context& context, float w, float h)
     render_absolute(context);
 }
 
+Direction const& Layout::direction() const { return _direction; };
+
+void Layout::set_direction(Direction direction)
+{
+    _direction = std::move(direction);
+    set_needs_update();
+};
+
+Justification const& Layout::justify_content() const 
+{ 
+    return _justify_content; 
+}
+
+void Layout::set_justify_content(Justification justify_content)
+{
+    _justify_content = std::move(justify_content);
+    set_needs_update();
+}
+
+Alignment const& Layout::align_items() const 
+{ 
+    return _align_items; 
+}
+
+void Layout::set_align_items(Alignment align_items)
+{
+    _align_items = std::move(align_items);
+    set_needs_update();
+}
+
+Length2 const& Layout::spacing() const 
+{ 
+    return _spacing; 
+}
+
+void Layout::set_spacing(Length2 spacing)
+{
+    _spacing = std::move(spacing);
+    set_needs_update();
+}
+
+Length2 const& Layout::padding() const 
+{ 
+    return _padding; 
+}
+
+void Layout::set_padding(Length2 padding)
+{
+    _padding = std::move(padding);
+    set_needs_update();
+}
+
 }

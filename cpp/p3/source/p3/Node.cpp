@@ -79,7 +79,7 @@ Node::Node(std::string element_name)
     if (NodeInitializer)
         NodeInitializer(*this);
     _style->add_observer(this);
-    _style_guard = OnScopeExit([this, style = _style]() {
+    _style_guard = on_scope_exit([this, style = _style]() {
         style->remove_observer(this);
     });
 }
@@ -642,14 +642,14 @@ void Node::render_impl(Context&, float width, float height)
 {
 }
 
-OnScopeExit Node::_apply_style_compiled()
+on_scope_exit Node::_apply_style_compiled()
 {
     auto apply = [this]() {
         for (auto& f : _style_compiled)
             f();
     };
     apply();
-    return OnScopeExit(apply);
+    return on_scope_exit(apply);
 }
 
 void Node::dispose()

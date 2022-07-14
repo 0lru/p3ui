@@ -145,7 +145,7 @@ Theme::ApplyFunction Theme::compile(Context const& context)
 
     return [apply]() mutable {
         apply();
-        return OnScopeExit(apply);
+        return on_scope_exit(apply);
     };
 }
 

@@ -45,7 +45,7 @@ void UserInterface::set_theme(std::shared_ptr<Theme> theme)
     if (_theme) {
         _theme->add_observer(this);
         // raii. theme is guarded by lambda capture
-        _theme_observer = OnScopeExit([this, theme = _theme]() {
+        _theme_observer = on_scope_exit([this, theme = _theme]() {
             theme->remove_observer(this);
         });
     }
@@ -219,7 +219,7 @@ void UserInterface::render(Context& context, float width, float height, bool)
 
     update_restyle(context);
 
-    std::optional<OnScopeExit> theme_guard;
+    std::optional<on_scope_exit> theme_guard;
     if (_theme_apply_function)
         theme_guard = _theme_apply_function();
 

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "OnScopeExit.h"
+#include "on_scope_exit.h"
 #include "RenderBackend.h"
 
 #include <cstdint>
@@ -48,7 +48,7 @@ private:
     std::unique_ptr<std::uint8_t[]> _data;
     bool _updated = true;
     std::optional<RenderBackend::Texture*> _texture = std::nullopt;
-    std::optional<OnScopeExit> _on_exit = std::nullopt;
+    std::optional<on_scope_exit> _on_exit = std::nullopt;
 };
 
 }

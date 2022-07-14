@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "OnScopeExit.h"
+#include "on_scope_exit.h"
 #include "RenderBackend.h"
 #include "StyleBlock.h"
 #include "StyleComputation.h"
@@ -172,7 +172,7 @@ protected:
     // node specific render implementation
     virtual void render_impl(Context&, float width, float height);
 
-    [[nodiscard]] OnScopeExit _apply_style_compiled();
+    [[nodiscard]] on_scope_exit _apply_style_compiled();
 
     virtual void dispose();
 
@@ -221,7 +221,7 @@ private:
     bool _needs_update = true;
     bool _needs_restyle = true;
     void on_style_changed();
-    std::optional<OnScopeExit> _style_guard;
+    std::optional<on_scope_exit> _style_guard;
     std::shared_ptr<StyleBlock> _style = nullptr;
     StyleComputation _style_computation;
     std::vector<std::function<void()>> _style_compiled;

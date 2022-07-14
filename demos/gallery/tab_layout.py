@@ -12,8 +12,8 @@ class TabLayout(Layout):
         justifications = [key for key, value in Justification.__members__.items()]
 
         def set_justification(value):
-            self.vertical.style.justify_content = value
-            self.horizontal.style.justify_content = value
+            self.vertical.justify_content = value
+            self.horizontal.justify_content = value
 
         self.add(ComboBox(
             label='justify_content (Justification)',
@@ -25,8 +25,8 @@ class TabLayout(Layout):
         alignments = [key for key, value in Alignment.__members__.items()]
 
         def set_alignment(value):
-            self.vertical.style.align_items = value
-            self.horizontal.style.align_items = value
+            self.vertical.align_items = value
+            self.horizontal.align_items = value
 
         self.add(ComboBox(
             label='align_items (Alignment)',

@@ -41,7 +41,7 @@ RenderBackend::TextureId Texture::use(Context& context)
     auto& backend = context.render_backend();
     if (!_texture) {
         _texture = context.render_backend().create_texture();
-        _on_exit = OnScopeExit([texture = _texture.value(), backend = context.render_backend().shared_from_this()]() {
+        _on_exit = on_scope_exit([texture = _texture.value(), backend = context.render_backend().shared_from_this()]() {
             backend->delete_texture(texture);
         });
     }

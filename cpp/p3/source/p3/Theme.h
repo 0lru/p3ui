@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Color.h"
-#include "OnScopeExit.h"
+#include "on_scope_exit.h"
 #include "StyleTypes.h"
 
 #include <array>
@@ -30,7 +30,7 @@ public:
     void add_observer(Observer*);
     void remove_observer(Observer*);
 
-    using ApplyFunction = std::function<OnScopeExit(void)>;
+    using ApplyFunction = std::function<on_scope_exit(void)>;
     ApplyFunction compile(Context const&);
 
     float alpha() const;

@@ -2,7 +2,7 @@
 
 #include "Font.h"
 #include "Node.h"
-#include "OnScopeExit.h"
+#include "on_scope_exit.h"
 #include "Theme.h"
 
 #include <memory>
@@ -85,14 +85,14 @@ protected:
     void update_restyle(Context&, bool whole_tree = false) override;
 
 private:
-    std::optional<p3::OnScopeExit> _theme_guard;
+    std::optional<p3::on_scope_exit> _theme_guard;
     Window* _window = nullptr;
     std::size_t _width = 1024;
     std::size_t _height = 768;
 
     std::shared_ptr<Theme> _theme;
     Theme::ApplyFunction _theme_apply_function;
-    std::optional<OnScopeExit> _theme_observer;
+    std::optional<on_scope_exit> _theme_observer;
 
     std::shared_ptr<Node> _content;
     std::shared_ptr<MenuBar> _menu_bar;

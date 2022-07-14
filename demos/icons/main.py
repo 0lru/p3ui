@@ -25,7 +25,7 @@ paint = skia.Paint(AntiAlias=True, Color=skia.ColorBLACK)
 class Icon(Surface):
 
     def __init__(self, name, dom, base_size=24, pixel_size=32, *, color=Color('yellow')):
-        self.color = skia.Color(*color.rgba)
+        self.__color = skia.Color(*color.rgba)
         self.name = name
         buff1 = skia.Surface(pixel_size, pixel_size)
         buff2 = skia.Surface(pixel_size, pixel_size)
@@ -40,7 +40,7 @@ class Icon(Surface):
             dom.render(canvas)
         image = buff1.makeImageSnapshot()
         with buff2 as canvas:
-            filter = skia.ColorMatrixFilter.MakeLightingFilter(skia.ColorWHITE, self.color)
+            filter = skia.ColorMatrixFilter.MakeLightingFilter(skia.ColorWHITE, self.__color)
             paint = skia.Paint(ColorFilter=filter)
             canvas.drawImage(image, 0, 0, paint)
         image = buff2.makeImageSnapshot()
