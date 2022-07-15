@@ -35,36 +35,6 @@ class ImageSurface(ScrollArea):
         MinMax = 1,
         Logarithmic = 2
 
-    class Painter:
-
-        def __init__(self, surface, canvas):
-            self.surface = surface
-            self.canvas = canvas
-
-        def draw_rectangle(self, x1, y1, x2, y2, color, stroke_width=1.):
-            if not isinstance(color, Color):
-                color = Color(color)
-            paint = skia.Paint(
-                AntiAlias=True,
-                Color=skia.ColorSetARGB(color.alpha, color.red, color.green, color.blue),
-                Style=skia.Paint.kStroke_Style,
-                StrokeWidth=stroke_width
-            )
-            sx, sy = self.surface.scale
-            self.canvas.drawRect(skia.Rect.MakeXYWH(x1 * sx, y1 * sy, (x2 - x1) * sx, (y2 - y1) * sy), paint)
-
-        def draw_line(self, x1, y1, x2, y2, color, *, stroke_width=1.):
-            if not isinstance(color, Color):
-                color = Color(color)
-            paint = skia.Paint(
-                AntiAlias=True,
-                Color=skia.ColorSetARGB(color.alpha, color.red, color.green, color.blue),
-                Style=skia.Paint.kStroke_Style,
-                StrokeWidth=stroke_width
-            )
-            sx, sy = self.surface.scale
-            self.canvas.drawLine(x1 * sx, y1 * sy, x2 * sx, y2 * sy, paint)
-
     def __init__(self, *args,
                  on_mouse_move=None,
                  on_mouse_leave=None,
@@ -300,7 +270,7 @@ class ImageSurface(ScrollArea):
             canvas.drawImage(self.__skia_image, 0, 0)
             canvas.restore()
             if self.__on_repaint is not None:
-                self.__on_repaint(ImageSurface.Painter(self, canvas))
+                self.__on_repaint(canvas)
         self.content_size = self.scaled_image_width, self.scaled_image_height
 
     @property
