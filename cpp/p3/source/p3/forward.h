@@ -23,6 +23,7 @@ namespace p3
     class ProgressBar;
     class ScrollArea;
     template<typename T> class Slider;
+    class Spacer;
     class StyleBlock;
     class Tab;
     class Table;

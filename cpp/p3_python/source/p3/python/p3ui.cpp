@@ -77,6 +77,7 @@ PYBIND11_MODULE(native, module)
     python::Definition<Slider<std::uint64_t>>::apply(module);
     python::Definition<Slider<float>>::apply(module);
     python::Definition<Slider<double>>::apply(module);
+    python::Definition<Spacer>::apply(module);
     python::Definition<Theme>::apply(module);
     python::Definition<UserInterface>::apply(module);
     python::Definition<Window>::apply(module);
