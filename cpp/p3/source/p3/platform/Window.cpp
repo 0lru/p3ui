@@ -87,6 +87,10 @@ Window::~Window()
 
 void Window::on_work_processed(EventLoop&)
 {
+    //
+    // removing this can crash the application
+    glfwMakeContextCurrent(_glfw_window.get());
+
     if (!_user_interface)
         return;
     ImGui::SetCurrentContext(&_user_interface->im_gui_context());
