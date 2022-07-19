@@ -37,11 +37,11 @@ void Layout::update_content()
                 if (!child->visible() || child->position() == Position::Absolute)
                     continue;
                 if (!first)
-                    _automatic_height += _spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y;
+                    _automatic_height += _spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.y;
                 first = false;
                 _automatic_height += child->contextual_height(0);
             }
-            _automatic_height += ImGui::GetStyle().FramePadding.y * 2.f;
+            _automatic_height += padding.y * 2.f;
         }
         if (!width_basis()) {
             _automatic_width = 0.0f;
@@ -82,7 +82,7 @@ void Layout::render_impl(Context& context, float w, float h)
 {
     if (_background_color) {
         auto& window = *ImGui::GetCurrentWindow();
-        auto p1 = ImGui::GetCursorPos();
+        auto p1 = ImGui::GetCursorScreenPos();
         auto p2 = ImVec2(p1.x + w, p1.y + h);
         auto color = ImColor(convert(_background_color.value()));
         window.DrawList->AddRectFilled(p1, p2, color);
@@ -208,7 +208,7 @@ void Layout::render_impl(Context& context, float w, float h)
             grow_total += child->height_grow();
         }
         if (visible_count > 1)
-            occupied += (visible_count - 1) * (_spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
+            occupied += (visible_count - 1) * (_spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
         auto remaining = content - occupied;
         first = true;
         for (auto& child : children()) {
@@ -266,7 +266,7 @@ void Layout::render_impl(Context& context, float w, float h)
             window->DC.CurrLineTextBaseOffset = 0;
             float backup = 0.f;
             child->render(context, width, height, true);
-            cursor.y += height + (_spacing ? Context::current().to_actual( _spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
+            cursor.y += height + (_spacing ? Context::current().to_actual(_spacing.value()) : ImGui::GetStyle().ItemSpacing.y);
             cursor.x = initial_cursor.x;
             first = false;
         }
@@ -298,9 +298,9 @@ void Layout::set_direction(Direction direction)
     set_needs_update();
 };
 
-Justification const& Layout::justify_content() const 
-{ 
-    return _justify_content; 
+Justification const& Layout::justify_content() const
+{
+    return _justify_content;
 }
 
 void Layout::set_justify_content(Justification justify_content)
@@ -309,9 +309,9 @@ void Layout::set_justify_content(Justification justify_content)
     set_needs_update();
 }
 
-Alignment const& Layout::align_items() const 
-{ 
-    return _align_items; 
+Alignment const& Layout::align_items() const
+{
+    return _align_items;
 }
 
 void Layout::set_align_items(Alignment align_items)
@@ -321,8 +321,8 @@ void Layout::set_align_items(Alignment align_items)
 }
 
 std::optional<Length> const& Layout::spacing() const
-{ 
-    return _spacing; 
+{
+    return _spacing;
 }
 
 void Layout::set_spacing(std::optional<Length> spacing)
@@ -332,8 +332,8 @@ void Layout::set_spacing(std::optional<Length> spacing)
 }
 
 std::optional<Length2> const& Layout::padding() const
-{ 
-    return _padding; 
+{
+    return _padding;
 }
 
 void Layout::set_padding(std::optional<Length2> padding)
