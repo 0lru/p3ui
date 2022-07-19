@@ -1,4 +1,3 @@
-import numpy as np
 from ..native import *
 from .. import skia
 from .image_surface import ImageSurface
@@ -24,6 +23,7 @@ class ImageViewer(Layout):
                  on_mouse_leave=None,
                  on_mouse_enter=None,
                  **kwargs):
+        self.on_repaint = on_repaint
         self.__collapsed = collapsed
         self.image_surface = ImageSurface(
             on_mouse_enter=on_mouse_enter,
@@ -31,7 +31,29 @@ class ImageViewer(Layout):
             on_mouse_leave=on_mouse_leave,
             on_scale_changed=self.__on_scale_changed,
             on_fitting_mode_changed=self.__on_fitting_mode_changed,
-            on_repaint=on_repaint
+            on_repaint=self.__on_repaint,
+        )
+        self.vertical_plot = Plot(
+            width=(11 | em, 0, 0),
+            legend_visible=False,
+            x_ticks_visible=False,
+            y_inverted=True,
+            x_opposite=True,
+            y_opposite=True,
+            line_weight=3.0,
+            border_width=1 | px,
+            padding=(0 | px, 0 | px)
+        )
+        self.horizontal_plot = Plot(
+            width=(auto, 1, 1),
+            height=(7 | em, 0, 0),
+            legend_visible=False,
+            line_weight=3.0,
+            x_opposite=False,
+            y_opposite=False,
+            y_ticks_visible=False,
+            border_width=1 | px,
+            padding=(0 | px, 0 | px)
         )
         self._scale_x_input = InputDouble(
             visible=not collapsed,
@@ -112,13 +134,14 @@ class ImageViewer(Layout):
             height=(auto, 0, 0),
             on_click=self.toggle_collapsed)
         self.collapsed = collapsed
-        self.surface_layout = Column(padding=(0 | px, 0 | px), children=[self.image_surface])
         super().__init__(
             **kwargs,
             direction=Direction.Horizontal,
             justify_content=Justification.Start,
             align_items=Alignment.Stretch,
             children=[
+                #
+                # button column
                 Column(
                     width=(auto, 0, 0),
                     padding=(0 | px, 0 | px),
@@ -126,6 +149,8 @@ class ImageViewer(Layout):
                     align_items=Alignment.End,
                     height=(auto, 1, 0),
                     children=[
+                        #
+                        # collapse button floating to the left
                         Row(
                             padding=(0 | px, 0 | px),
                             width=(100 | percent, 0, 0),
@@ -145,8 +170,26 @@ class ImageViewer(Layout):
                         self._fitting_mode_combo_box,
                         self._scale_x_input,
                         self._scale_y_input
-                    ]),
-                self.surface_layout
+                    ]
+                ),
+                #
+                # surface with plots besides
+                Column(padding=(0 | px, 0 | px), spacing=0 | px, children=[
+                    Row(
+                        spacing=0 | px,
+                        padding=(0 | px, 0 | px),
+                        children=[
+                            self.image_surface,
+                            self.vertical_plot
+                        ]
+                    ),
+                    Row(
+                        spacing=0 | px,
+                        padding=(0 | px, 0 | px),
+                        height=(auto, 0, 0),
+                        children=[self.horizontal_plot]
+                    )
+                ])
             ])
 
     @property
@@ -239,3 +282,23 @@ class ImageViewer(Layout):
     @property
     def viewport(self):
         return self.image_surface.viewport
+
+    def __on_repaint(self, canvas, surface_width, surface_height):
+        viewport = self.viewport
+        if viewport is not None:
+            w, h = self.image_surface.size
+            self.vertical_plot.y_axis.fixed = True
+            self.vertical_plot.y_axis.auto_fit = False
+            self.vertical_plot.y_axis.limits = (
+                viewport[1] / self.scale[1],
+                (viewport[1] + h) / self.scale[1]
+            )
+            size = self.horizontal_plot.size
+            self.horizontal_plot.x_axis.fixed = True
+            self.horizontal_plot.x_axis.auto_fit = False
+            self.horizontal_plot.x_axis.limits = (
+                viewport[0] / self.scale[0],
+                (viewport[0] + size[0]) / self.scale[0]
+            )
+        if self.on_repaint:
+            self.on_repaint(canvas, surface_width, surface_height)

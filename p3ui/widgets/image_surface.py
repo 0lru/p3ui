@@ -270,7 +270,7 @@ class ImageSurface(ScrollArea):
             canvas.drawImage(self.__skia_image, 0, 0)
             canvas.restore()
             if self.__on_repaint is not None:
-                self.__on_repaint(canvas)
+                self.__on_repaint(canvas, surface_width, surface_height)
         self.content_size = self.scaled_image_width, self.scaled_image_height
 
     @property
