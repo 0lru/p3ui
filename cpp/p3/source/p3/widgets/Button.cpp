@@ -13,11 +13,6 @@ Button::Button(std::optional<std::string> label)
     set_label(std::move(label));
 }
 
-void Button::dispose()
-{
-    Node::dispose();
-}
-
 void Button::render_impl(Context& context, float width, float height)
 {
     ImVec2 size(width, height);

@@ -1,6 +1,6 @@
 #include "p3ui.h"
-#include <p3/DataSuffix.h>
-#include <p3/widgets/Slider.h>
+#include <p3/data_suffix.h>
+#include <p3/widgets/slider.h>
 
 namespace p3::python {
 

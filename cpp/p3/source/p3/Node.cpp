@@ -349,11 +349,15 @@ void Node::render(Context& context, float width, float height, bool adjust_works
 
 void Node::render_absolute(Context& context)
 {
-    /* for (auto& child : _children)
-        if (child->position == Position::Absolute) {
+    if (!parent())
+        return;
+    auto& parent = *this->parent();
+
+    for (auto& child : _children)
+        if (child->position() == Position::Absolute) {
             auto avail = ImGui::GetContentRegionAvail();
             child->render(context, child->contextual_width(avail.x), child->contextual_height(avail.y));
-        }*/
+        }
 }
 
 void Node::set_label(std::optional<std::string> label)

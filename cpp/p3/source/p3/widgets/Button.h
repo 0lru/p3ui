@@ -23,9 +23,6 @@ public:
 
     void update_content() override;
 
-protected:
-    void dispose() override;
-
 private:
     OnClick _on_click;
     std::optional<Color> _background_color = std::nullopt;

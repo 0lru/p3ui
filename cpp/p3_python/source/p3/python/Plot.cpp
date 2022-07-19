@@ -1,7 +1,7 @@
 #include "numpy.h"
 #include "p3ui.h"
 
-#include <p3/DataSuffix.h>
+#include <p3/data_suffix.h>
 #include <p3/widgets/Plot.h>
 
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<p3::Plot::Annotation>>);
