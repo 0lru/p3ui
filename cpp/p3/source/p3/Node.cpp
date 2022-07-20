@@ -603,7 +603,7 @@ void Node::render_impl(Context&, float width, float height)
 void Node::dispose()
 {
     if (_render_layer)
-        _render_layer.reset();
+        _render_layer->reset();
     for (auto& child : _children)
         child->dispose();
 }
