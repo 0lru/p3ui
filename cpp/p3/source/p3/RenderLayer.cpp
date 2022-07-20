@@ -18,7 +18,7 @@ namespace {
 
 RenderLayer::~RenderLayer()
 {
-    _reset();
+    reset();
 }
 
 void RenderLayer::push_to(Context& context)
@@ -86,7 +86,7 @@ void RenderLayer::_draw_debug()
     window.DrawList->AddRect(window.ClipRect.Min, window.ClipRect.Max, _render_target ? green : red, 0, 0, 2);
 }
 
-void RenderLayer::_reset()
+void RenderLayer::reset()
 {
     if (_render_target)
         _render_backend->delete_render_target(_render_target);
@@ -103,7 +103,7 @@ void RenderLayer::pop_from_context_and_render(Context& context, Node& node)
     if (!_object_count) {
         if (context.show_render_layers())
             _draw_debug();
-        _reset();
+        reset();
         return;
     }
 
@@ -113,7 +113,7 @@ void RenderLayer::pop_from_context_and_render(Context& context, Node& node)
         || _requested_width != _render_target->width()
         || _requested_height != _render_target->height()) {
         if (_render_target) {
-            _reset();
+            reset();
         }
         _render_target = backend.create_render_target(_requested_width, _requested_height);
         _render_backend = backend.shared_from_this();

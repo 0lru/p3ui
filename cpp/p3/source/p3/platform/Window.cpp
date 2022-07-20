@@ -127,7 +127,6 @@ void Window::on_work_processed(EventLoop&)
         glViewport(0, 0, _window_state.framebuffer_size.width, _window_state.framebuffer_size.height);
         if (_user_interface)
             _render_backend->render(*_user_interface);
-        glFlush();
         glfwSwapBuffers(_glfw_window.get());
     }
     if (!_key_release_events.empty()) {

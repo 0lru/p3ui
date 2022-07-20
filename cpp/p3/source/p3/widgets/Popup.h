@@ -24,7 +24,7 @@ public:
 
 private:
     std::shared_ptr<Node> _content;
-    OnClose _on_close;
+    OnClose _on_close = nullptr;
     bool _opened = false;
 };
 

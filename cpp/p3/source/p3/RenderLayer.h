@@ -34,10 +34,10 @@ public:
     void set_dirty();
 
     Viewport const& viewport() const { return _viewport; }
+    void reset();
 
 private:
     void _draw_debug();
-    void _reset();
 
     bool _dirty = true;
     std::uint32_t _object_count = 0;

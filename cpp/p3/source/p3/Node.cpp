@@ -356,6 +356,7 @@ void Node::render_absolute(Context& context)
     for (auto& child : _children)
         if (child->position() == Position::Absolute) {
             auto avail = ImGui::GetContentRegionAvail();
+            auto cursor = ImGui::GetCursorPos();
             child->render(context, child->contextual_width(avail.x), child->contextual_height(avail.y));
         }
 }
@@ -601,9 +602,10 @@ void Node::render_impl(Context&, float width, float height)
 
 void Node::dispose()
 {
+    if (_render_layer)
+        _render_layer.reset();
     for (auto& child : _children)
         child->dispose();
-    _disposed = true;
 }
 
 void Node::set_tooltip(std::shared_ptr<Node> tooltip)
