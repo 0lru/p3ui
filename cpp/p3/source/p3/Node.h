@@ -27,11 +27,17 @@ std::shared_ptr<T> make(Args&&... args)
 {
     return std::make_shared<T>(std::forward<Args>(args)...);
 }
+class Node;
+
+namespace registry {
+    extern Node* get(std::uint64_t);
+}
 
 class Node
     : public std::enable_shared_from_this<Node> {
 public:
     virtual ~Node();
+
 
     std::string const& element_name() const;
     // this is used by the loader to apply xml attributes
@@ -140,6 +146,8 @@ public:
     std::shared_ptr<void> const& user_data() const;
     void set_user_data(std::shared_ptr<void>);
 
+    void focus();
+
 protected:
     std::shared_ptr<void> _user_data = nullptr;
 
@@ -182,6 +190,7 @@ protected:
     void set_tooltip(std::shared_ptr<Node>);
     std::shared_ptr<Node> const& tooltip() const;
 
+
 protected:
     virtual void push_style();
     virtual void pop_style();
@@ -199,6 +208,7 @@ private:
     Node* _parent = nullptr;
     std::vector<std::shared_ptr<Node>> _children;
 
+    bool _focus_event = false;
     bool _visible = true; // NOTE: style..
     bool _disabled = false;
     LengthPercentage _left = 10|px;

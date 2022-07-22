@@ -5,10 +5,11 @@
 #include "log.h"
 
 // hm.. move this to widgets?
-#include <p3/widgets/child_window.h>
 #include <p3/widgets/Menu.h>
 #include <p3/widgets/MenuBar.h>
 #include <p3/widgets/Popup.h>
+#include <p3/widgets/child_window.h>
+#include <p3/platform/event_loop.h>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -279,9 +280,41 @@ void UserInterface::render(Context& context, float width, float height, bool)
     //
     //
     ImGui::End();
+    if (ImGui::GetActiveID() == 0)
+        set_active_node(nullptr);
     //
     // generate draw-lists
     ImGui::Render();
+}
+
+void UserInterface::set_on_active_node_changed(OnChanged on_active_node_changed)
+{
+    _on_active_node_changed = on_active_node_changed;
+}
+
+UserInterface::OnChanged UserInterface::on_active_node_changed() const
+{
+    return _on_active_node_changed;
+}
+
+void UserInterface::add_input_character(unsigned int code)
+{
+    ImGui::GetIO().AddInputCharacter(code);
+}
+
+void UserInterface::set_active_node(std::shared_ptr<Node> node)
+{
+    auto active_node = _active_node.lock();
+    if (active_node == node)
+        return;
+    _active_node = node;
+    if (_on_active_node_changed)
+        EventLoop::current()->call_at(EventLoop::Clock::now(), Event::create(_on_active_node_changed));
+}
+
+std::shared_ptr<Node> UserInterface::active_node() const
+{
+    return _active_node.lock();
 }
 
 void UserInterface::set_anti_aliased_fill(bool value)

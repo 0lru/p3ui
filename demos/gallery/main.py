@@ -10,6 +10,12 @@ async def main():
     window.size = (1000, 900)
     gallery = Gallery(window)
     window.user_interface = gallery
+
+    def on_active_node_changed():
+        print('active node: ', window.user_interface.active_node)
+
+    window.user_interface.on_active_node_changed = on_active_node_changed
+
     await window.closed
     await gallery.shutdown()
 

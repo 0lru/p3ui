@@ -34,13 +34,18 @@ namespace p3::python
             (*dict)["menu_bar"] = py::cast(menu_bar);
             user_interface->set_menu_bar(menu_bar);
 
+            assign(kwargs, "on_activated", *user_interface, &UserInterface::set_on_active_node_changed);
+
             return user_interface;
         }), py::kw_only(), py::arg("menu_bar") = py::none(), py::arg("content") = py::none());
 
         def_content_property(user_interface, "content", &UserInterface::content, &UserInterface::set_content);
         def_content_property(user_interface, "menu_bar", &UserInterface::menu_bar, &UserInterface::set_menu_bar);
+        def_signal_property(user_interface, "on_active_node_changed", &UserInterface::on_active_node_changed, &UserInterface::set_on_active_node_changed);
         def_property(user_interface, "theme", &UserInterface::theme, &UserInterface::set_theme);
+        def_property(user_interface, "active_node", &UserInterface::active_node, &UserInterface::set_active_node);
         def_method(user_interface, "load_font", &UserInterface::load_font);
+        def_method(user_interface, "add_input_character", &UserInterface::add_input_character);
         user_interface.def("merge_font", &UserInterface::merge_font, 
             py::arg("filename"), py::arg("size")=16, py::arg("offset")=std::nullopt);
         def_property(user_interface, "default_font", &UserInterface::default_font, &UserInterface::set_default_font);

@@ -5,6 +5,7 @@
 #include "convert.h"
 #include "log.h"
 #include "platform/event_loop.h"
+#include "UserInterface.h"
 
 #include <p3/Parser.h>
 
@@ -50,6 +51,13 @@ namespace registry {
         state.nodes.erase(id);
     }
 
+    Node* get(std::uint64_t id)
+    {
+        if (!registry::state.nodes.count(id))
+            return nullptr;
+        return registry::state.nodes[id];
+    }
+
 }
 
 Node::Node(std::string element_name)
@@ -85,6 +93,10 @@ void Node::set_attribute(std::string const& name, std::string const& value)
 
 void Node::update_status()
 {
+    if (ImGui::IsItemActivated()) {
+        Context::current().user_interface().set_active_node(shared_from_this());
+    }
+
     ImGuiWindow const& window = *GImGui->CurrentWindow;
     auto const status_flags = GImGui->LastItemData.StatusFlags;
     if (status_flags == _status_flags) {
@@ -316,6 +328,10 @@ void Node::render(Context& context, float width, float height, bool adjust_works
     on_scope_exit guard([&]() {
         pop_style();
     });
+    if (_focus_event) {
+        _focus_event = false;
+        ImGui::SetKeyboardFocusHere(0);
+    }
     if (adjust_worksrect) {
         //
         // this needs to be done after style was applied and is only used by Layout.cpp
@@ -603,6 +619,11 @@ void Node::set_tooltip(std::shared_ptr<Node> tooltip)
 std::shared_ptr<Node> const& Node::tooltip() const
 {
     return _tooltip;
+}
+
+void Node::focus()
+{
+    _focus_event = true;
 }
 
 Node::Size Node::size() const

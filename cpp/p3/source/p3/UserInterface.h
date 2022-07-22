@@ -2,8 +2,8 @@
 
 #include "Font.h"
 #include "Node.h"
-#include "on_scope_exit.h"
 #include "Theme.h"
+#include "on_scope_exit.h"
 
 #include <memory>
 #include <optional>
@@ -22,6 +22,8 @@ class UserInterface
     : public Node,
       public Theme::Observer {
 public:
+    using OnChanged = std::function<void()>;
+
     UserInterface(std::size_t width = 1024, std::size_t height = 768);
     ~UserInterface();
 
@@ -32,9 +34,6 @@ public:
 
     // root em
     float rem() const;
-
-    // do one frame?
-    void frame();
 
     //
     // theme / styling
@@ -80,11 +79,21 @@ public:
 
     void render(Context&, float width, float height, bool) override;
 
+    void set_on_active_node_changed(OnChanged);
+    OnChanged on_active_node_changed() const;
+    void set_active_node(std::shared_ptr<Node>);
+    std::shared_ptr<Node> active_node() const;
+
+    void add_input_character(unsigned int);
+
 protected:
     void update_content() override;
     void update_restyle(Context&, bool whole_tree = false) override;
 
 private:
+    std::weak_ptr<Node> _active_node;
+    OnChanged _on_active_node_changed = nullptr;
+
     std::optional<p3::on_scope_exit> _theme_guard;
     Window* _window = nullptr;
     std::size_t _width = 1024;

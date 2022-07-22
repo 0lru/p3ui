@@ -92,6 +92,7 @@ void Definition<Node>::apply(py::module& module)
         auto s = py::cast(self);
         return s.attr("__foo");
     });
+    node.def("focus", &Node::focus);
     def_property(node, "position", &Node::position, &Node::set_position);
     def_property(node, "left", &Node::left, &Node::set_left);
     def_property(node, "top", &Node::top, &Node::set_top);
