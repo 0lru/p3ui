@@ -4,7 +4,6 @@
 
 #include "OpenGLRenderTarget.h"
 #include <include/gpu/gl/GrGLTypes.h>
-
 namespace p3
 {
 
@@ -48,7 +47,7 @@ namespace p3
 
     void OpenGLRenderTarget::_make_skia_surface(RenderBackend& backend)
     {
-        auto framebuffer_info = GrGLFramebufferInfo{_framebuffer_id, GL_RGBA8 };
+        auto framebuffer_info = GrGLFramebufferInfo { _framebuffer_id, GL_RGBA8 };
         auto backend_render_target = GrBackendRenderTarget(_width, _height, 0, 8, framebuffer_info);
         auto color_space = SkColorSpace::MakeSRGB();
         _skia_surface = SkSurface::MakeFromBackendRenderTarget(

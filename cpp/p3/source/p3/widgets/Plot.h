@@ -176,7 +176,7 @@ public:
 
     private:
         std::string _text;
-        double _x, _y;
+        double _x=0., _y=0.;
         ImVec2 _offset { 0.f, 0.f };
         bool _clamped = false;
     };

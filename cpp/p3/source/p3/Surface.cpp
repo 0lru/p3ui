@@ -106,7 +106,7 @@ void Surface::render(RenderBackend::RenderTarget& render_target)
 
 void Surface::set_picture(sk_sp<SkPicture> picture)
 {
-    _skia_picture = std::move(picture);
+    _skia_picture = picture;
     set_needs_update();
     redraw();
 }
