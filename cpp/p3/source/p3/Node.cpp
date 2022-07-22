@@ -17,57 +17,44 @@ namespace p3 {
 
 std::function<void(Node&)> NodeInitializer = nullptr;
 
-class NodeRegistry {
-public:
+namespace registry {
+
+    thread_local struct
+    {
+        std::vector<std::uint64_t> pool;
+        std::uint64_t max = 0;
+        std::unordered_map<std::uint64_t, Node*> nodes;
+    } state;
+
     std::size_t count()
     {
-        std::lock_guard<std::mutex> l(_mutex);
-        return _nodes.size();
+        return state.nodes.size();
     }
 
     std::uint64_t add(Node* node)
     {
-        std::lock_guard<std::mutex> l(_mutex);
         std::uint64_t id;
-        if (_pool.empty()) {
-            id = _max_id++;
+        if (state.pool.empty()) {
+            id = state.max++;
         } else {
-            id = _pool.back();
-            _pool.pop_back();
+            id = state.pool.back();
+            state.pool.pop_back();
         }
-        _nodes[id] = node;
+        state.nodes[id] = node;
         return id;
     }
 
     void release(std::uint64_t id)
     {
-        std::lock_guard<std::mutex> l(_mutex);
-        _pool.push_back(id);
-        _nodes.erase(id);
+        state.pool.push_back(id);
+        state.nodes.erase(id);
     }
 
-    static NodeRegistry& instance()
-    {
-        static NodeRegistry instance;
-        return instance;
-    }
-
-private:
-    NodeRegistry() = default;
-    ~NodeRegistry() = default;
-    NodeRegistry(const NodeRegistry&) = delete;
-    NodeRegistry& operator=(const NodeRegistry&) = delete;
-    static std::shared_ptr<NodeRegistry> _instance;
-
-    std::mutex _mutex;
-    std::vector<std::uint64_t> _pool;
-    std::uint64_t _max_id = 0;
-    std::unordered_map<std::uint64_t, Node*> _nodes;
-};
+}
 
 Node::Node(std::string element_name)
     : _element_name(std::move(element_name))
-    , _imgui_id(NodeRegistry::instance().add(this))
+    , _imgui_id(registry::add(this))
     , _imgui_label("##" + std::to_string(_imgui_id))
     , _status_flags(ImGuiItemStatusFlags_None)
 {
@@ -80,7 +67,7 @@ Node::~Node()
     for (auto& child : _children)
         child->_parent = nullptr;
     // log_warn("~Node: {} {}", this->imgui_label(), element_name());
-    NodeRegistry::instance().release(_imgui_id);
+    registry::release(_imgui_id);
 }
 
 void Node::set_attribute(std::string const& name, std::string const& value)
@@ -197,7 +184,7 @@ void Node::redraw()
 
 std::size_t Node::node_count()
 {
-    return NodeRegistry::instance().count();
+    return registry::count();
 }
 
 void Node::set_needs_update()
