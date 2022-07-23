@@ -2,10 +2,10 @@
 #include "Context.h"
 #include "RenderLayer.h"
 #include "Theme.h"
+#include "UserInterface.h"
 #include "convert.h"
 #include "log.h"
 #include "platform/event_loop.h"
-#include "UserInterface.h"
 
 #include <p3/Parser.h>
 
@@ -93,10 +93,6 @@ void Node::set_attribute(std::string const& name, std::string const& value)
 
 void Node::update_status()
 {
-    if (ImGui::IsItemActivated()) {
-        Context::current().user_interface().set_active_node(shared_from_this());
-    }
-
     ImGuiWindow const& window = *GImGui->CurrentWindow;
     auto const status_flags = GImGui->LastItemData.StatusFlags;
     if (status_flags == _status_flags) {
@@ -174,8 +170,8 @@ void Node::update_restyle(Context& context, bool force)
             if (child->visible())
                 child->update_restyle(context,
                     _needs_restyle /* force restyle of child if this was restyled*/);
-        pop_style();
         update_content();
+        pop_style();
     }
     //
     // change state

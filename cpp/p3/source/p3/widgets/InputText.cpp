@@ -1,5 +1,7 @@
 #include "InputText.h"
 
+#include <p3/context.h>
+#include <p3/UserInterface.h>
 #include <p3/constant.h>
 
 #include <imgui.h>
@@ -12,9 +14,9 @@ namespace p3 {
 InputText::InputText(std::size_t size, std::optional<std::string> label)
     : Node("InputText")
     , _value()
-    , _size(4)
+    , _size(size)
 {
-    _value.reserve(4);
+    _value.reserve(size);
     set_label(std::move(label));
     set_height(LayoutLength { std::nullopt, 0.f, 1.f });
 }
@@ -46,6 +48,9 @@ void InputText::render_impl(Context&, float width, float height)
                 if (_on_change)
                     postpone(_on_change);
         }
+    }
+    if (ImGui::IsItemActivated()) {
+        Context::current().user_interface().set_active_node(shared_from_this());
     }
     update_status();
 }
@@ -107,8 +112,9 @@ int InputText::Callback(ImGuiInputTextCallbackData* data)
 {
     auto self = static_cast<InputText*>(data->UserData);
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-        self->_value.resize(data->BufTextLen);
+        self->_value.resize(data->BufTextLen+1);
         data->Buf = self->_value.data();
+        std::cout << "resize: " << data->BufTextLen << std::endl;
     }
     return 0;
 }
