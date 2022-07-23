@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <optional>
+#include <imgui.h>
 
 struct ImGuiContext;
 struct ImPlotContext;
@@ -85,6 +86,7 @@ public:
     std::shared_ptr<Node> active_node() const;
 
     void add_input_character(unsigned int);
+    void add_key_event(ImGuiKey_ imgui_key, bool down, std::optional<int> scancode);
 
 protected:
     void update_content() override;

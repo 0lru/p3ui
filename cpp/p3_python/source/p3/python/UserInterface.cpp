@@ -46,6 +46,8 @@ namespace p3::python
         def_property(user_interface, "active_node", &UserInterface::active_node, &UserInterface::set_active_node);
         def_method(user_interface, "load_font", &UserInterface::load_font);
         def_method(user_interface, "add_input_character", &UserInterface::add_input_character);
+        user_interface.def("add_key_event", &UserInterface::add_key_event,
+            py::arg("key"), py::arg("down")=false, py::arg("scancode"));
         user_interface.def("merge_font", &UserInterface::merge_font, 
             py::arg("filename"), py::arg("size")=16, py::arg("offset")=std::nullopt);
         def_property(user_interface, "default_font", &UserInterface::default_font, &UserInterface::set_default_font);

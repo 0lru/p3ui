@@ -277,11 +277,13 @@ void UserInterface::render(Context& context, float width, float height, bool)
             }), _popups.end());
             */
 
+// render_absolute(context);
     //
     //
     ImGui::End();
     if (ImGui::GetActiveID() == 0)
         set_active_node(nullptr);
+
     //
     // generate draw-lists
     ImGui::Render();
@@ -300,6 +302,13 @@ UserInterface::OnChanged UserInterface::on_active_node_changed() const
 void UserInterface::add_input_character(unsigned int code)
 {
     ImGui::GetIO().AddInputCharacter(code);
+}
+
+void UserInterface::add_key_event(ImGuiKey_ key, bool down, std::optional<int> scancode)
+{
+    auto& io = this->_im_gui_context->IO;
+    ImGui::SetCurrentContext(&im_gui_context());
+    io.AddKeyEvent(ImGuiKey(key), down);
 }
 
 void UserInterface::set_active_node(std::shared_ptr<Node> node)
